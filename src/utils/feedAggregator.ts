@@ -55,18 +55,37 @@ const rssParser = new Parser({
 export const sources: Source[] = [
   // Tech News Category
   {
-    name: 'FemTech News',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=femtech&per_page=10',
+    name: 'FemTech Insider',
+    type: 'rss',
+    endpoint: 'https://femtechinsider.com/feed/',
     category: 'tech-news'
   },
   {
-    name: 'Women In Tech',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
+    name: 'FemTech Live',
+    type: 'rss',
+    endpoint: 'https://femtech.live/feed/',
     category: 'tech-news'
   },
-  // Career Development
+  {
+    name: 'FemTech Focus',
+    type: 'rss',
+    endpoint: 'https://femtechfocus.org/feed/',
+    category: 'tech-news'
+  },
+  {
+    name: 'HIT Consultant',
+    type: 'rss',
+    endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
+    category: 'tech-news'
+  },
+  
+  // Career Development Category
+  {
+    name: 'Women of Wearables',
+    type: 'rss',
+    endpoint: 'https://www.womenofwearables.com/blog?format=rss',
+    category: 'career-development'
+  },
   {
     name: 'Career Growth',
     type: 'devto',
@@ -79,33 +98,36 @@ export const sources: Source[] = [
     endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
     category: 'career-development'
   },
-  // Community Updates
+  
+  // Community Updates Category
+  {
+    name: 'Women In Tech',
+    type: 'devto',
+    endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
+    category: 'community-updates'
+  },
   {
     name: 'Community News',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=community&per_page=10', 
     category: 'community-updates'
   },
-  {
-    name: 'Diversity in Tech',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=diversity&per_page=10', 
-    category: 'community-updates'
-  },
-  // Technical Tutorials
-  {
-    name: 'Coding Tutorials',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=tutorial&per_page=10',
-    category: 'technical-tutorials'
-  },
+  
+  // Technical Tutorials Category
   {
     name: 'Programming Tips',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=beginners&per_page=10',
     category: 'technical-tutorials'
   },
-  // Founder Stories
+  {
+    name: 'Coding Tutorials',
+    type: 'devto',
+    endpoint: 'https://dev.to/api/articles?tag=tutorial&per_page=10',
+    category: 'technical-tutorials'
+  },
+  
+  // Founder Stories Category
   {
     name: 'Startup Stories',
     type: 'devto',
@@ -413,6 +435,9 @@ export function formatDate(date: string): string {
     return format(parseISO(date), 'MMM d, yyyy');
   } catch (error) {
     // Fallback for invalid dates
+    return 'Recent';
+  }
+}
     return 'Recent';
   }
 }
