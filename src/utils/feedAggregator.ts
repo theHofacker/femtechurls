@@ -42,6 +42,26 @@ export interface Source {
   category: string;
 }
 
+// Keywords related to women in tech
+const womenInTechKeywords = [
+  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion',
+  'femtech', 'girls who code', 'women who code', 'ladies', 'she',
+  'her', 'maternity', 'maternal', 'pregnancy', 'girl'
+];
+
+// Function to filter content based on keywords
+function filterForWomenContent(items: NewsItem[]): NewsItem[] {
+  return items.filter(item => {
+    const titleLower = item.title.toLowerCase();
+    const descLower = item.description.toLowerCase();
+    
+    // Check if any keywords exist in title or description
+    return womenInTechKeywords.some(keyword => 
+      titleLower.includes(keyword) || descLower.includes(keyword)
+    );
+  });
+}
+
 // Initialize RSS parser
 const rssParser = new Parser({
   customFields: {
@@ -78,12 +98,36 @@ export const sources: Source[] = [
     endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
     category: 'tech-news'
   },
+  {
+    name: 'Women 2.0',
+    type: 'rss',
+    endpoint: 'https://women2.com/feed/',
+    category: 'tech-news'
+  },
+  {
+    name: 'TechCrunch',
+    type: 'rss',
+    endpoint: 'https://techcrunch.com/feed/',
+    category: 'tech-news'
+  },
+  {
+    name: 'Wired',
+    type: 'rss',
+    endpoint: 'https://www.wired.com/feed/rss',
+    category: 'tech-news'
+  },
   
   // Career Development Category
   {
     name: 'Women of Wearables',
     type: 'rss',
     endpoint: 'https://www.womenofwearables.com/blog?format=rss',
+    category: 'career-development'
+  },
+  {
+    name: 'WITI',
+    type: 'rss',
+    endpoint: 'https://witi.com/feed/',
     category: 'career-development'
   },
   {
@@ -100,6 +144,12 @@ export const sources: Source[] = [
   },
   
   // Community Updates Category
+  {
+    name: 'Ada\'s List Blog',
+    type: 'rss',
+    endpoint: 'https://adaslist.co/blog?format=rss',
+    category: 'community-updates'
+  },
   {
     name: 'Women In Tech',
     type: 'devto',
@@ -206,7 +256,7 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
   try {
     const feed = await rssParser.parseURL(source.endpoint);
     
-    return feed.items.map(item => ({
+    let items = feed.items.map(item => ({
       title: item.title || 'Untitled',
       description: item.contentSnippet || item.content || '',
       date: item.isoDate || item.pubDate || new Date().toISOString(),
@@ -215,6 +265,14 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
       imageUrl: extractImageFromContent(item.content || item['contentEncoded']),
       category: source.category
     }));
+    
+    // Apply filtering only to specific sources
+    const sourcesToFilter = ['TechCrunch', 'Wired', 'The Verge'];
+    if (sourcesToFilter.includes(source.name)) {
+      items = filterForWomenContent(items);
+    }
+    
+    return items;
   } catch (error) {
     console.error(`Error fetching RSS feed from ${source.name}:`, error);
     const { getSampleNews } = await import('./sampleData');
@@ -234,7 +292,7 @@ async function fetchDevToArticles(source: Source): Promise<NewsItem[]> {
     const response = await axios.get<DevToArticle[]>(source.endpoint);
     console.log(`Received ${response.data.length} articles from Dev.to`);
     
-    const items = response.data.map(article => ({
+    let items = response.data.map(article => ({
       title: article.title,
       description: article.description || '',
       date: article.published_at,
@@ -243,6 +301,12 @@ async function fetchDevToArticles(source: Source): Promise<NewsItem[]> {
       imageUrl: article.cover_image,
       category: source.category
     }));
+    
+    // Apply filtering for general dev.to sources that aren't specifically women-focused
+    const sourcesToFilter = ['Career Growth', 'Tech Leadership', 'Community News', 'Programming Tips', 'Coding Tutorials', 'Startup Stories', 'Founder Insights'];
+    if (sourcesToFilter.includes(source.name)) {
+      items = filterForWomenContent(items);
+    }
     
     updateCache(source, items);
     updateSourceHealth(source, 'active');
