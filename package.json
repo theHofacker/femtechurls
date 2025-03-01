@@ -1,0 +1,22 @@
+{
+  "name": "femtech-urls",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/tailwind": "^5.1.0",
+    "astro": "^5.2.5",
+    "axios": "^1.6.7",
+    "date-fns": "^3.3.1",
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0",
+    "tailwindcss": "^3.4.1"
+  }
+}

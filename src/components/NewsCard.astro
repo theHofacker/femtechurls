@@ -1,0 +1,81 @@
+---
+import { formatDate } from '../utils/feedAggregator';
+
+interface Props {
+  title: string;
+  description: string;
+  date: string;
+  source: string;
+  url: string;
+}
+
+const { title, description, date, source, url } = Astro.props;
+
+// Truncate description to 160 characters while keeping whole words
+const truncateDescription = (text: string, maxLength: number) => {
+  if (!text) return 'No description available';
+  if (text.length <= maxLength) return text;
+  const truncated = text.slice(0, maxLength);
+  return truncated.slice(0, truncated.lastIndexOf(' ')) + '...';
+};
+
+const truncatedDescription = truncateDescription(description, 160);
+---
+
+<article class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden article-card">
+  <div class="p-6">
+    <div class="flex items-center text-sm text-gray-500 mb-2">
+      <span class="font-medium text-purple-700">{source}</span>
+      <span class="mx-2">•</span>
+      <time datetime={date}>{formatDate(date)}</time>
+    </div>
+    
+    <h2 class="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 article-title">
+      <a 
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:text-purple-700 transition-colors duration-200"
+      >
+        {title}
+      </a>
+    </h2>
+    
+    <p class="text-gray-600 mb-4 line-clamp-3 article-description">
+      {truncatedDescription}
+    </p>
+    
+    <div class="flex justify-between items-center">
+      <div class="flex space-x-2">
+        <button 
+          class="text-gray-400 hover:text-purple-700 transition-colors duration-200"
+          aria-label="Share article"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+          </svg>
+        </button>
+        <button 
+          class="text-gray-400 hover:text-purple-700 transition-colors duration-200"
+          aria-label="Save article"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+          </svg>
+        </button>
+      </div>
+      
+      <a 
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center text-sm font-medium text-purple-700 hover:text-purple-900 transition-colors duration-200"
+      >
+        Read more
+        <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>

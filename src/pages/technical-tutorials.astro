@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsCard from '../components/NewsCard.astro';
+import SkeletonCard from '../components/SkeletonCard.astro';
+import { fetchNews } from '../utils/feedAggregator';
+import { getSampleNews } from '../utils/sampleData';
+
+// Category configuration
+const category = 'technical-tutorials';
+const title = 'Technical Tutorials';
+const description = 'Learn and grow with tutorials, coding guides, and technical resources for all skill levels.';
+
+// Get news for this category
+const news = await fetchNews(category);
+
+// Group by source
+const groupedBySource = news.reduce((acc, item) => {
+  if (!acc[item.source]) {
+    acc[item.source] = [];
+  }
+  acc[item.source].push(item);
+  return acc;
+}, {} as Record<string, typeof news>);
+
+// Default display settings
+const articlesPerCategory = 3;
+const articlesPerSource = 5;
+
+const sources = Object.keys(groupedBySource);
+console.log('Sources found:', sources);
+console.log('Articles per source:', sources.map(source => ({
+  source,
+  count: groupedBySource[source].length
+})));
+---
+
+<BaseLayout title={`${title} - FemTechURLs`}>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+    <p class="text-gray-600">{description}</p>
+  </div>
+
+  {sources.length > 0 ? (
+    <div class="space-y-12">
+      {sources.map(source => (
+        <section>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{source}</h2>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {groupedBySource[source].map(item => (
+              <NewsCard
+                title={item.title}
+                description={item.description}
+                date={item.date}
+                source={item.source}
+                url={item.url}
+                imageUrl={item.imageUrl}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-16">
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    </div>
+  )}
+</BaseLayout>
+
+<script>
+  // Handle search functionality
+  const searchInput = document.getElementById('search-input');
+  
+  function handleSearch(value: string) {
+    console.log('Searching for:', value);
+    const articles = document.querySelectorAll('.article-card');
+    const sections = document.querySelectorAll('section');
+    value = value.toLowerCase().trim();
+    
+    sections.forEach(section => {
+      let hasVisibleArticles = false;
+      const sectionArticles = section.querySelectorAll('.article-card');
+      
+      sectionArticles.forEach(article => {
+        const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
+        const description = article.querySelector('.article-description')?.textContent?.toLowerCase() || '';
+        
+        if (title.includes(value) || description.includes(value)) {
+          article.classList.remove('hidden');
+          hasVisibleArticles = true;
+        } else {
+          article.classList.add('hidden');
+        }
+      });
+      
+      if (hasVisibleArticles) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    });
+
+    console.log('Search results:', {
+      totalArticles: articles.length,
+      visibleArticles: document.querySelectorAll('.article-card:not(.hidden)').length,
+      visibleSections: document.querySelectorAll('section:not(.hidden)').length
+    });
+  }
+
+  searchInput?.addEventListener('input', (e) => {
+    handleSearch((e.target as HTMLInputElement).value);
+  });
+
+  // Log initial page state
+  console.log('Initial page state:', {
+    totalArticles: document.querySelectorAll('.article-card').length,
+    totalSections: document.querySelectorAll('section').length
+  });
+</script>

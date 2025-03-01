@@ -1,0 +1,138 @@
+---
+const navItems = [
+  { name: 'Home', path: '/', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+  { name: 'Tech News', path: '/tech-news', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z' },
+  { name: 'Career Development', path: '/career-development', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+  { name: 'Community Updates', path: '/community-updates', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+  { name: 'Technical Tutorials', path: '/technical-tutorials', icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4' },
+  { name: 'Founder Stories', path: '/founder-stories', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' }
+];
+
+const pathname = new URL(Astro.request.url).pathname;
+---
+
+<div class="h-full flex flex-col py-4">
+  <div class="px-4 pb-6 flex justify-between items-center border-b border-gray-200">
+    <a href="/" class="text-xl font-bold text-purple-800 flex items-center overflow-hidden">
+      <span class="sidebar-text">FemTechURLs</span>
+    </a>
+    <button 
+      id="sidebarToggle"
+      class="ml-2 p-1.5 rounded-md bg-purple-100 text-purple-800 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      aria-label="Toggle Sidebar"
+    >
+      <svg 
+        id="toggleIcon" 
+        xmlns="http://www.w3.org/2000/svg" 
+        class="h-5 w-5 transition-transform duration-200" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="flex-1 px-2 space-y-1 overflow-y-auto">
+    {navItems.map((item) => (
+      <a
+        href={item.path}
+        class={`flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+          pathname === item.path
+            ? 'bg-purple-100 text-purple-900'
+            : 'text-gray-600 hover:bg-purple-50 hover:text-purple-900'
+        }`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class={`h-5 w-5 mr-3 flex-shrink-0 ${
+            pathname === item.path ? 'text-purple-700' : 'text-gray-500'
+          }`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={item.icon} />
+        </svg>
+        <span class="sidebar-text truncate">{item.name}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="px-4 pt-4 border-t border-gray-200 mt-auto">
+    <p class="text-xs text-gray-500 sidebar-text">
+      Last updated: {new Date().toLocaleDateString()}
+    </p>
+  </div>
+</div>
+
+<style>
+  nav {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.purple.200') theme('colors.purple.50');
+  }
+
+  nav::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  nav::-webkit-scrollbar-track {
+    background: theme('colors.purple.50');
+  }
+
+  nav::-webkit-scrollbar-thumb {
+    background-color: theme('colors.purple.200');
+    border-radius: 3px;
+  }
+</style>
+
+<script>
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const toggleIcon = document.getElementById('toggleIcon');
+  const sidebarTexts = document.querySelectorAll('.sidebar-text');
+  const sidebar = document.getElementById('sidebar');
+  
+  let isCollapsed = false;
+  
+  const updateSidebarState = () => {
+    sidebarTexts.forEach(text => {
+      if (isCollapsed) {
+        text.classList.add('hidden');
+      } else {
+        text.classList.remove('hidden');
+      }
+    });
+    
+    toggleIcon?.classList.toggle('rotate-180', isCollapsed);
+    
+    if (sidebar) {
+      if (isCollapsed) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-16');
+      } else {
+        sidebar.classList.remove('w-16');
+        sidebar.classList.add('w-64');
+      }
+    }
+  };
+
+  sidebarToggle?.addEventListener('click', () => {
+    isCollapsed = !isCollapsed;
+    updateSidebarState();
+  });
+
+  // Handle initial state on mobile
+  const handleResize = () => {
+    if (window.innerWidth < 768) {
+      isCollapsed = true;
+      updateSidebarState();
+    } else {
+      isCollapsed = false;
+      updateSidebarState();
+    }
+  };
+
+  window.addEventListener('resize', handleResize);
+  handleResize(); // Initial check
+</script>

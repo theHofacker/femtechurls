@@ -1,0 +1,306 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "FemTechURLs" } = Astro.props;
+---
+
+<header class="bg-purple-800 text-white shadow h-16">
+  <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-full">
+      <div class="flex items-center">
+        <button 
+          class="md:hidden p-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          id="mobileSidebarToggle"
+          aria-label="Toggle Mobile Menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h1 class="text-xl font-bold ml-4 md:ml-0">{title}</h1>
+      </div>
+
+      <div class="flex-1 max-w-lg mx-8 hidden md:block">
+        <div class="relative">
+          <input
+            type="search"
+            id="search-input"
+            placeholder="Search articles..."
+            class="w-full pl-10 pr-4 py-2 rounded-lg bg-purple-700 text-white placeholder-purple-300 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <button 
+          id="mobile-search-button"
+          class="md:hidden p-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          aria-label="Toggle Search"
+        >
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        
+        <div class="relative">
+          <button 
+            id="sources-filter"
+            class="hidden md:flex items-center px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-800"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+            </svg>
+            Sources
+          </button>
+
+          <!-- Sources dropdown -->
+          <div id="sources-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-50">
+            <div class="p-4">
+              <h3 class="text-sm font-semibold text-gray-900 mb-3">Filter by Source</h3>
+              
+              <div class="space-y-2">
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    id="source-all" 
+                    class="h-4 w-4 text-purple-600 rounded border-gray-300" 
+                    checked
+                  />
+                  <label for="source-all" class="ml-2 text-sm text-gray-700 font-medium">
+                    All Sources
+                  </label>
+                </div>
+                
+                <div class="border-t border-gray-200 my-2"></div>
+                
+                <div id="source-checkboxes" class="space-y-2">
+                  <!-- Source checkboxes will be dynamically added here -->
+                </div>
+              </div>
+              
+              <button 
+                id="apply-filters"
+                class="w-full mt-4 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Search Overlay -->
+  <div
+    id="mobile-search-overlay"
+    class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
+  >
+    <div class="p-4 bg-purple-800">
+      <div class="relative">
+        <input
+          type="search"
+          id="mobile-search-input"
+          placeholder="Search articles..."
+          class="w-full pl-10 pr-4 py-3 rounded-lg bg-purple-700 text-white placeholder-purple-300 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <button
+          id="close-mobile-search"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          aria-label="Close Search"
+        >
+          <svg class="h-6 w-6 text-purple-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Search functionality
+  function handleSearch(value: string) {
+    const articles = document.querySelectorAll('.article-card');
+    value = value.toLowerCase().trim();
+    
+    articles.forEach(article => {
+      const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
+      const description = article.querySelector('.article-description')?.textContent?.toLowerCase() || '';
+      
+      if (title.includes(value) || description.includes(value)) {
+        article.classList.remove('hidden');
+      } else {
+        article.classList.add('hidden');
+      }
+    });
+
+    updateSectionVisibility();
+  }
+
+  // Desktop search
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  searchInput?.addEventListener('input', (e) => {
+    handleSearch((e.target as HTMLInputElement).value);
+  });
+
+  // Mobile search
+  const mobileSearchButton = document.getElementById('mobile-search-button');
+  const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
+  const closeMobileSearch = document.getElementById('close-mobile-search');
+  const mobileSearchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
+
+  mobileSearchButton?.addEventListener('click', () => {
+    mobileSearchOverlay?.classList.remove('hidden');
+    mobileSearchInput?.focus();
+  });
+
+  closeMobileSearch?.addEventListener('click', () => {
+    mobileSearchOverlay?.classList.add('hidden');
+  });
+
+  mobileSearchInput?.addEventListener('input', (e) => {
+    handleSearch((e.target as HTMLInputElement).value);
+  });
+
+  // Close mobile search on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !mobileSearchOverlay?.classList.contains('hidden')) {
+      mobileSearchOverlay?.classList.add('hidden');
+    }
+  });
+
+  // Sources filter functionality
+  const sourcesFilter = document.getElementById('sources-filter');
+  const sourcesDropdown = document.getElementById('sources-dropdown');
+  const sourceCheckboxesContainer = document.getElementById('source-checkboxes');
+  const allSourcesCheckbox = document.getElementById('source-all') as HTMLInputElement;
+  const applyFiltersButton = document.getElementById('apply-filters');
+
+  // Get unique sources from the page
+  function getUniqueSources(): string[] {
+    const sources = new Set<string>();
+    document.querySelectorAll('.article-card').forEach(article => {
+      const sourceElement = article.querySelector('.font-medium.text-purple-700');
+      const sourceName = sourceElement?.textContent;
+      if (sourceName) sources.add(sourceName);
+    });
+    return Array.from(sources);
+  }
+
+  // Create source checkboxes
+  function createSourceCheckboxes() {
+    if (!sourceCheckboxesContainer) return;
+    
+    const sources = getUniqueSources();
+    sourceCheckboxesContainer.innerHTML = sources.map((source, index) => `
+      <div class="flex items-center">
+        <input 
+          type="checkbox" 
+          id="source-${index}" 
+          class="source-checkbox h-4 w-4 text-purple-600 rounded border-gray-300" 
+          data-source="${source}"
+          checked
+        />
+        <label for="source-${index}" class="ml-2 text-sm text-gray-700">${source}</label>
+      </div>
+    `).join('');
+
+    // Add event listeners to new checkboxes
+    document.querySelectorAll('.source-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', updateAllSourcesCheckbox);
+    });
+  }
+
+  // Toggle dropdown
+  sourcesFilter?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = sourcesDropdown?.classList.contains('hidden');
+    
+    if (isHidden) {
+      createSourceCheckboxes();
+      sourcesDropdown?.classList.remove('hidden');
+    } else {
+      sourcesDropdown?.classList.add('hidden');
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (sourcesDropdown && 
+        !sourcesDropdown.contains(e.target as Node) && 
+        !sourcesFilter?.contains(e.target as Node)) {
+      sourcesDropdown.classList.add('hidden');
+    }
+  });
+
+  // Update "All Sources" checkbox
+  function updateAllSourcesCheckbox() {
+    const sourceCheckboxes = document.querySelectorAll('.source-checkbox') as NodeListOf<HTMLInputElement>;
+    const allChecked = Array.from(sourceCheckboxes).every(cb => cb.checked);
+    if (allSourcesCheckbox) allSourcesCheckbox.checked = allChecked;
+  }
+
+  // Handle "All Sources" checkbox
+  allSourcesCheckbox?.addEventListener('change', () => {
+    const sourceCheckboxes = document.querySelectorAll('.source-checkbox') as NodeListOf<HTMLInputElement>;
+    sourceCheckboxes.forEach(cb => {
+      cb.checked = allSourcesCheckbox.checked;
+    });
+  });
+
+  // Apply filters
+  applyFiltersButton?.addEventListener('click', () => {
+    const sourceCheckboxes = document.querySelectorAll('.source-checkbox') as NodeListOf<HTMLInputElement>;
+    const selectedSources = Array.from(sourceCheckboxes)
+      .filter(cb => cb.checked)
+      .map(cb => cb.dataset.source);
+
+    // Filter articles
+    const articles = document.querySelectorAll('.article-card');
+    articles.forEach(article => {
+      const sourceElement = article.querySelector('.font-medium.text-purple-700');
+      const sourceName = sourceElement?.textContent;
+      
+      if (sourceName && selectedSources.includes(sourceName)) {
+        article.classList.remove('hidden');
+      } else {
+        article.classList.add('hidden');
+      }
+    });
+
+    // Update sections visibility
+    updateSectionVisibility();
+    
+    // Close dropdown
+    sourcesDropdown?.classList.add('hidden');
+  });
+
+  // Update section visibility
+  function updateSectionVisibility() {
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+      const visibleArticles = section.querySelectorAll('.article-card:not(.hidden)');
+      if (visibleArticles.length > 0) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    });
+  }
+
+  // Initialize source checkboxes on page load
+  createSourceCheckboxes();
+</script>
