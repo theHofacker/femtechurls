@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Parser from 'rss-parser';
+import { format, parseISO } from 'date-fns';
 
 // Initialize RSS parser
 const rssParser = new Parser({
@@ -536,4 +537,34 @@ export async function fetchNews(): Promise<NewsItem[]> {
  */
 export function getCategories(): string[] {
   return Array.from(new Set(sources.map(source => source.category)));
+}
+
+/**
+ * Format a date to a readable string
+ */
+export function formatDate(date: Date | string): string {
+  try {
+    if (!date) return 'Unknown date';
+    
+    // Handle string dates
+    if (typeof date === 'string') {
+      // Try to parse the date
+      try {
+        date = parseISO(date);
+      } catch (e) {
+        date = new Date(date);
+      }
+    }
+    
+    // Check if date is valid
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return 'Unknown date';
+    }
+    
+    // Format the date
+    return format(date, 'MMM d, yyyy');
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return 'Unknown date';
+  }
 }
