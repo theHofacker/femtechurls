@@ -2,23 +2,34 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import { fetchNews } from '../utils/feedAggregator';
-import { getSampleNews } from '../utils/sampleData';
+import { fetchNewsByCategory, sampleNewsItems } from '../utils/feedAggregator';
 
 // Category configuration
-const category = 'technical-tutorials';
+const category = 'Technical Tutorials';
 const title = 'Technical Tutorials';
 const description = 'Learn and grow with tutorials, coding guides, and technical resources for all skill levels.';
 
-// Get news for this category
-const news = await fetchNews(category);
+// Fetch news for this category with improved error handling
+let news;
+try {
+  news = await fetchNewsByCategory(category);
+  
+  // If there's no news (empty array), use some fallbacks
+  if (!news || news.length === 0) {
+    console.warn(`No news items returned for category: ${category}, using sample data`);
+    news = sampleNewsItems.filter(item => item.category === category);
+  }
+} catch (error) {
+  console.error(`Error fetching news for category ${category}:`, error);
+  news = sampleNewsItems.filter(item => item.category === category);
+}
 
 // Group by source
 const groupedBySource = news.reduce((acc, item) => {
-  if (!acc[item.source]) {
-    acc[item.source] = [];
+  if (!acc[item.sourceName]) {
+    acc[item.sourceName] = [];
   }
-  acc[item.source].push(item);
+  acc[item.sourceName].push(item);
   return acc;
 }, {} as Record<string, typeof news>);
 
@@ -27,11 +38,6 @@ const articlesPerCategory = 3;
 const articlesPerSource = 5;
 
 const sources = Object.keys(groupedBySource);
-console.log('Sources found:', sources);
-console.log('Articles per source:', sources.map(source => ({
-  source,
-  count: groupedBySource[source].length
-})));
 ---
 
 <BaseLayout title={`${title} - FemTechURLs`}>
@@ -50,10 +56,9 @@ console.log('Articles per source:', sources.map(source => ({
               <NewsCard
                 title={item.title}
                 description={item.description}
+                link={item.link}
                 date={item.date}
-                source={item.source}
-                url={item.url}
-                imageUrl={item.imageUrl}
+                source={item.sourceName}
               />
             ))}
           </div>
@@ -76,18 +81,17 @@ console.log('Articles per source:', sources.map(source => ({
   const searchInput = document.getElementById('search-input');
   
   function handleSearch(value: string) {
-    console.log('Searching for:', value);
-    const articles = document.querySelectorAll('.article-card');
+    const articles = document.querySelectorAll('.bg-white');
     const sections = document.querySelectorAll('section');
     value = value.toLowerCase().trim();
     
     sections.forEach(section => {
       let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.article-card');
+      const sectionArticles = section.querySelectorAll('.bg-white');
       
       sectionArticles.forEach(article => {
-        const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('.article-description')?.textContent?.toLowerCase() || '';
+        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
         
         if (title.includes(value) || description.includes(value)) {
           article.classList.remove('hidden');
@@ -103,21 +107,9 @@ console.log('Articles per source:', sources.map(source => ({
         section.classList.add('hidden');
       }
     });
-
-    console.log('Search results:', {
-      totalArticles: articles.length,
-      visibleArticles: document.querySelectorAll('.article-card:not(.hidden)').length,
-      visibleSections: document.querySelectorAll('section:not(.hidden)').length
-    });
   }
 
   searchInput?.addEventListener('input', (e) => {
     handleSearch((e.target as HTMLInputElement).value);
-  });
-
-  // Log initial page state
-  console.log('Initial page state:', {
-    totalArticles: document.querySelectorAll('.article-card').length,
-    totalSections: document.querySelectorAll('section').length
   });
 </script>
