@@ -1,66 +1,5 @@
 import axios from 'axios';
-import { parseISO, format } from 'date-fns';
 import Parser from 'rss-parser';
-
-export interface NewsItem {
-  title: string;
-  description: string;
-  date: string;
-  source: string;
-  url: string;
-  imageUrl?: string;
-  category: string;
-}
-
-interface DevToArticle {
-  title: string;
-  description: string;
-  published_at: string;
-  user: {
-    name: string;
-  };
-  url: string;
-  cover_image: string;
-  tag_list: string[];
-}
-
-interface GitHubRepo {
-  name: string;
-  description: string;
-  created_at: string;
-  owner: {
-    login: string;
-  };
-  html_url: string;
-  topics: string[];
-}
-
-export interface Source {
-  name: string;
-  type: 'rss' | 'devto' | 'github';
-  endpoint: string;
-  category: string;
-}
-
-// Keywords related to women in tech
-const womenInTechKeywords = [
-  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion',
-  'femtech', 'girls who code', 'women who code', 'ladies', 'she',
-  'her', 'maternity', 'maternal', 'pregnancy', 'girl'
-];
-
-// Function to filter content based on keywords
-function filterForWomenContent(items: NewsItem[]): NewsItem[] {
-  return items.filter(item => {
-    const titleLower = item.title.toLowerCase();
-    const descLower = item.description.toLowerCase();
-    
-    // Check if any keywords exist in title or description
-    return womenInTechKeywords.some(keyword => 
-      titleLower.includes(keyword) || descLower.includes(keyword)
-    );
-  });
-}
 
 // Initialize RSS parser
 const rssParser = new Parser({
@@ -72,49 +11,86 @@ const rssParser = new Parser({
   }
 });
 
+// Define NewsItem interface
+export interface NewsItem {
+  title: string;
+  description: string;
+  date: Date;
+  sourceName: string;
+  category: string;
+  link: string;
+  guid: string;
+}
+
+// Define Source interface
+export interface Source {
+  name: string;
+  type: 'devto' | 'rss' | 'github' | 'hackernews';
+  endpoint: string;
+  category: string;
+}
+
+// Source health status
+export interface SourceHealth {
+  status: 'active' | 'error' | 'inactive';
+  lastChecked: Date;
+  errorMessage?: string;
+}
+
+// Category-specific keywords
+const categoryKeywords = {
+  'Tech News': ['technology', 'tech', 'digital', 'innovation', 'ai', 'artificial intelligence', 'femtech', 'women in tech'],
+  'Career Development': ['career', 'job', 'leadership', 'management', 'professional', 'mentor', 'salary', 'promotion', 'skills'],
+  'Community Updates': ['community', 'event', 'conference', 'meetup', 'diversity', 'inclusion', 'dei', 'advocacy'],
+  'Technical Tutorials': ['tutorial', 'guide', 'how to', 'learn', 'code', 'programming', 'development', 'software', 'engineering'],
+  'Founder Stories': ['founder', 'startup', 'entrepreneur', 'venture', 'funding', 'business', 'ceo', 'launch']
+};
+
+// Women in tech specific keywords
+const womenInTechKeywords = [
+  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion',
+  'femtech', 'girls who code', 'women who code', 'ladies', 'she',
+  'her', 'maternity', 'maternal', 'pregnancy', 'girl'
+];
+
+// Define sources
 export const sources: Source[] = [
   // Tech News Category
   {
     name: 'FemTech Insider',
     type: 'rss',
     endpoint: 'https://femtechinsider.com/feed/',
-    category: 'tech-news'
+    category: 'Tech News'
   },
   {
     name: 'FemTech Live',
     type: 'rss',
     endpoint: 'https://femtech.live/feed/',
-    category: 'tech-news'
+    category: 'Tech News'
   },
   {
     name: 'FemTech Focus',
     type: 'rss',
     endpoint: 'https://femtechfocus.org/feed/',
-    category: 'tech-news'
+    category: 'Tech News'
   },
   {
     name: 'HIT Consultant',
     type: 'rss',
     endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
-    category: 'tech-news'
+    category: 'Tech News'
   },
   {
-    name: 'Women 2.0',
+    name: 'Women In Tech Review',
     type: 'rss',
-    endpoint: 'https://women2.com/feed/',
-    category: 'tech-news'
+    endpoint: 'https://womenintech.co.uk/feed/',
+    category: 'Tech News'
   },
   {
-    name: 'TechCrunch',
+    name: 'WomenTech Network',
     type: 'rss',
-    endpoint: 'https://techcrunch.com/feed/',
-    category: 'tech-news'
-  },
-  {
-    name: 'Wired',
-    type: 'rss',
-    endpoint: 'https://www.wired.com/feed/rss',
-    category: 'tech-news'
+    endpoint: 'https://www.womentech.net/feed',
+    category: 'Tech News'
   },
   
   // Career Development Category
@@ -122,82 +98,228 @@ export const sources: Source[] = [
     name: 'Women of Wearables',
     type: 'rss',
     endpoint: 'https://www.womenofwearables.com/blog?format=rss',
-    category: 'career-development'
+    category: 'Career Development'
   },
   {
-    name: 'WITI',
+    name: 'Elvie Blog',
     type: 'rss',
-    endpoint: 'https://witi.com/feed/',
-    category: 'career-development'
+    endpoint: 'https://www.elvie.com/en-us/blog/feed',
+    category: 'Career Development'
+  },
+  {
+    name: 'PowerToFly Blog',
+    type: 'rss',
+    endpoint: 'https://blog.powertofly.com/feed',
+    category: 'Career Development'
   },
   {
     name: 'Career Growth',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=career&per_page=10',
-    category: 'career-development'
+    category: 'Career Development'
   },
   {
     name: 'Tech Leadership',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
-    category: 'career-development'
+    category: 'Career Development'
   },
   
   // Community Updates Category
   {
+    name: 'FemTech Focus',
+    type: 'rss',
+    endpoint: 'https://femtechfocus.org/feed/',
+    category: 'Community Updates'
+  },
+  {
+    name: 'Ovia Health',
+    type: 'rss',
+    endpoint: 'https://www.oviahealth.com/blog/feed/',
+    category: 'Community Updates'
+  },
+  {
+    name: 'Women in Technology International',
+    type: 'rss',
+    endpoint: 'https://witi.com/feed/',
+    category: 'Community Updates'
+  },
+  {
     name: 'Ada\'s List Blog',
     type: 'rss',
     endpoint: 'https://adaslist.co/blog?format=rss',
-    category: 'community-updates'
+    category: 'Community Updates'
   },
   {
     name: 'Women In Tech',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
-    category: 'community-updates'
+    category: 'Community Updates'
   },
   {
     name: 'Community News',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=community&per_page=10', 
-    category: 'community-updates'
+    category: 'Community Updates'
   },
   
   // Technical Tutorials Category
   {
+    name: 'Women Who Code',
+    type: 'rss',
+    endpoint: 'https://www.womenwhocode.com/blog/feed',
+    category: 'Technical Tutorials'
+  },
+  {
+    name: 'Code Like A Girl',
+    type: 'rss',
+    endpoint: 'https://medium.com/feed/code-like-a-girl',
+    category: 'Technical Tutorials'
+  },
+  {
+    name: 'She Can Code',
+    type: 'rss',
+    endpoint: 'https://shecancode.io/stories?format=rss',
+    category: 'Technical Tutorials'
+  },
+  {
     name: 'Programming Tips',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=beginners&per_page=10',
-    category: 'technical-tutorials'
+    category: 'Technical Tutorials'
   },
   {
     name: 'Coding Tutorials',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=tutorial&per_page=10',
-    category: 'technical-tutorials'
+    category: 'Technical Tutorials'
   },
   
   // Founder Stories Category
   {
+    name: 'Femovate',
+    type: 'rss',
+    endpoint: 'https://www.femovate.com/feed/',
+    category: 'Founder Stories'
+  },
+  {
+    name: 'FutureFemHealth',
+    type: 'rss',
+    endpoint: 'https://www.futurefemhealth.com/feed',
+    category: 'Founder Stories'
+  },
+  {
+    name: 'Women in Startups',
+    type: 'rss',
+    endpoint: 'https://medium.com/feed/women-in-startups',
+    category: 'Founder Stories'
+  },
+  {
     name: 'Startup Stories',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=startup&per_page=10',
-    category: 'founder-stories'
+    category: 'Founder Stories'
   },
   {
     name: 'Founder Insights',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=entrepreneurship&per_page=10',
-    category: 'founder-stories'
+    category: 'Founder Stories'
   }
 ];
 
-const CATEGORIES = [
-  'tech-news',
-  'career-development',
-  'community-updates',
-  'technical-tutorials',
-  'founder-stories'
+// Sample data for fallbacks
+export const sampleNewsItems: NewsItem[] = [
+  {
+    title: 'Women in Tech: Breaking Barriers and Building Futures',
+    description: 'An exploration of the challenges and opportunities for women in the technology sector today.',
+    date: new Date('2023-08-15'),
+    sourceName: 'FemTech Insider',
+    category: 'Tech News',
+    link: 'https://example.com/article1',
+    guid: 'sample-1'
+  },
+  {
+    title: 'The Rise of Women-Led Startups in 2023',
+    description: 'How female founders are changing the startup landscape with innovative approaches to technology and business.',
+    date: new Date('2023-08-10'),
+    sourceName: 'Femovate',
+    category: 'Founder Stories',
+    link: 'https://example.com/article2',
+    guid: 'sample-2'
+  },
+  {
+    title: 'Essential Career Skills for Women in Tech Leadership',
+    description: 'Key competencies and strategies for women aiming for leadership positions in technology companies.',
+    date: new Date('2023-08-05'),
+    sourceName: 'Women of Wearables',
+    category: 'Career Development',
+    link: 'https://example.com/article3',
+    guid: 'sample-3'
+  },
+  {
+    title: 'Mastering React: A Guide for Female Developers',
+    description: 'Step-by-step tutorial on building complex applications with React, designed to be inclusive for all skill levels.',
+    date: new Date('2023-07-28'),
+    sourceName: 'Women Who Code',
+    category: 'Technical Tutorials',
+    link: 'https://example.com/article4',
+    guid: 'sample-4'
+  },
+  {
+    title: 'Global Women in Tech Summit Announces 2023 Speakers',
+    description: 'Preview of the upcoming international conference highlighting achievements of women in technology.',
+    date: new Date('2023-07-20'),
+    sourceName: 'WomenTech Network',
+    category: 'Community Updates',
+    link: 'https://example.com/article5',
+    guid: 'sample-5'
+  },
+  {
+    title: 'The Future of FemTech: Innovations Transforming Women\'s Health',
+    description: 'Exploring the latest technological advances designed specifically for women\'s health and wellness needs.',
+    date: new Date('2023-07-15'),
+    sourceName: 'FemTech Live',
+    category: 'Tech News',
+    link: 'https://example.com/article6',
+    guid: 'sample-6'
+  },
+  {
+    title: 'From Engineer to CEO: One Woman\'s Journey in Silicon Valley',
+    description: 'The inspiring story of a female engineer who built a tech empire from the ground up.',
+    date: new Date('2023-07-10'),
+    sourceName: 'Female Founders Fund',
+    category: 'Founder Stories',
+    link: 'https://example.com/article7',
+    guid: 'sample-7'
+  },
+  {
+    title: 'Building Community: Women Supporting Women in Tech',
+    description: 'How community initiatives are creating support networks for women at all stages of their tech careers.',
+    date: new Date('2023-07-05'),
+    sourceName: 'Ada\'s List Blog',
+    category: 'Community Updates',
+    link: 'https://example.com/article8',
+    guid: 'sample-8'
+  },
+  {
+    title: 'Python for Data Science: A Beginner\'s Tutorial',
+    description: 'An accessible introduction to using Python for data analysis and visualization, with examples relevant to women researchers.',
+    date: new Date('2023-06-28'),
+    sourceName: 'Code Like A Girl',
+    category: 'Technical Tutorials',
+    link: 'https://example.com/article9',
+    guid: 'sample-9'
+  },
+  {
+    title: 'Negotiation Strategies for Women in Tech',
+    description: 'Practical advice for salary negotiations and career advancement specific to the challenges women face in technology fields.',
+    date: new Date('2023-06-20'),
+    sourceName: 'PowerToFly Blog',
+    category: 'Career Development',
+    link: 'https://example.com/article10',
+    guid: 'sample-10'
+  }
 ];
 
 // Cache for feed data
@@ -205,165 +327,137 @@ const feedCache = new Map<string, { data: NewsItem[], timestamp: number }>();
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 // Source health tracking
-const sourceHealth = new Map<string, { status: 'active' | 'error', message?: string }>();
+const sourceHealth = new Map<string, SourceHealth>();
 
-// Get cached feed data if available and not expired
+/**
+ * Updates the health status of a source
+ */
+function updateSourceHealth(source: Source, status: 'active' | 'error' | 'inactive', errorMessage?: string): void {
+  sourceHealth.set(source.name, {
+    status,
+    lastChecked: new Date(),
+    errorMessage
+  });
+}
+
+/**
+ * Gets cached feed data if available and not expired
+ */
 function getCachedFeed(source: Source): NewsItem[] | null {
-  const cacheKey = `${source.type}-${source.name}`;
-  const cached = feedCache.get(cacheKey);
-  
-  if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
-    console.log(`Using cached data for ${source.name}`);
+  const cached = feedCache.get(source.endpoint);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
     return cached.data;
   }
-  
   return null;
 }
 
-// Update cache with new feed data
+/**
+ * Updates the cache with new feed data
+ */
 function updateCache(source: Source, data: NewsItem[]): void {
-  const cacheKey = `${source.type}-${source.name}`;
-  feedCache.set(cacheKey, {
+  feedCache.set(source.endpoint, {
     data,
     timestamp: Date.now()
   });
 }
 
-// Update source health status
-function updateSourceHealth(source: Source, status: 'active' | 'error', message?: string): void {
-  sourceHealth.set(source.name, { status, message });
+/**
+ * Filters content to ensure it's relevant to both women in tech and the specified category
+ */
+function filterContentByCategory(items: NewsItem[], category: string): NewsItem[] {
+  return items.filter(item => {
+    const titleLower = item.title.toLowerCase();
+    const descLower = item.description.toLowerCase();
+    
+    // For women-specific sources, we only need to filter by category
+    const matchesCategory = categoryKeywords[category]?.some(keyword => 
+      titleLower.includes(keyword) || descLower.includes(keyword)
+    ) || false;
+    
+    // For general tech sources, we need both women and category matches
+    const matchesWomenInTech = womenInTechKeywords.some(keyword => 
+      titleLower.includes(keyword) || descLower.includes(keyword)
+    );
+    
+    // List of general tech sources that need dual filtering
+    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
+    
+    // If it's a general source, require both women and category matches
+    // If it's a women-specific source, only require category match
+    if (generalTechSources.includes(item.sourceName)) {
+      return matchesWomenInTech && matchesCategory;
+    } else {
+      // For women-specific sources, we assume the content is already women-focused
+      // So we only check category relevance, but more leniently (don't require an exact match)
+      return matchesCategory || category === 'Tech News';  // Default to Tech News if no matches
+    }
+  });
 }
 
-// Helper function to strip HTML tags
-function stripHtml(html: string): string {
-  if (typeof DOMParser !== 'undefined') {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body.textContent || '';
-  } else {
-    // Fallback for server-side
-    return html.replace(/<[^>]*>?/gm, '');
+/**
+ * Fetches articles from DEV.to API
+ */
+async function fetchFromDevTo(source: Source): Promise<NewsItem[]> {
+  try {
+    const response = await axios.get(source.endpoint);
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid response format from DEV.to API');
+    }
+    
+    return response.data.map(item => ({
+      title: item.title,
+      description: item.description || '',
+      date: new Date(item.published_at),
+      sourceName: source.name,
+      category: source.category,
+      link: item.url,
+      guid: item.id.toString()
+    }));
+  } catch (error) {
+    console.error(`Error fetching from DEV.to (${source.name}):`, error);
+    updateSourceHealth(source, 'error', error instanceof Error ? error.message : 'Unknown error');
+    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
   }
 }
 
-function extractImageFromContent(content: string): string | undefined {
-  // Simple regex to extract the first image URL from HTML content
-  const imgMatch = content?.match(/<img[^>]+src="([^">]+)"/);
-  return imgMatch ? imgMatch[1] : undefined;
-}
-
-// Updated function to handle RSS feeds using rss-parser
+/**
+ * Fetches articles from RSS feeds
+ */
 async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
   try {
     const feed = await rssParser.parseURL(source.endpoint);
     
+    if (!feed.items || !Array.isArray(feed.items)) {
+      throw new Error('Invalid RSS feed format');
+    }
+    
     let items = feed.items.map(item => ({
       title: item.title || 'Untitled',
+      link: item.link || '',
       description: item.contentSnippet || item.content || '',
-      date: item.isoDate || item.pubDate || new Date().toISOString(),
-      source: source.name,
-      url: item.link || '',
-      imageUrl: extractImageFromContent(item.content || item['contentEncoded']),
-      category: source.category
+      date: item.isoDate ? new Date(item.isoDate) : new Date(),
+      sourceName: source.name,
+      category: source.category,
+      guid: item.guid || item.link || ''
     }));
     
-    // Apply filtering only to specific sources
-    const sourcesToFilter = ['TechCrunch', 'Wired', 'The Verge'];
-    if (sourcesToFilter.includes(source.name)) {
-      items = filterForWomenContent(items);
+    // Apply category filtering for general tech sources
+    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
+    if (generalTechSources.includes(source.name)) {
+      items = filterContentByCategory(items, source.category);
     }
     
     return items;
   } catch (error) {
     console.error(`Error fetching RSS feed from ${source.name}:`, error);
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return sampleNews.filter(item => item.category === source.category).slice(0, 5);
-  }
-}
-
-async function fetchDevToArticles(source: Source): Promise<NewsItem[]> {
-  console.log(`Fetching Dev.to articles from: ${source.endpoint}`);
-  
-  // Check cache first
-  const cached = getCachedFeed(source);
-  if (cached) return cached;
-  
-  try {
-    const response = await axios.get<DevToArticle[]>(source.endpoint);
-    console.log(`Received ${response.data.length} articles from Dev.to`);
-    
-    let items = response.data.map(article => ({
-      title: article.title,
-      description: article.description || '',
-      date: article.published_at,
-      source: source.name,
-      url: article.url,
-      imageUrl: article.cover_image,
-      category: source.category
-    }));
-    
-    // Apply filtering for general dev.to sources that aren't specifically women-focused
-    const sourcesToFilter = ['Career Growth', 'Tech Leadership', 'Community News', 'Programming Tips', 'Coding Tutorials', 'Startup Stories', 'Founder Insights'];
-    if (sourcesToFilter.includes(source.name)) {
-      items = filterForWomenContent(items);
-    }
-    
-    updateCache(source, items);
-    updateSourceHealth(source, 'active');
-    return items;
-  } catch (error) {
-    console.error(`Error fetching from Dev.to (${source.name}):`, error);
     updateSourceHealth(source, 'error', error instanceof Error ? error.message : 'Unknown error');
-    
-    // Return sample data as fallback
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return sampleNews.filter(item => item.category === source.category).slice(0, 5);
+    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
   }
 }
 
-async function fetchGitHubTrending(source: Source): Promise<NewsItem[]> {
-  console.log(`Fetching GitHub trending repositories from: ${source.endpoint}`);
-  
-  // Check cache first
-  const cached = getCachedFeed(source);
-  if (cached) return cached;
-  
-  try {
-    const response = await axios.get<{ items: GitHubRepo[] }>(
-      source.endpoint,
-      {
-        headers: {
-          Accept: 'application/vnd.github.v3+json'
-        }
-      }
-    );
-    
-    console.log(`Received ${response.data.items.length} repositories from GitHub`);
-    const items = response.data.items.slice(0, 10).map(repo => ({
-      title: repo.name,
-      description: repo.description || '',
-      date: repo.created_at,
-      source: source.name,
-      url: repo.html_url,
-      category: source.category
-    }));
-    
-    updateCache(source, items);
-    updateSourceHealth(source, 'active');
-    return items;
-  } catch (error) {
-    console.error(`Error fetching from GitHub (${source.name}):`, error);
-    updateSourceHealth(source, 'error', error instanceof Error ? error.message : 'Unknown error');
-    
-    // Return sample data as fallback
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return sampleNews.filter(item => item.category === source.category).slice(0, 5);
-  }
-}
-
-// Update the main fetchFeed function to handle the appropriate type
+/**
+ * Main function to fetch from any source type
+ */
 export async function fetchFeed(source: Source): Promise<NewsItem[]> {
   // Check cache first
   const cached = getCachedFeed(source);
@@ -377,10 +471,7 @@ export async function fetchFeed(source: Source): Promise<NewsItem[]> {
         items = await fetchFromRSS(source);
         break;
       case 'devto':
-        items = await fetchDevToArticles(source);
-        break;
-      case 'github':
-        items = await fetchGitHubTrending(source);
+        items = await fetchFromDevTo(source);
         break;
       default:
         throw new Error(`Unknown source type: ${source.type}`);
@@ -392,113 +483,57 @@ export async function fetchFeed(source: Source): Promise<NewsItem[]> {
   } catch (error) {
     console.error(`Error fetching from ${source.name}:`, error);
     updateSourceHealth(source, 'error', error instanceof Error ? error.message : 'Unknown error');
-    
-    // Return sample data as fallback
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return sampleNews.filter(item => item.category === source.category).slice(0, 5);
+    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
   }
 }
 
-async function fetchSourceData(source: Source): Promise<NewsItem[]> {
-  return fetchFeed(source);
-}
-
+/**
+ * Fetches news items by category
+ */
 export async function fetchNewsByCategory(category: string): Promise<NewsItem[]> {
-  console.log(`Fetching news for category: ${category}`);
+  const categorySources = sources.filter(source => source.category === category);
+  
+  if (categorySources.length === 0) {
+    return sampleNewsItems.filter(item => item.category === category);
+  }
+  
+  const promises = categorySources.map(source => fetchFeed(source));
   
   try {
-    // Filter sources by category
-    const categorySources = sources.filter(source => source.category === category);
-    console.log(`Found ${categorySources.length} sources for category ${category}`);
+    const results = await Promise.allSettled(promises);
+    const fulfilled = results
+      .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
+      .map(result => result.value);
     
-    // Fetch from all sources for this category
-    const fetchPromises = categorySources.map(source => fetchSourceData(source));
-    const results = await Promise.allSettled(fetchPromises);
-    
-    // Combine all successful results
-    let allNews: NewsItem[] = [];
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        allNews = [...allNews, ...result.value];
-      } else {
-        console.error(`Failed to fetch from ${categorySources[index].name}:`, result.reason);
-      }
-    });
-    
-    console.log(`Total items fetched for ${category}: ${allNews.length}`);
-
-    // Sort by date
-    allNews.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-
-    if (allNews.length === 0) {
-      console.log(`No items found for ${category}, using sample data`);
-      const { getSampleNews } = await import('./sampleData');
-      const sampleNews = getSampleNews();
-      return sampleNews.filter(item => item.category === category);
-    }
-
-    return allNews;
+    return fulfilled.flat();
   } catch (error) {
-    console.error('Error fetching news:', error);
-    // Return sample data as fallback
-    console.log('Falling back to sample data');
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return sampleNews.filter(item => item.category === category);
+    console.error(`Error fetching news for category ${category}:`, error);
+    return sampleNewsItems.filter(item => item.category === category);
   }
 }
 
-export async function fetchNews(category?: string): Promise<NewsItem[]> {
+/**
+ * Fetches all news items
+ */
+export async function fetchNews(): Promise<NewsItem[]> {
+  const promises = sources.map(source => fetchFeed(source));
+  
   try {
-    if (category) {
-      return fetchNewsByCategory(category);
-    }
+    const results = await Promise.allSettled(promises);
+    const fulfilled = results
+      .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
+      .map(result => result.value);
     
-    // Fetch from all sources
-    const fetchPromises = sources.map(source => fetchSourceData(source));
-    const results = await Promise.allSettled(fetchPromises);
-    
-    // Combine all successful results
-    let allNews: NewsItem[] = [];
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        allNews = [...allNews, ...result.value];
-      } else {
-        console.error(`Failed to fetch from ${sources[index].name}:`, result.reason);
-      }
-    });
-    
-    console.log(`Total items fetched: ${allNews.length}`);
-
-    // Sort by date
-    allNews.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-
-    if (allNews.length === 0) {
-      console.log('No items found, using sample data');
-      const { getSampleNews } = await import('./sampleData');
-      return getSampleNews();
-    }
-
-    return allNews;
+    return fulfilled.flat();
   } catch (error) {
-    console.error('Error fetching news:', error);
-    // Return sample data as fallback
-    const { getSampleNews } = await import('./sampleData');
-    const sampleNews = getSampleNews();
-    return category ? sampleNews.filter(item => item.category === category) : sampleNews;
+    console.error('Error fetching all news:', error);
+    return sampleNewsItems;
   }
 }
 
-export function formatDate(date: string): string {
-  try {
-    return format(parseISO(date), 'MMM d, yyyy');
-  } catch (error) {
-    // Fallback for invalid dates
-    return 'Recent';
-  }
+/**
+ * Gets all active categories
+ */
+export function getCategories(): string[] {
+  return Array.from(new Set(sources.map(source => source.category)));
 }
