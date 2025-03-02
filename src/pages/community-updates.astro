@@ -2,22 +2,34 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import { fetchNews } from '../utils/feedAggregator';
+import { fetchNewsByCategory, sampleNewsItems } from '../utils/feedAggregator';
 
 // Category configuration
-const category = 'community-updates';
+const category = 'Community Updates';
 const title = 'Community Updates';
 const description = 'Connect with the women in tech community through events, meetups, and initiatives that promote diversity and inclusion.';
 
-// Fetch news for this category
-const news = await fetchNews(category);
+// Fetch news for this category with improved error handling
+let news;
+try {
+  news = await fetchNewsByCategory(category);
+  
+  // If there's no news (empty array), use some fallbacks
+  if (!news || news.length === 0) {
+    console.warn(`No news items returned for category: ${category}, using sample data`);
+    news = sampleNewsItems.filter(item => item.category === category);
+  }
+} catch (error) {
+  console.error(`Error fetching news for category ${category}:`, error);
+  news = sampleNewsItems.filter(item => item.category === category);
+}
 
 // Group by source
 const groupedBySource = news.reduce((acc, item) => {
-  if (!acc[item.source]) {
-    acc[item.source] = [];
+  if (!acc[item.sourceName]) {
+    acc[item.sourceName] = [];
   }
-  acc[item.source].push(item);
+  acc[item.sourceName].push(item);
   return acc;
 }, {} as Record<string, typeof news>);
 
@@ -44,10 +56,9 @@ const sources = Object.keys(groupedBySource);
               <NewsCard
                 title={item.title}
                 description={item.description}
+                link={item.link}
                 date={item.date}
-                source={item.source}
-                url={item.url}
-                imageUrl={item.imageUrl}
+                source={item.sourceName}
               />
             ))}
           </div>
@@ -70,17 +81,17 @@ const sources = Object.keys(groupedBySource);
   const searchInput = document.getElementById('search-input');
   
   function handleSearch(value: string) {
-    const articles = document.querySelectorAll('.article-card');
+    const articles = document.querySelectorAll('.bg-white');
     const sections = document.querySelectorAll('section');
     value = value.toLowerCase().trim();
     
     sections.forEach(section => {
       let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.article-card');
+      const sectionArticles = section.querySelectorAll('.bg-white');
       
       sectionArticles.forEach(article => {
-        const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('.article-description')?.textContent?.toLowerCase() || '';
+        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
         
         if (title.includes(value) || description.includes(value)) {
           article.classList.remove('hidden');
