@@ -4,8 +4,24 @@ import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
 import { fetchNews } from '../utils/feedAggregator';
 
-// Fetch all news
-let news = await fetchNews();
+// Fetch all news items with improved error handling
+let news;
+try {
+  news = await fetchNews();
+  
+  // If there's no news (empty array), use some fallbacks
+  if (!news || news.length === 0) {
+    console.warn('No news items returned from fetchNews, using sample data');
+    // Import sample data directly
+    const { sampleNewsItems } = await import('../utils/feedAggregator');
+    news = sampleNewsItems;
+  }
+} catch (error) {
+  console.error('Error fetching news:', error);
+  // Import sample data directly
+  const { sampleNewsItems } = await import('../utils/feedAggregator');
+  news = sampleNewsItems;
+}
 
 // Group news by category
 const groupedByCategory = news.reduce((acc, item) => {
@@ -18,20 +34,20 @@ const groupedByCategory = news.reduce((acc, item) => {
 
 // Group news by source
 const groupedBySource = news.reduce((acc, item) => {
-  if (!acc[item.source]) {
-    acc[item.source] = [];
+  if (!acc[item.sourceName]) {
+    acc[item.sourceName] = [];
   }
-  acc[item.source].push(item);
+  acc[item.sourceName].push(item);
   return acc;
 }, {} as Record<string, typeof news>);
 
 // Categories to display
 const categories = [
-  { id: 'tech-news', name: 'Tech News' },
-  { id: 'career-development', name: 'Career Development' },
-  { id: 'community-updates', name: 'Community Updates' },
-  { id: 'technical-tutorials', name: 'Technical Tutorials' },
-  { id: 'founder-stories', name: 'Founder Stories' }
+  { id: 'Tech News', name: 'Tech News' },
+  { id: 'Career Development', name: 'Career Development' },
+  { id: 'Community Updates', name: 'Community Updates' },
+  { id: 'Technical Tutorials', name: 'Technical Tutorials' },
+  { id: 'Founder Stories', name: 'Founder Stories' }
 ];
 
 // Default number of articles to show per section
@@ -120,11 +136,11 @@ const articlesPerSource = 3;
     {categories.map(category => {
       const categoryNews = groupedByCategory[category.id] || [];
       return categoryNews.length > 0 ? (
-        <section id={category.id}>
+        <section id={category.id.toLowerCase().replace(/\s+/g, '-')}>
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
             <a 
-              href={`/${category.id}`}
+              href={`/${category.id.toLowerCase().replace(/\s+/g, '-')}`}
               class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
             >
               View All
@@ -139,10 +155,9 @@ const articlesPerSource = 3;
               <NewsCard
                 title={item.title}
                 description={item.description}
+                link={item.link}
                 date={item.date}
-                source={item.source}
-                url={item.url}
-                imageUrl={item.imageUrl}
+                source={item.sourceName}
               />
             ))}
           </div>
@@ -164,10 +179,9 @@ const articlesPerSource = 3;
             <NewsCard
               title={item.title}
               description={item.description}
+              link={item.link}
               date={item.date}
-              source={item.source}
-              url={item.url}
-              imageUrl={item.imageUrl}
+              source={item.sourceName}
             />
           ))}
         </div>
@@ -191,17 +205,17 @@ const articlesPerSource = 3;
   const searchInput = document.getElementById('search-input');
   
   function handleSearch(value: string) {
-    const articles = document.querySelectorAll('.article-card');
+    const articles = document.querySelectorAll('.bg-white');
     const sections = document.querySelectorAll('section');
     value = value.toLowerCase().trim();
     
     sections.forEach(section => {
       let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.article-card');
+      const sectionArticles = section.querySelectorAll('.bg-white');
       
       sectionArticles.forEach(article => {
-        const title = article.querySelector('.article-title')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('.article-description')?.textContent?.toLowerCase() || '';
+        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
         
         if (title.includes(value) || description.includes(value)) {
           article.classList.remove('hidden');
@@ -247,10 +261,13 @@ const articlesPerSource = 3;
     // Hide/show sections based on selected categories
     document.querySelectorAll('section').forEach(section => {
       const sectionId = section.id;
+      const categoryId = categories.find(cat => 
+        cat.id.toLowerCase().replace(/\s+/g, '-') === sectionId
+      )?.id;
       
-      if (selectedCategories.includes(sectionId)) {
+      if (categoryId && selectedCategories.includes(categoryId)) {
         section.classList.remove('hidden');
-      } else {
+      } else if (categoryId) {
         section.classList.add('hidden');
       }
     });
@@ -258,7 +275,7 @@ const articlesPerSource = 3;
     // Update number of articles shown
     const articlesCount = parseInt(articlesPerSection.value);
     document.querySelectorAll('.grid').forEach(grid => {
-      const articles = grid.querySelectorAll('.article-card');
+      const articles = grid.querySelectorAll('div[class^="bg-white"]');
       articles.forEach((article, index) => {
         if (index < articlesCount) {
           article.classList.remove('hidden');
