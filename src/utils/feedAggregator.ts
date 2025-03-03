@@ -49,20 +49,21 @@ const sourceHealthStore = new Map<string, SourceHealth>();
 // Cache configuration
 const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 
-// Keywords for filtering
+// Expanded keywords for better filtering
 const categoryKeywords = {
-  'Tech News': ['technology', 'tech', 'digital', 'innovation', 'ai', 'artificial intelligence', 'femtech', 'women in tech'],
-  'Career Development': ['career', 'job', 'leadership', 'management', 'professional', 'mentor', 'salary', 'promotion', 'skills'],
-  'Community Updates': ['community', 'event', 'conference', 'meetup', 'diversity', 'inclusion', 'dei', 'advocacy'],
-  'Technical Tutorials': ['tutorial', 'guide', 'how to', 'learn', 'code', 'programming', 'development', 'software', 'engineering'],
-  'Founder Stories': ['founder', 'startup', 'entrepreneur', 'venture', 'funding', 'business', 'ceo', 'launch']
+  'Tech News': ['technology', 'tech', 'digital', 'innovation', 'ai', 'artificial intelligence', 'femtech', 'women in tech', 'startup', 'product', 'launch', 'health tech', 'fintech'],
+  'Career Development': ['career', 'job', 'leadership', 'management', 'professional', 'mentor', 'salary', 'promotion', 'skills', 'work', 'employment', 'hiring', 'interview', 'resume'],
+  'Community Updates': ['community', 'event', 'conference', 'meetup', 'diversity', 'inclusion', 'dei', 'advocacy', 'networking', 'organization', 'initiative', 'program', 'award'],
+  'Technical Tutorials': ['tutorial', 'guide', 'how to', 'learn', 'code', 'programming', 'development', 'software', 'engineering', 'github', 'coding', 'framework', 'language'],
+  'Founder Stories': ['founder', 'startup', 'entrepreneur', 'venture', 'funding', 'business', 'ceo', 'launch', 'seed', 'series a', 'investment', 'vc', 'fundraising']
 };
 
-// Women in tech specific keywords
+// Expanded women in tech specific keywords
 const womenInTechKeywords = [
-  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion',
-  'femtech', 'girls who code', 'women who code', 'ladies', 'she',
-  'her', 'maternity', 'maternal', 'pregnancy', 'girl'
+  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion', 'equity',
+  'femtech', 'girls who code', 'women who code', 'ladies', 'she', 'her', 
+  'maternity', 'maternal', 'pregnancy', 'girl', 'feminine', 'gender gap',
+  'gender bias', 'glass ceiling', 'equal pay', 'representation'
 ];
 
 // Define our comprehensive list of sources
@@ -156,12 +157,6 @@ export const sources: Source[] = [
     category: 'Career Development'
   },
   {
-    name: 'Elpha',
-    type: 'rss',
-    endpoint: 'https://elpha.com/feed',
-    category: 'Career Development'
-  },
-  {
     name: 'Ladies Get Paid',
     type: 'rss',
     endpoint: 'https://ladiesgetpaid.com/feed/',
@@ -186,15 +181,33 @@ export const sources: Source[] = [
     category: 'Career Development'
   },
   {
-    name: 'Elvie Blog',
+    name: 'Women in Cloud',
     type: 'rss',
-    endpoint: 'https://www.elvie.com/en-us/blog/feed',
+    endpoint: 'https://womenincloud.com/feed/',
     category: 'Career Development'
   },
   {
-    name: 'Tech Ladies',
+    name: 'Elpha Blog',
     type: 'rss',
-    endpoint: 'https://www.hiretechladies.com/feed/',
+    endpoint: 'https://elpha.com/blog?format=rss',
+    category: 'Career Development'
+  },
+  {
+    name: 'Hire Tech Ladies',
+    type: 'rss',
+    endpoint: 'https://www.hiretechladies.com/blog?format=rss',
+    category: 'Career Development'
+  },
+  {
+    name: 'ThinkHer Ambition',
+    type: 'rss',
+    endpoint: 'https://www.thinkhera.com/feed/',
+    category: 'Career Development'
+  },
+  {
+    name: 'Women in Product',
+    type: 'rss',
+    endpoint: 'https://www.womenpm.org/feed',
     category: 'Career Development'
   },
   {
@@ -224,9 +237,33 @@ export const sources: Source[] = [
     category: 'Community Updates'
   },
   {
-    name: 'Ada\'s List Blog',
+    name: 'Women Who Code Blog',
     type: 'rss',
-    endpoint: 'https://adaslist.co/blog?format=rss',
+    endpoint: 'https://www.womenwhocode.com/blog/feed',
+    category: 'Community Updates'
+  },
+  {
+    name: 'Girls in Tech',
+    type: 'rss',
+    endpoint: 'https://girlsintech.org/feed/',
+    category: 'Community Updates'
+  },
+  {
+    name: 'Women in Tech World',
+    type: 'rss',
+    endpoint: 'https://womenintechworldseries.com/feed/',
+    category: 'Community Updates'
+  },
+  {
+    name: 'Black Tech Women',
+    type: 'rss',
+    endpoint: 'https://medium.com/feed/blacktechwomen',
+    category: 'Community Updates'
+  },
+  {
+    name: 'AnitaB.org',
+    type: 'rss',
+    endpoint: 'https://anitab.org/feed/',
     category: 'Community Updates'
   },
   {
@@ -245,12 +282,6 @@ export const sources: Source[] = [
     name: 'Women in Technology International',
     type: 'rss',
     endpoint: 'https://witi.com/feed/',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Women of Silicon Valley',
-    type: 'rss',
-    endpoint: 'https://womenofsilicon.valley.com/blog?format=rss',
     category: 'Community Updates'
   },
   {
@@ -276,7 +307,7 @@ export const sources: Source[] = [
   {
     name: 'Women Who Code Tech Blog',
     type: 'rss',
-    endpoint: 'https://www.womenwhocode.com/blog/category/technical/feed',
+    endpoint: 'https://medium.com/feed/women-who-code-technical-blog',
     category: 'Technical Tutorials'
   },
   {
@@ -292,15 +323,27 @@ export const sources: Source[] = [
     category: 'Technical Tutorials'
   },
   {
-    name: 'Women Who Code',
-    type: 'rss',
-    endpoint: 'https://www.womenwhocode.com/blog/feed',
-    category: 'Technical Tutorials'
-  },
-  {
     name: 'Code Like A Girl',
     type: 'rss',
     endpoint: 'https://medium.com/feed/code-like-a-girl',
+    category: 'Technical Tutorials'
+  },
+  {
+    name: 'Girls Who Code Tech Blog',
+    type: 'rss',
+    endpoint: 'https://girlswhocode.medium.com/feed',
+    category: 'Technical Tutorials'
+  },
+  {
+    name: 'She Geeks Out',
+    type: 'rss',
+    endpoint: 'https://shegeeksout.com/feed/',
+    category: 'Technical Tutorials'
+  },
+  {
+    name: 'Hackbright Academy Blog',
+    type: 'rss',
+    endpoint: 'https://hackbrightacademy.com/blog/feed/',
     category: 'Technical Tutorials'
   },
   {
@@ -369,6 +412,24 @@ export const sources: Source[] = [
     name: 'Women in Startups',
     type: 'rss',
     endpoint: 'https://medium.com/feed/women-in-startups',
+    category: 'Founder Stories'
+  },
+  {
+    name: 'Female Founders Alliance',
+    type: 'rss',
+    endpoint: 'https://foundingmoms.com/feed/',
+    category: 'Founder Stories'
+  },
+  {
+    name: 'SheEO',
+    type: 'rss',
+    endpoint: 'https://sheeo.world/feed/',
+    category: 'Founder Stories'
+  },
+  {
+    name: '500 Women',
+    type: 'rss',
+    endpoint: 'https://500.co/blog/category/women/feed',
     category: 'Founder Stories'
   },
   {
@@ -579,33 +640,36 @@ function updateSourceHealth(source: Source, status: 'active' | 'error' | 'using_
 
 /**
  * Filters content to ensure it's relevant to both women in tech and the specified category
+ * Uses a scoring system instead of binary matching
  */
 function filterContentByCategory(items: NewsItem[], category: string): NewsItem[] {
   return items.filter(item => {
     const titleLower = item.title.toLowerCase();
     const descLower = item.description.toLowerCase();
     
-    // For women-specific sources, we only need to filter by category
-    const matchesCategory = categoryKeywords[category]?.some(keyword => 
-      titleLower.includes(keyword) || descLower.includes(keyword)
-    ) || false;
+    // Calculate relevance score
+    let relevanceScore = 0;
     
-    // For general tech sources, we need both women and category matches
-    const matchesWomenInTech = womenInTechKeywords.some(keyword => 
-      titleLower.includes(keyword) || descLower.includes(keyword)
-    );
+    // Check for women in tech keywords
+    for (const keyword of womenInTechKeywords) {
+      if (titleLower.includes(keyword)) relevanceScore += 3; // Title matches are more important
+      if (descLower.includes(keyword)) relevanceScore += 1;
+    }
     
-    // List of general tech sources that need dual filtering
+    // Check for category keywords
+    for (const keyword of categoryKeywords[category] || []) {
+      if (titleLower.includes(keyword)) relevanceScore += 2;
+      if (descLower.includes(keyword)) relevanceScore += 1;
+    }
+    
+    // General tech sources need a higher threshold
     const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
     
-    // If it's a general source, require both women and category matches
-    // If it's a women-specific source, only require category match
+    // Different thresholds based on source type
     if (generalTechSources.includes(item.sourceName)) {
-      return matchesWomenInTech && matchesCategory;
+      return relevanceScore >= 4; // Higher threshold for general sources
     } else {
-      // For women-specific sources, we assume the content is already women-focused
-      // So we only check category relevance, but more leniently (don't require an exact match)
-      return matchesCategory || category === 'Tech News';  // Default to Tech News if no matches
+      return relevanceScore >= 2; // Lower threshold for women-specific sources
     }
   });
 }
