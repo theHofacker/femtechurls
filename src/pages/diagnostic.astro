@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { sources, getSourcesHealth, fetchFeed, Source, NewsItem, getCacheStatus } from '../utils/feedAggregator';
+
+// Attempt to fetch one item from each source to test it
+const sourceStatus = {};
+const testResults = {};
+const categoryStats = {};
+
+// Initialize category stats
+const categories = [...new Set(sources.map(source => source.category))];
+categories.forEach(category => {
+  categoryStats[category] = {
+    total: 0,
+    working: 0,
+    failing: 0
+  };
+});
+
+// Count sources by category
+sources.forEach(source => {
+  const category = source.category;
+  categoryStats[category].total += 1;
+});
+
+// Test each source
+for (const source of sources) {
+  try {
+    const items = await fetchFeed(source);
+    testResults[source.name] = {
+      status: items.length > 0 ? 'working' : 'empty',
+      count: items.length,
+      sample: items.length > 0 ? items[0] : null
+    };
+    
+    if (items.length > 0) {
+      categoryStats[source.category].working += 1;
+    } else {
+      categoryStats[source.category].failing += 1;
+    }
+  } catch (error) {
+    testResults[source.name] = {
+      status: 'error',
+      error: error.message
+    };
+    categoryStats[source.category].failing += 1;
+  }
+}
+
+// Get last checked time
+const sourceHealth = getSourcesHealth();
+const cacheStatus = getCacheStatus();
+
+// Sort sources by category and status
+const sourcesByCategory = {};
+categories.forEach(category => {
+  sourcesByCategory[category] = sources.filter(s => s.category === category).sort((a, b) => {
+    // Sort working sources first, then by name
+    const aStatus = testResults[a.name]?.status || 'unknown';
+    const bStatus = testResults[b.name]?.status || 'unknown';
+    if (aStatus === 'working' && bStatus !== 'working') return -1;
+    if (aStatus !== 'working' && bStatus === 'working') return 1;
+    return a.name.localeCompare(b.name);
+  });
+});
+---
+
+<Layout title="FemTechURLs - Diagnostic Page">
+  <div class="p-8 max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-purple-700 dark:text-purple-400">FemTechURLs Diagnostic Page</h1>
+    
+    <div class="mb-8 bg-white dark:bg-gray-800 p-4 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4">Category Statistics</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {Object.entries(categoryStats).map(([category, stats]) => (
+          <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded">
+            <h3 class="font-medium mb-2">{category}</h3>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div>Total:</div>
+              <div>{stats.total}</div>
+              <div>Working:</div>
+              <div class="text-green-600 dark:text-green-400">{stats.working}</div>
+              <div>Failing:</div>
+              <div class="text-red-600 dark:text-red-400">{stats.failing}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {categories.map(category => (
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-300">{category}</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full bg-white dark:bg-gray-800 shadow rounded">
+            <thead>
+              <tr class="bg-gray-100 dark:bg-gray-700">
+                <th class="py-2 px-4 text-left">Source Name</th>
+                <th class="py-2 px-4 text-left">Type</th>
+                <th class="py-2 px-4 text-left">Status</th>
+                <th class="py-2 px-4 text-left">Items Count</th>
+                <th class="py-2 px-4 text-left">Endpoint</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sourcesByCategory[category].map(source => {
+                const result = testResults[source.name] || { status: 'unknown' };
+                const health = sourceHealth[source.name] || { status: 'unknown', lastChecked: 0 };
+                const statusClass = 
+                  result.status === 'working' ? 'text-green-600 dark:text-green-400' : 
+                  result.status === 'error' ? 'text-red-600 dark:text-red-400' : 
+                  'text-yellow-600 dark:text-yellow-400';
+                
+                return (
+                  <tr class="border-t border-gray-200 dark:border-gray-700">
+                    <td class="py-3 px-4">{source.name}</td>
+                    <td class="py-3 px-4">{source.type}</td>
+                    <td class={`py-3 px-4 font-medium ${statusClass}`}>
+                      {result.status}
+                      {result.error && <p class="text-xs text-red-500 mt-1">{result.error}</p>}
+                    </td>
+                    <td class="py-3 px-4">{result.count || 0}</td>
+                    <td class="py-3 px-4">
+                      <a 
+                        href={source.endpoint} 
+                        target="_blank" 
+                        class="text-blue-600 dark:text-blue-400 text-sm hover:underline truncate block max-w-xs"
+                        title={source.endpoint}
+                      >
+                        {source.endpoint}
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))}
+
+    <div class="mt-8 text-sm text-gray-600 dark:text-gray-400">
+      <p class="mb-2">This diagnostic page tests all your RSS and API sources and reports their status.</p>
+      <p>For sources marked as "error" or "empty", try visiting the endpoint URL directly in your browser to diagnose the issue.</p>
+    </div>
+  </div>
+</Layout>
