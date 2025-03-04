@@ -117,6 +117,18 @@ export const sources: Source[] = [
     endpoint: 'https://www.womentech.net/feed',
     category: 'Tech News'
   },
+  {
+  name: 'Med-Tech Insights FemTech',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/bnx9o8imYxcim0YF.xml',
+  category: 'Tech News'
+},
+{
+  name: 'FemTech Health',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/M1VCLwRreb8msGIC.xml',
+  category: 'Tech News'
+},
   // General tech sources (with filtering)
   {
     name: 'TechCrunch',
@@ -222,6 +234,12 @@ export const sources: Source[] = [
     endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
     category: 'Career Development'
   },
+  {
+  name: 'Maven Clinic - Career',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/V3sweXLyvLhqR2DX.xml',
+  category: 'Career Development'
+  },
   
   // Community Updates Category
   {
@@ -296,6 +314,42 @@ export const sources: Source[] = [
     endpoint: 'https://dev.to/api/articles?tag=diversity&per_page=10',
     category: 'Community Updates'
   },
+  {
+  name: 'Future Fem Health',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/z5MUcYQ7ocqlPkf0.xml',
+  category: 'Community Updates'
+  },
+  {
+  name: 'Flo Health - Menstrual Cycle',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/IR2Vq1nmmF752hpE.xml',
+  category: 'Founder Stories'
+},
+{
+  name: 'Flo Health - Getting Pregnant',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/FRkZlECyVfI6BSgV.xml',
+  category: 'Founder Stories'
+},
+{
+  name: 'Flo Health - Being a Mom',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/ReM4oFcyMw3jOcuQ.xml',
+  category: 'Founder Stories'
+ },
+  {
+  name: 'Maven Clinic - Insights',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/0jmcOyjdyOVJ849e.xml',
+  category: 'Technical Tutorials'
+},
+{
+  name: 'Maven Clinic - Health',
+  type: 'rss',
+  endpoint: 'https://rss.app/feeds/O0yCyMe0OiKaBgOs.xml',
+  category: 'Technical Tutorials'
+},
   
   // Technical Tutorials Category
   {
