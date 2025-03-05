@@ -51,600 +51,440 @@ const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 
 // Expanded keywords for better filtering
 const categoryKeywords = {
-  'Tech News': ['technology', 'tech', 'digital', 'innovation', 'ai', 'artificial intelligence', 'femtech', 'women in tech', 'startup', 'product', 'launch', 'health tech', 'fintech'],
-  'Career Development': ['career', 'job', 'leadership', 'management', 'professional', 'mentor', 'salary', 'promotion', 'skills', 'work', 'employment', 'hiring', 'interview', 'resume'],
-  'Community Updates': ['community', 'event', 'conference', 'meetup', 'diversity', 'inclusion', 'dei', 'advocacy', 'networking', 'organization', 'initiative', 'program', 'award'],
-  'Technical Tutorials': ['tutorial', 'guide', 'how to', 'learn', 'code', 'programming', 'development', 'software', 'engineering', 'github', 'coding', 'framework', 'language'],
-  'Founder Stories': ['founder', 'startup', 'entrepreneur', 'venture', 'funding', 'business', 'ceo', 'launch', 'seed', 'series a', 'investment', 'vc', 'fundraising']
+  'FemTech News & Innovation': ['femtech', 'women\'s health', 'technology', 'innovation', 'digital health', 'health tech', 'startup', 'product', 'launch'],
+  'Reproductive & Maternal Health': ['pregnancy', 'fertility', 'menstrual', 'period', 'maternal', 'birth', 'mother', 'prenatal', 'postnatal', 'baby', 'breastfeeding', 'cycle'],
+  'Women\'s Health & Wellness': ['health', 'wellness', 'nutrition', 'fitness', 'mental health', 'menopause', 'hormones', 'selfcare', 'wellbeing', 'healthcare'],
+  'Women in Tech & Leadership': ['women in tech', 'leadership', 'diversity', 'inclusion', 'representation', 'tech industry', 'women leaders', 'women entrepreneurs'],
+  'Career & Professional Development': ['career', 'job', 'professional', 'skills', 'resume', 'interview', 'promotion', 'salary', 'negotiation', 'workplace'],
+  'Tech Education & Skills': ['education', 'learning', 'tutorial', 'coding', 'programming', 'development', 'software', 'engineering', 'tech skills']
 };
 
-// Expanded women in tech specific keywords
-const womenInTechKeywords = [
+// Women in tech and femtech specific keywords
+const femtechKeywords = [
   'women', 'woman', 'female', 'gender', 'diversity', 'inclusion', 'equity',
   'femtech', 'girls who code', 'women who code', 'ladies', 'she', 'her', 
   'maternity', 'maternal', 'pregnancy', 'girl', 'feminine', 'gender gap',
-  'gender bias', 'glass ceiling', 'equal pay', 'representation'
+  'gender bias', 'glass ceiling', 'equal pay', 'representation', 'menstrual',
+  'fertility', 'menopause', 'reproductive', 'maternal'
 ];
 
-// Define our comprehensive list of sources
+// Define our comprehensive list of sources organized by new categories
 export const sources: Source[] = [
-  // Tech News Category
+  // FemTech News & Innovation
   {
     name: 'FemTech Insider',
     type: 'rss',
     endpoint: 'https://femtechinsider.com/feed/',
-    category: 'Tech News'
+    category: 'FemTech News & Innovation'
   },
   {
     name: 'FemTech Live',
     type: 'rss',
     endpoint: 'https://femtech.live/feed/',
-    category: 'Tech News'
-  },
-  {
-    name: 'FemTech Focus',
-    type: 'rss',
-    endpoint: 'https://femtechfocus.org/feed/',
-    category: 'Tech News'
+    category: 'FemTech News & Innovation'
   },
   {
     name: 'HIT Consultant',
     type: 'rss',
     endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
-    category: 'Tech News'
+    category: 'FemTech News & Innovation'
   },
   {
-    name: 'Women Who Code',
+    name: 'Med-Tech Insights FemTech',
     type: 'rss',
-    endpoint: 'https://www.womenwhocode.com/blog/feed',
-    category: 'Tech News'
+    endpoint: 'https://rss.app/feeds/bnx9o8imYxcim0YF.xml',
+    category: 'FemTech News & Innovation'
   },
   {
-    name: 'Women 2.0',
+    name: 'FemTech Health',
     type: 'rss',
-    endpoint: 'https://women2.com/feed/',
-    category: 'Tech News'
+    endpoint: 'https://rss.app/feeds/M1VCLwRreb8msGIC.xml',
+    category: 'FemTech News & Innovation'
   },
   {
-    name: 'Women in Tech Review',
+    name: 'Femovate',
     type: 'rss',
-    endpoint: 'https://womenintech.co.uk/feed/',
-    category: 'Tech News'
-  },
-  {
-    name: 'WomenTech Network',
-    type: 'rss',
-    endpoint: 'https://www.womentech.net/feed',
-    category: 'Tech News'
-  },
-  {
-  name: 'Med-Tech Insights FemTech',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/bnx9o8imYxcim0YF.xml',
-  category: 'Tech News'
-},
-{
-  name: 'FemTech Health',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/M1VCLwRreb8msGIC.xml',
-  category: 'Tech News'
-},
-  // General tech sources (with filtering)
-  {
-    name: 'TechCrunch',
-    type: 'rss',
-    endpoint: 'https://techcrunch.com/feed/',
-    category: 'Tech News'
-  },
-  {
-    name: 'Wired',
-    type: 'rss',
-    endpoint: 'https://www.wired.com/feed/rss',
-    category: 'Tech News'
-  },
-  {
-    name: 'The Verge',
-    type: 'rss',
-    endpoint: 'https://www.theverge.com/rss/index.xml',
-    category: 'Tech News'
-  },
-  {
-    name: 'VentureBeat',
-    type: 'rss',
-    endpoint: 'https://venturebeat.com/feed/',
-    category: 'Tech News'
-  },
-  {
-    name: 'Women In Tech Dev',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
-    category: 'Tech News'
+    endpoint: 'https://rss.app/feeds/3C8HedhSEAyT0e3A.xml',
+    category: 'FemTech News & Innovation'
   },
   
-  // Career Development Category
+  // Reproductive & Maternal Health
   {
-    name: 'Ada\'s List',
+    name: 'Flo Health - Menstrual Cycle',
     type: 'rss',
-    endpoint: 'https://adaslist.co/blog?format=rss',
-    category: 'Career Development'
+    endpoint: 'https://rss.app/feeds/IR2Vq1nmmF752hpE.xml',
+    category: 'Reproductive & Maternal Health'
   },
   {
-    name: 'Ladies Get Paid',
+    name: 'Flo Health - Getting Pregnant',
     type: 'rss',
-    endpoint: 'https://ladiesgetpaid.com/feed/',
-    category: 'Career Development'
+    endpoint: 'https://rss.app/feeds/FRkZlECyVfI6BSgV.xml',
+    category: 'Reproductive & Maternal Health'
   },
   {
-    name: 'PowerToFly Blog',
+    name: 'Flo Health - Being a Mom',
     type: 'rss',
-    endpoint: 'https://blog.powertofly.com/feed',
-    category: 'Career Development'
+    endpoint: 'https://rss.app/feeds/ReM4oFcyMw3jOcuQ.xml',
+    category: 'Reproductive & Maternal Health'
   },
   {
-    name: 'WITI',
+    name: 'Maven Clinic - Health',
     type: 'rss',
-    endpoint: 'https://witi.com/feed/',
-    category: 'Career Development'
+    endpoint: 'https://rss.app/feeds/O0yCyMe0OiKaBgOs.xml',
+    category: 'Reproductive & Maternal Health'
   },
   {
-    name: 'Women of Wearables',
+    name: 'Joylux',
     type: 'rss',
-    endpoint: 'https://www.womenofwearables.com/blog?format=rss',
-    category: 'Career Development'
+    endpoint: 'https://rss.app/feeds/alBRVrwCSbiQ9cFP.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Nurx Health',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/fkRtN3NueMrY6Jip.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Willow - Breastfeeding',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/sQUko7g3kYHPFXlt.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Willow - Expert Guidance',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/b8uAF4AEWcZcHFky.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Clue - Menstrual Cycle',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/N8Hm5TN5V2o3PaXs.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Clue - Fertility',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/uT03fffyFYm7RDVv.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Clue - Birth Control',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/qbffgMx68SwysLQx.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Ovia - Life During Pregnancy',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/4bXDcc46TVje86D5.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Ovia - Pregnancy by Week',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/KZoE71UAa9W63VW6.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  {
+    name: 'Ovia - Your Body After Baby',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/IHCX9FuSffL3Qc22.xml',
+    category: 'Reproductive & Maternal Health'
+  },
+  
+  // Women's Health & Wellness
+  {
+    name: 'Maven Clinic - Insights',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/0jmcOyjdyOVJ849e.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Future Fem Health',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/z5MUcYQ7ocqlPkf0.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Balance - Menopause',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/vndruuaeiVu6IiKv.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Clue - Issues & Conditions',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/CZbPvlVppu7sAXJN.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Clue - Dating & Pleasure',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/1jAnZxeBMZMkvmfc.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Clue - Life & Culture',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/E3ktXXU0vd4nbO3a.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  {
+    name: 'Ovia - Health & Wellness',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/TkriSZ8NV31YR67P.xml',
+    category: 'Women\'s Health & Wellness'
+  },
+  
+  // Women in Tech & Leadership
+  {
+    name: 'Women in Tech (UK)',
+    type: 'rss',
+    endpoint: 'https://womenintech.co.uk/feed/',
+    category: 'Women in Tech & Leadership'
   },
   {
     name: 'Women in Cloud',
     type: 'rss',
     endpoint: 'https://womenincloud.com/feed/',
-    category: 'Career Development'
-  },
-  {
-    name: 'Elpha Blog',
-    type: 'rss',
-    endpoint: 'https://elpha.com/blog?format=rss',
-    category: 'Career Development'
-  },
-  {
-    name: 'Hire Tech Ladies',
-    type: 'rss',
-    endpoint: 'https://www.hiretechladies.com/blog?format=rss',
-    category: 'Career Development'
-  },
-  {
-    name: 'ThinkHer Ambition',
-    type: 'rss',
-    endpoint: 'https://www.thinkhera.com/feed/',
-    category: 'Career Development'
-  },
-  {
-    name: 'Women in Product',
-    type: 'rss',
-    endpoint: 'https://www.womenpm.org/feed',
-    category: 'Career Development'
-  },
-  {
-    name: 'Career Growth',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=career&per_page=10',
-    category: 'Career Development'
-  },
-  {
-    name: 'Tech Leadership',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
-    category: 'Career Development'
-  },
-  {
-  name: 'Maven Clinic - Career',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/V3sweXLyvLhqR2DX.xml',
-  category: 'Career Development'
-  },
-  
-  // Community Updates Category
-  {
-    name: 'Women in Tech Chat',
-    type: 'rss',
-    endpoint: 'https://podcast.womenintechshow.com/rss',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Girls Who Code',
-    type: 'rss',
-    endpoint: 'https://girlswhocode.com/news/feed',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Women Who Code Blog',
-    type: 'rss',
-    endpoint: 'https://www.womenwhocode.com/blog/feed',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Girls in Tech',
-    type: 'rss',
-    endpoint: 'https://girlsintech.org/feed/',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Women in Tech World',
-    type: 'rss',
-    endpoint: 'https://womenintechworldseries.com/feed/',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Black Tech Women',
-    type: 'rss',
-    endpoint: 'https://medium.com/feed/blacktechwomen',
-    category: 'Community Updates'
+    category: 'Women in Tech & Leadership'
   },
   {
     name: 'AnitaB.org',
     type: 'rss',
     endpoint: 'https://anitab.org/feed/',
-    category: 'Community Updates'
+    category: 'Women in Tech & Leadership'
   },
   {
-    name: 'FemTech Focus',
+    name: 'Black Tech Women',
     type: 'rss',
-    endpoint: 'https://femtechfocus.org/feed/',
-    category: 'Community Updates'
+    endpoint: 'https://medium.com/feed/blacktechwomen',
+    category: 'Women in Tech & Leadership'
   },
   {
-    name: 'Ovia Health',
+    name: 'Joylux - Women We Admire',
     type: 'rss',
-    endpoint: 'https://www.oviahealth.com/blog/feed/',
-    category: 'Community Updates'
+    endpoint: 'https://rss.app/feeds/RFDlQehrDn2nw7lC.xml',
+    category: 'Women in Tech & Leadership'
   },
   {
-    name: 'Women in Technology International',
-    type: 'rss',
-    endpoint: 'https://witi.com/feed/',
-    category: 'Community Updates'
-  },
-  {
-    name: 'Community News',
+    name: 'Women In Tech Dev',
     type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=community&per_page=10',
-    category: 'Community Updates'
+    endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
+    category: 'Women in Tech & Leadership'
   },
   {
-    name: 'Diversity in Tech',
+    name: 'Tech Leadership',
     type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=diversity&per_page=10',
-    category: 'Community Updates'
+    endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
+    category: 'Women in Tech & Leadership'
   },
-  {
-  name: 'Future Fem Health',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/z5MUcYQ7ocqlPkf0.xml',
-  category: 'Community Updates'
-  },
-  {
-  name: 'Flo Health - Menstrual Cycle',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/IR2Vq1nmmF752hpE.xml',
-  category: 'Founder Stories'
-},
-{
-  name: 'Flo Health - Getting Pregnant',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/FRkZlECyVfI6BSgV.xml',
-  category: 'Founder Stories'
-},
-{
-  name: 'Flo Health - Being a Mom',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/ReM4oFcyMw3jOcuQ.xml',
-  category: 'Founder Stories'
- },
-  {
-  name: 'Maven Clinic - Insights',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/0jmcOyjdyOVJ849e.xml',
-  category: 'Technical Tutorials'
-},
-{
-  name: 'Maven Clinic - Health',
-  type: 'rss',
-  endpoint: 'https://rss.app/feeds/O0yCyMe0OiKaBgOs.xml',
-  category: 'Technical Tutorials'
-},
   
-  // Technical Tutorials Category
+  // Career & Professional Development
   {
-    name: 'She Codes',
+    name: 'Ladies Get Paid',
     type: 'rss',
-    endpoint: 'https://shecodes.com/blog/feed/',
-    category: 'Technical Tutorials'
+    endpoint: 'https://ladiesgetpaid.com/feed/',
+    category: 'Career & Professional Development'
   },
   {
-    name: 'Women Who Code Tech Blog',
+    name: 'Women in Product',
     type: 'rss',
-    endpoint: 'https://medium.com/feed/women-who-code-technical-blog',
-    category: 'Technical Tutorials'
+    endpoint: 'https://www.womenpm.org/feed',
+    category: 'Career & Professional Development'
   },
+  {
+    name: 'Maven Clinic - Career',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/V3sweXLyvLhqR2DX.xml',
+    category: 'Career & Professional Development'
+  },
+  {
+    name: 'She Can Code - Career Advice',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/qwHYGqXQ1ODPCGyj.xml',
+    category: 'Career & Professional Development'
+  },
+  {
+    name: 'Hire Tech Ladies',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/clQVJ9Ji7yPmBW2Z.xml',
+    category: 'Career & Professional Development'
+  },
+  {
+    name: 'Career Growth',
+    type: 'devto',
+    endpoint: 'https://dev.to/api/articles?tag=career&per_page=10',
+    category: 'Career & Professional Development'
+  },
+  
+  // Tech Education & Skills
   {
     name: 'Code First Girls',
     type: 'rss',
     endpoint: 'https://codefirstgirls.com/feed/',
-    category: 'Technical Tutorials'
-  },
-  {
-    name: 'Coding Girls',
-    type: 'rss',
-    endpoint: 'https://coding-girls.com/feed/',
-    category: 'Technical Tutorials'
+    category: 'Tech Education & Skills'
   },
   {
     name: 'Code Like A Girl',
     type: 'rss',
     endpoint: 'https://medium.com/feed/code-like-a-girl',
-    category: 'Technical Tutorials'
+    category: 'Tech Education & Skills'
   },
   {
     name: 'Girls Who Code Tech Blog',
     type: 'rss',
     endpoint: 'https://girlswhocode.medium.com/feed',
-    category: 'Technical Tutorials'
+    category: 'Tech Education & Skills'
   },
   {
     name: 'She Geeks Out',
     type: 'rss',
     endpoint: 'https://shegeeksout.com/feed/',
-    category: 'Technical Tutorials'
-  },
-  {
-    name: 'Hackbright Academy Blog',
-    type: 'rss',
-    endpoint: 'https://hackbrightacademy.com/blog/feed/',
-    category: 'Technical Tutorials'
+    category: 'Tech Education & Skills'
   },
   {
     name: 'She Can Code',
     type: 'rss',
-    endpoint: 'https://shecancode.io/stories?format=rss',
-    category: 'Technical Tutorials'
-  },
-  {
-    name: 'Women in Web Dev',
-    type: 'rss',
-    endpoint: 'https://womeninwebdev.com/feed/',
-    category: 'Technical Tutorials'
+    endpoint: 'https://rss.app/feeds/6sobZsVsrj197cmH.xml',
+    category: 'Tech Education & Skills'
   },
   {
     name: 'Coding Tutorials',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=tutorial&per_page=10',
-    category: 'Technical Tutorials'
+    category: 'Tech Education & Skills'
   },
   {
     name: 'Programming Tips',
     type: 'devto',
     endpoint: 'https://dev.to/api/articles?tag=beginners&per_page=10',
-    category: 'Technical Tutorials'
-  },
-  
-  // Founder Stories Category
-  {
-    name: 'Female Founders Fund',
-    type: 'rss',
-    endpoint: 'https://femalefoundersfund.com/feed/',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Women 2.0',
-    type: 'rss',
-    endpoint: 'https://women2.com/feed',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'All Raise',
-    type: 'rss',
-    endpoint: 'https://allraise.org/feed',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Female Startup Club',
-    type: 'rss',
-    endpoint: 'https://femalestartupclub.com/feed',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Femovate',
-    type: 'rss',
-    endpoint: 'https://www.femovate.com/feed/',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'FutureFemHealth',
-    type: 'rss',
-    endpoint: 'https://www.futurefemhealth.com/feed',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Women in Startups',
-    type: 'rss',
-    endpoint: 'https://medium.com/feed/women-in-startups',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Female Founders Alliance',
-    type: 'rss',
-    endpoint: 'https://foundingmoms.com/feed/',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'SheEO',
-    type: 'rss',
-    endpoint: 'https://sheeo.world/feed/',
-    category: 'Founder Stories'
-  },
-  {
-    name: '500 Women',
-    type: 'rss',
-    endpoint: 'https://500.co/blog/category/women/feed',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Startup Stories',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=startup&per_page=10',
-    category: 'Founder Stories'
-  },
-  {
-    name: 'Founder Insights',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=entrepreneurship&per_page=10',
-    category: 'Founder Stories'
+    category: 'Tech Education & Skills'
   }
 ];
 
 // Sample data for fallbacks
 export const sampleNewsItems: NewsItem[] = [
-  // Tech News Category
+  // FemTech News & Innovation
   {
-    title: "Women in Tech: Breaking Barriers and Building Futures",
+    title: "The Growing Landscape of FemTech Innovations in 2023",
     link: "https://example.com/article1",
-    description: "An exploration of the challenges and opportunities for women in the technology sector today.",
+    description: "An exploration of the latest technologies transforming women's health and wellbeing.",
     date: new Date('2023-08-15'),
     sourceName: "FemTech Insider",
-    category: "Tech News",
+    category: "FemTech News & Innovation",
     guid: "sample-1"
   },
   {
-    title: "The Latest AI Tools Transforming Women's Health Tech",
+    title: "Investment in FemTech Reaches Record High",
     link: "https://example.com/article2",
-    description: "How artificial intelligence is revolutionizing femtech and creating new opportunities for innovation.",
+    description: "Venture capital funding for women's health technology startups has doubled in the past year.",
     date: new Date('2023-08-12'),
-    sourceName: "Women In Tech",
-    category: "Tech News",
+    sourceName: "FemTech Live",
+    category: "FemTech News & Innovation",
     guid: "sample-2"
   },
+  
+  // Reproductive & Maternal Health
   {
-    title: "Microsoft Announces New Initiative for Women in STEM",
+    title: "New Research Reveals Link Between Diet and Menstrual Health",
     link: "https://example.com/article3",
-    description: "The tech giant unveils a $50 million program to support women entering technology fields with scholarships and mentorship.",
+    description: "Study finds certain foods may improve symptoms of menstrual discomfort for many women.",
     date: new Date('2023-08-10'),
-    sourceName: "Tech News",
-    category: "Tech News",
+    sourceName: "Flo Health",
+    category: "Reproductive & Maternal Health",
     guid: "sample-3"
   },
-  
-  // Career Development Category
   {
-    title: "Essential Career Skills for Women in Tech Leadership",
+    title: "The Science of Fertility Tracking: Beyond the Calendar Method",
     link: "https://example.com/article4",
-    description: "Key competencies and strategies for women aiming for leadership positions in technology companies.",
+    description: "Modern approaches to understanding your fertility window using technology and biomarkers.",
     date: new Date('2023-08-05'),
-    sourceName: "Tech Leadership",
-    category: "Career Development",
+    sourceName: "Clue",
+    category: "Reproductive & Maternal Health",
     guid: "sample-4"
   },
+  
+  // Women's Health & Wellness
   {
-    title: "Negotiation Tactics That Work for Women in Tech",
+    title: "Managing Menopause Symptoms: New Approaches",
     link: "https://example.com/article5",
-    description: "Research-backed strategies to help women negotiate better salaries and opportunities in male-dominated industries.",
+    description: "Innovative techniques and lifestyle changes to address common menopause challenges.",
     date: new Date('2023-08-03'),
-    sourceName: "Career Growth",
-    category: "Career Development",
+    sourceName: "Balance",
+    category: "Women's Health & Wellness",
     guid: "sample-5"
   },
   {
-    title: "From Developer to CTO: One Woman's Journey to the Top",
+    title: "The Connection Between Stress and Women's Health",
     link: "https://example.com/article6",
-    description: "An inspiring interview with Jane Chen, who rose from junior developer to CTO at a major tech firm.",
+    description: "How chronic stress affects women differently and strategies for better stress management.",
     date: new Date('2023-07-28'),
-    sourceName: "Tech Leadership",
-    category: "Career Development",
+    sourceName: "Maven Clinic",
+    category: "Women's Health & Wellness",
     guid: "sample-6"
   },
   
-  // Community Updates Category
+  // Women in Tech & Leadership
   {
-    title: "Global Women in Tech Summit Announces 2023 Speakers",
+    title: "Breaking the Glass Ceiling: Women Leaders in Health Tech",
     link: "https://example.com/article7",
-    description: "Preview of the upcoming international conference highlighting achievements of women in technology.",
+    description: "Profiles of women who are transforming healthcare through innovative technology solutions.",
     date: new Date('2023-07-20'),
-    sourceName: "Community News",
-    category: "Community Updates",
+    sourceName: "Women in Tech",
+    category: "Women in Tech & Leadership",
     guid: "sample-7"
   },
   {
-    title: "New Study Shows Progress in Tech Gender Diversity",
+    title: "Diversity in FemTech: Why Representation Matters",
     link: "https://example.com/article8",
-    description: "Recent research indicates that gender diversity in tech has improved by 12% over the past five years.",
+    description: "How diverse teams create more effective solutions for women's health challenges.",
     date: new Date('2023-07-18'),
-    sourceName: "Diversity in Tech",
-    category: "Community Updates",
+    sourceName: "Black Tech Women",
+    category: "Women in Tech & Leadership",
     guid: "sample-8"
   },
+  
+  // Career & Professional Development
   {
-    title: "Women in Tech Mentorship Program Launches Nationwide",
+    title: "Navigating Career Transitions in Health Technology",
     link: "https://example.com/article9",
-    description: "A new initiative connecting experienced women in tech with early-career professionals expands to 50 cities.",
+    description: "Strategies for women looking to move into health tech from other industries.",
     date: new Date('2023-07-15'),
-    sourceName: "Community News",
-    category: "Community Updates",
+    sourceName: "Ladies Get Paid",
+    category: "Career & Professional Development",
     guid: "sample-9"
   },
-  
-  // Technical Tutorials Category
   {
-    title: "Mastering React: A Guide for Female Developers",
+    title: "Salary Negotiation Tactics for Women in FemTech",
     link: "https://example.com/article10",
-    description: "Step-by-step tutorial on building complex applications with React, designed to be inclusive for all skill levels.",
+    description: "Expert advice on how to advocate for fair compensation in the growing FemTech sector.",
     date: new Date('2023-07-12'),
-    sourceName: "Coding Tutorials",
-    category: "Technical Tutorials",
+    sourceName: "Career Growth",
+    category: "Career & Professional Development",
     guid: "sample-10"
   },
+  
+  // Tech Education & Skills
   {
-    title: "Getting Started with Machine Learning: A Beginner's Guide",
+    title: "Building Your First FemTech App: A Beginner's Guide",
     link: "https://example.com/article11",
-    description: "An introduction to machine learning concepts and practical first steps for women interested in AI development.",
+    description: "Step-by-step tutorial for creating a basic women's health tracking application.",
     date: new Date('2023-07-08'),
-    sourceName: "Programming Tips",
-    category: "Technical Tutorials",
+    sourceName: "Code Like A Girl",
+    category: "Tech Education & Skills",
     guid: "sample-11"
   },
   {
-    title: "Building Your First Mobile App: From Concept to Deployment",
+    title: "Data Science Skills for Women's Health Innovation",
     link: "https://example.com/article12",
-    description: "A comprehensive tutorial on developing and launching a mobile application even with limited coding experience.",
+    description: "Essential data analysis techniques being used to advance women's health research and products.",
     date: new Date('2023-07-05'),
-    sourceName: "Coding Tutorials",
-    category: "Technical Tutorials",
+    sourceName: "She Can Code",
+    category: "Tech Education & Skills",
     guid: "sample-12"
-  },
-  
-  // Founder Stories Category
-  {
-    title: "The Rise of Women-Led Startups in 2023",
-    link: "https://example.com/article13",
-    description: "How female founders are changing the startup landscape with innovative approaches to technology and business.",
-    date: new Date('2023-07-01'),
-    sourceName: "Founder Insights",
-    category: "Founder Stories",
-    guid: "sample-13"
-  },
-  {
-    title: "How I Secured $5M in Funding as a Solo Female Founder",
-    link: "https://example.com/article14",
-    description: "Sarah Johnson shares her journey of building a successful health tech startup and navigating the VC landscape.",
-    date: new Date('2023-06-28'),
-    sourceName: "Startup Stories",
-    category: "Founder Stories",
-    guid: "sample-14"
-  },
-  {
-    title: "From Side Project to Unicorn: The Story of TechWomen Inc.",
-    link: "https://example.com/article15",
-    description: "The remarkable growth story of a women-led tech company that reached billion-dollar valuation in just four years.",
-    date: new Date('2023-06-25'),
-    sourceName: "Founder Insights",
-    category: "Founder Stories",
-    guid: "sample-15"
   }
 ];
 
@@ -693,7 +533,7 @@ function updateSourceHealth(source: Source, status: 'active' | 'error' | 'using_
 }
 
 /**
- * Filters content to ensure it's relevant to both women in tech and the specified category
+ * Filters content to ensure it's relevant to both femtech and the specified category
  * Uses a scoring system instead of binary matching
  */
 function filterContentByCategory(items: NewsItem[], category: string): NewsItem[] {
@@ -704,8 +544,8 @@ function filterContentByCategory(items: NewsItem[], category: string): NewsItem[
     // Calculate relevance score
     let relevanceScore = 0;
     
-    // Check for women in tech keywords
-    for (const keyword of womenInTechKeywords) {
+    // Check for femtech keywords
+    for (const keyword of femtechKeywords) {
       if (titleLower.includes(keyword)) relevanceScore += 3; // Title matches are more important
       if (descLower.includes(keyword)) relevanceScore += 1;
     }
