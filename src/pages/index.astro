@@ -73,34 +73,34 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
     ))}
   </div>
 
-  <!-- Featured article banner -->
-  {featuredArticle && (
-    <<div class="bg-gradient-to-r from-purple-900 to-purple-600 text-white mb-8 rounded-lg overflow-hidden shadow-lg">
-      <div class="container mx-auto p-6 md:p-8">
-        <div class="flex flex-col md:flex-row">
-          <div class="md:w-2/3 pr-0 md:pr-8 mb-6 md:mb-0">
-            <div class="text-purple-200 mb-2 font-medium">Featured</div>
-            <h2 class="text-2xl md:text-3xl font-bold mb-3">{featuredArticle.title}</h2>
-            <p class="text-purple-100 mb-4">{featuredArticle.description}</p>
-            <div class="flex items-center">
-              <span class="text-purple-200 mr-4">{featuredArticle.sourceName}</span>
-              <span class="text-purple-200">
-                {featuredArticle.date instanceof Date 
-                  ? featuredArticle.date.toLocaleDateString() 
-                  : new Date(featuredArticle.date).toLocaleDateString()
-                }
-              </span>
-            </div>
+<!-- Featured article banner -->
+{featuredArticle ? (
+  <div class="bg-gradient-to-r from-purple-900 to-purple-600 text-white mb-8 rounded-lg overflow-hidden shadow-lg">
+    <div class="container mx-auto p-6 md:p-8">
+      <div class="flex flex-col md:flex-row">
+        <div class="md:w-2/3 pr-0 md:pr-8 mb-6 md:mb-0">
+          <div class="text-purple-200 mb-2 font-medium">Featured</div>
+          <h2 class="text-2xl md:text-3xl font-bold mb-3">{featuredArticle.title}</h2>
+          <p class="text-purple-100 mb-4">{featuredArticle.description}</p>
+          <div class="flex items-center">
+            <span class="text-purple-200 mr-4">{featuredArticle.sourceName}</span>
+            <span class="text-purple-200">
+              {featuredArticle.date instanceof Date 
+                ? featuredArticle.date.toLocaleDateString() 
+                : new Date(featuredArticle.date).toLocaleDateString()
+              }
+            </span>
           </div>
-          <div class="md:w-1/3 flex items-center justify-center">
-            <a href={featuredArticle.link} target="_blank" rel="noopener" class="px-5 py-3 bg-white text-purple-700 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-              Read Article
-            </a>
-          </div>
+        </div>
+        <div class="md:w-1/3 flex items-center justify-center">
+          <a href={featuredArticle.link} target="_blank" rel="noopener" class="px-5 py-3 bg-white text-purple-700 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+            Read Article
+          </a>
         </div>
       </div>
     </div>
-  )}
+  </div>
+) : null}
 
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest in FemTech & Women's Health</h1>
