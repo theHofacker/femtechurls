@@ -56,7 +56,8 @@ const articlesPerCategory = 3;
 const articlesPerSource = 3;
 
 // Find a featured article (most recent from FemTech News & Innovation)
-const featuredArticle = news.find(item => item.category === 'FemTech News & Innovation') || news[0];
+const featuredNews = groupedByCategory['FemTech News & Innovation'] || [];
+const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length > 0 ? news[0] : null);
 ---
 
 <BaseLayout title="FemTechURLs">
@@ -74,7 +75,7 @@ const featuredArticle = news.find(item => item.category === 'FemTech News & Inno
 
   <!-- Featured article banner -->
   {featuredArticle && (
-    <div class="bg-gradient-to-r from-purple-900 to-purple-600 text-white mb-8 rounded-lg overflow-hidden shadow-lg">
+    <<div class="bg-gradient-to-r from-purple-900 to-purple-600 text-white mb-8 rounded-lg overflow-hidden shadow-lg">
       <div class="container mx-auto p-6 md:p-8">
         <div class="flex flex-col md:flex-row">
           <div class="md:w-2/3 pr-0 md:pr-8 mb-6 md:mb-0">
