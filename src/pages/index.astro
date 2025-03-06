@@ -168,29 +168,76 @@ const featuredArticle = news.find(item => item.category === 'FemTech News & Inno
     })}
   </div>
 
-  <!-- Source-based view (initially hidden) - Styled like esportsurls.com -->
-  <div id="source-content" class="hidden">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {Object.keys(groupedBySource).sort().map(sourceName => (
-        <div class="bg-white rounded-lg shadow overflow-hidden source-card" data-source={sourceName}>
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h2 class="text-lg font-bold text-gray-900">{sourceName}</h2>
+ <!-- Replace the existing source view with this improved version -->
+
+<!-- Source-based view (initially hidden) -->
+<div id="source-content" class="hidden">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {Object.keys(groupedBySource).sort().map(sourceName => (
+      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden source-card" data-source={sourceName}>
+        <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
+          <h2 class="text-lg font-bold text-white flex items-center">
+            {sourceName}
+            <span class="ml-auto text-xs bg-white bg-opacity-20 text-white px-2 py-0.5 rounded-full">
+              {groupedBySource[sourceName].length} articles
+            </span>
+          </h2>
+        </div>
+        
+        <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
+          {groupedBySource[sourceName].slice(0, articlesPerSource).map((item, index) => (
+            <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
+              <a href={item.link} target="_blank" rel="noopener" class="block">
+                <div class="flex items-center text-xs text-gray-500 mb-1.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {typeof item.date === 'string' 
+                    ? new Date(item.date).toLocaleDateString() 
+                    : item.date.toLocaleDateString()}
+                </div>
+                <h3 class="text-base font-medium text-gray-900 mb-1.5 line-clamp-2 hover:text-purple-700 transition-colors">{item.title}</h3>
+                <p class="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+              </a>
+            </div>
+          ))}
+        </div>
+        
+        {groupedBySource[sourceName].length > articlesPerSource && (
+          <div class="px-4 py-2.5 bg-gray-50 text-right border-t border-gray-100">
+            <button class="text-purple-600 text-sm font-medium hover:text-purple-800 focus:outline-none inline-flex items-center">
+              View all {groupedBySource[sourceName].length} articles
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
           </div>
-          
-          <div class="divide-y divide-gray-200 article-grid">
-            {groupedBySource[sourceName].slice(0, articlesPerSource).map(item => (
-              <div class="p-4 hover:bg-gray-50 transition-colors article-card">
-                <a href={item.link} target="_blank" rel="noopener" class="block">
-                  <div class="text-xs text-gray-500 mb-1">
-                    {typeof item.date === 'string' 
-                      ? new Date(item.date).toLocaleDateString() 
-                      : item.date.toLocaleDateString()}
-                  </div>
-                  <h3 class="text-base font-medium text-gray-900 mb-1 line-clamp-2">{item.title}</h3>
-                  <p class="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                </a>
-              </div>
-            ))}
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Add these styles to your component for smoother scrolling */
+  .article-grid {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
+  }
+  
+  .article-grid::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .article-grid::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 1);
+  }
+  
+  .article-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+  }
+</style>
             
             {groupedBySource[sourceName].length > articlesPerSource && (
               <div class="px-4 py-2 bg-gray-50 text-right">
