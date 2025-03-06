@@ -41,13 +41,14 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
-// Categories to display
+// Updated categories to display
 const categories = [
-  { id: 'Tech News', name: 'Tech News' },
-  { id: 'Career Development', name: 'Career Development' },
-  { id: 'Community Updates', name: 'Community Updates' },
-  { id: 'Technical Tutorials', name: 'Technical Tutorials' },
-  { id: 'Founder Stories', name: 'Founder Stories' }
+  { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
+  { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
+  { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' },
+  { id: 'Women in Tech & Leadership', name: 'Women in Tech & Leadership', slug: 'women-in-tech-leadership' },
+  { id: 'Career & Professional Development', name: 'Career & Professional Development', slug: 'career-professional-development' },
+  { id: 'Tech Education & Skills', name: 'Tech Education & Skills', slug: 'tech-education-skills' }
 ];
 
 // Default number of articles to show per section
@@ -57,8 +58,8 @@ const articlesPerSource = 3;
 
 <BaseLayout title="FemTechURLs">
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest Updates in Women's Tech</h1>
-    <p class="text-gray-600">Your curated source for women in technology news, career resources, and community updates.</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest in FemTech & Women's Health</h1>
+    <p class="text-gray-600">Your curated source for women's health technology, innovations, and resources.</p>
   </div>
 
   <div class="bg-white rounded-lg shadow mb-8 transition-all duration-300">
@@ -136,11 +137,11 @@ const articlesPerSource = 3;
     {categories.map(category => {
       const categoryNews = groupedByCategory[category.id] || [];
       return categoryNews.length > 0 ? (
-        <section id={category.id.toLowerCase().replace(/\s+/g, '-')}>
+        <section id={category.slug}>
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
             <a 
-              href={`/${category.id.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/${category.slug}`}
               class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
             >
               View All
@@ -261,13 +262,11 @@ const articlesPerSource = 3;
     // Hide/show sections based on selected categories
     document.querySelectorAll('section').forEach(section => {
       const sectionId = section.id;
-      const categoryId = categories.find(cat => 
-        cat.id.toLowerCase().replace(/\s+/g, '-') === sectionId
-      )?.id;
+      const categoryItem = categories.find(cat => cat.slug === sectionId);
       
-      if (categoryId && selectedCategories.includes(categoryId)) {
+      if (categoryItem && selectedCategories.includes(categoryItem.id)) {
         section.classList.remove('hidden');
-      } else if (categoryId) {
+      } else if (categoryItem) {
         section.classList.add('hidden');
       }
     });
@@ -329,4 +328,14 @@ const articlesPerSource = 3;
     sourceContent?.classList.remove('hidden');
     categoryContent?.classList.add('hidden');
   });
+
+  // Define categories for script access
+  const categories = [
+    { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
+    { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
+    { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' },
+    { id: 'Women in Tech & Leadership', name: 'Women in Tech & Leadership', slug: 'women-in-tech-leadership' },
+    { id: 'Career & Professional Development', name: 'Career & Professional Development', slug: 'career-professional-development' },
+    { id: 'Tech Education & Skills', name: 'Tech Education & Skills', slug: 'tech-education-skills' }
+  ];
 </script>
