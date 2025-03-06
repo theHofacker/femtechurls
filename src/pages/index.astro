@@ -202,10 +202,20 @@ const articlesPerSource = 3;
 </BaseLayout>
 
 <script>
+  // Define categories for script access - needs to match the server-side categories
+  const categories = [
+    { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
+    { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
+    { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' },
+    { id: 'Women in Tech & Leadership', name: 'Women in Tech & Leadership', slug: 'women-in-tech-leadership' },
+    { id: 'Career & Professional Development', name: 'Career & Professional Development', slug: 'career-professional-development' },
+    { id: 'Tech Education & Skills', name: 'Tech Education & Skills', slug: 'tech-education-skills' }
+  ];
+
   // Handle search functionality
   const searchInput = document.getElementById('search-input');
   
-  function handleSearch(value: string) {
+  function handleSearch(value) {
     const articles = document.querySelectorAll('.bg-white');
     const sections = document.querySelectorAll('section');
     value = value.toLowerCase().trim();
@@ -235,7 +245,7 @@ const articlesPerSource = 3;
   }
 
   searchInput?.addEventListener('input', (e) => {
-    handleSearch((e.target as HTMLInputElement).value);
+    handleSearch(e.target.value);
   });
 
   // Toggle customization panel
@@ -251,22 +261,26 @@ const articlesPerSource = 3;
   // Customization panel functionality
   const saveButton = document.getElementById('save-preferences');
   const categoryToggles = document.querySelectorAll('.category-toggle');
-  const articlesPerSection = document.getElementById('articles-per-section') as HTMLSelectElement;
+  const articlesPerSection = document.getElementById('articles-per-section');
   
   saveButton?.addEventListener('click', () => {
     // Get selected categories
     const selectedCategories = Array.from(categoryToggles)
-      .filter(cb => (cb as HTMLInputElement).checked)
-      .map(cb => (cb as HTMLElement).dataset.category);
+      .filter(cb => cb.checked)
+      .map(cb => cb.dataset.category);
     
     // Hide/show sections based on selected categories
     document.querySelectorAll('section').forEach(section => {
       const sectionId = section.id;
-      const categoryItem = categories.find(cat => cat.slug === sectionId);
       
-      if (categoryItem && selectedCategories.includes(categoryItem.id)) {
+      // Try to find matching category by slug
+      const matchingCategory = categories.find(cat => 
+        cat.slug === sectionId || cat.id.toLowerCase().replace(/\s+/g, '-').replace(/[&\']/g, '') === sectionId
+      );
+      
+      if (matchingCategory && selectedCategories.includes(matchingCategory.id)) {
         section.classList.remove('hidden');
-      } else if (categoryItem) {
+      } else if (matchingCategory) {
         section.classList.add('hidden');
       }
     });
@@ -274,7 +288,7 @@ const articlesPerSource = 3;
     // Update number of articles shown
     const articlesCount = parseInt(articlesPerSection.value);
     document.querySelectorAll('.grid').forEach(grid => {
-      const articles = grid.querySelectorAll('div[class^="bg-white"]');
+      const articles = grid.querySelectorAll('.bg-white');
       articles.forEach((article, index) => {
         if (index < articlesCount) {
           article.classList.remove('hidden');
@@ -328,14 +342,4 @@ const articlesPerSource = 3;
     sourceContent?.classList.remove('hidden');
     categoryContent?.classList.add('hidden');
   });
-
-  // Define categories for script access
-  const categories = [
-    { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
-    { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
-    { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' },
-    { id: 'Women in Tech & Leadership', name: 'Women in Tech & Leadership', slug: 'women-in-tech-leadership' },
-    { id: 'Career & Professional Development', name: 'Career & Professional Development', slug: 'career-professional-development' },
-    { id: 'Tech Education & Skills', name: 'Tech Education & Skills', slug: 'tech-education-skills' }
-  ];
 </script>
