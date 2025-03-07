@@ -136,50 +136,50 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   </div>
 
   <!-- Category-based view (default) -->
-<div id="category-content" class="space-y-12">
-  {categories.map(category => {
-    const categoryNews = groupedByCategory[category.id] || [];
-    return categoryNews.length > 0 ? (
-      <section id={category.slug} class="article-section">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
-          <a 
-            href={`/${category.slug}`}
-            class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
-          >
-            View All
-            <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </a>
-        </div>
-        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
-          {categoryNews
-            /* Sort by date, newest first */
-            .sort(function(a, b) {
-              return new Date(b.date).getTime() - new Date(a.date).getTime();
-            })
-            /* Take the specified number of articles */
-            .slice(0, articlesPerCategory)
-            /* Map each item to a NewsCard component */
-            .map(function(item) {
-              return (
-                <NewsCard
-                  title={item.title}
-                  description={item.description}
-                  link={item.link}
-                  date={item.date}
-                  source={item.sourceName}
-                  class="article-card"
-                />
-              );
-            })
-          }
-        </div>
-      </section>
-    ) : null;
-  })}
-</div>
+  <div id="category-content" class="space-y-12">
+    {categories.map(category => {
+      const categoryNews = groupedByCategory[category.id] || [];
+      return categoryNews.length > 0 ? (
+        <section id={category.slug} class="article-section">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
+            <a 
+              href={`/${category.slug}`}
+              class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
+            >
+              View All
+              <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </a>
+          </div>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
+            {categoryNews
+              /* Sort by date, newest first */
+              .sort(function(a, b) {
+                return new Date(b.date).getTime() - new Date(a.date).getTime();
+              })
+              /* Take the specified number of articles */
+              .slice(0, articlesPerCategory)
+              /* Map each item to a NewsCard component */
+              .map(function(item) {
+                return (
+                  <NewsCard
+                    title={item.title}
+                    description={item.description}
+                    link={item.link}
+                    date={item.date}
+                    source={item.sourceName}
+                    class="article-card"
+                  />
+                );
+              })
+            }
+          </div>
+        </section>
+      ) : null;
+    })}
+  </div>
 
   <!-- Source-based view (initially hidden) -->
   <div id="source-content" class="hidden">
@@ -197,11 +197,7 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           
           <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
             {groupedBySource[sourceName].map((item, index) => (
-  <div key={index} class="p-4 hover:bg-purple-50 transition-colors article-card">
-    {/* Article content */}
-  </div>
-))}
-              <div className={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
+              <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
                 <a href={item.link} target="_blank" rel="noopener" class="block">
                   <div class="flex items-center text-xs text-gray-500 mb-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,15 +213,10 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
               </div>
             ))}
           </div>
-
-
-          <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-y-auto">
-  {groupedBySource[sourceName].map((item, index) => (
-    <div key={index} class="p-4 hover:bg-purple-50 transition-colors article-card">
-      {/* Article content */}
+        </div>
+      ))}
     </div>
-  ))}
-</div>
+  </div>
 
   {Object.keys(groupedByCategory).length === 0 && Object.keys(groupedBySource).length === 0 && (
     <div class="text-center py-16">
