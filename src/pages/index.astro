@@ -184,7 +184,7 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   <!-- Source-based view (initially hidden) -->
   <div id="source-content" class="hidden">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {Object.keys(groupedBySource).sort().map(sourceName) => (
+      {Object.keys(groupedBySource).sort().map((sourceName) => (
         <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden source-card" data-source={sourceName}>
           <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
             <h2 class="text-lg font-bold text-white flex items-center">
@@ -197,11 +197,11 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           
           <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
             {groupedBySource[sourceName].map((item, index) => (
-  <div class="p-4 hover:bg-purple-50 transition-colors article-card">
+  <div key={index} class="p-4 hover:bg-purple-50 transition-colors article-card">
     {/* Article content */}
   </div>
 ))}
-              <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
+              <div className={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
                 <a href={item.link} target="_blank" rel="noopener" class="block">
                   <div class="flex items-center text-xs text-gray-500 mb-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -220,12 +220,12 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
 
 
           <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-y-auto">
-          {groupedBySource[sourceName].map((item) => (
-          <div class="p-4 hover:bg-purple-50 transition-colors article-card">
-         {/* Article content */}
+  {groupedBySource[sourceName].map((item, index) => (
+    <div key={index} class="p-4 hover:bg-purple-50 transition-colors article-card">
+      {/* Article content */}
     </div>
-    ))}
-  </div>
+  ))}
+</div>
 
   {Object.keys(groupedByCategory).length === 0 && Object.keys(groupedBySource).length === 0 && (
     <div class="text-center py-16">
