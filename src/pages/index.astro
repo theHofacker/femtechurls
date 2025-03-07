@@ -136,29 +136,32 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   </div>
 
   <!-- Category-based view (default) -->
-  <div id="category-content" class="space-y-12">
-    {categories.map(category => {
-      const categoryNews = groupedByCategory[category.id] || [];
-      return categoryNews.length > 0 ? (
-        <section id={category.slug} class="article-section">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
-            <a 
-              href={`/${category.slug}`}
-              class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
-            >
-              View All
-              <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          </div>
-
-          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
-            {categoryNews
-  .sort((a, b) => new Date(b.date) > new Date(a.date) ? 1 : -1)
-  .slice(0, articlesPerCategory)
-  .map(item => (
+<div id="category-content" class="space-y-12">
+  {categories.map(category => {
+    const categoryNews = groupedByCategory[category.id] || [];
+    return categoryNews.length > 0 ? (
+      <section id={category.slug} class="article-section">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
+          <a 
+            href={`/${category.slug}`}
+            class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
+          >
+            View All
+            <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </a>
+        </div>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
+          {categoryNews
+            .sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return dateB - dateA; // Sort newest first
+            })
+            .slice(0, articlesPerCategory)
+            .map(item => (
               <NewsCard
                 title={item.title}
                 description={item.description}
@@ -168,11 +171,11 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
                 class="article-card"
               />
             ))}
-          </div>
-        </section>
-      ) : null;
-    })}
-  </div>
+        </div>
+      </section>
+    ) : null;
+  })}
+</div>
 
   <!-- Source-based view (initially hidden) -->
   <div id="source-content" class="hidden">
