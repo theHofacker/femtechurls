@@ -184,7 +184,7 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   <!-- Source-based view (initially hidden) -->
   <div id="source-content" class="hidden">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {Object.keys(groupedBySource).sort().map(sourceName => (
+      {Object.keys(groupedBySource).sort().map(sourceName) => (
         <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden source-card" data-source={sourceName}>
           <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
             <h2 class="text-lg font-bold text-white flex items-center">
