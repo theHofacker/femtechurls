@@ -155,22 +155,26 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
         </div>
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
           {categoryNews
-            .sort((a, b) => {
-              const dateA = new Date(a.date);
-              const dateB = new Date(b.date);
-              return dateB - dateA; // Sort newest first
+            /* Sort by date, newest first */
+            .sort(function(a, b) {
+              return new Date(b.date).getTime() - new Date(a.date).getTime();
             })
+            /* Take the specified number of articles */
             .slice(0, articlesPerCategory)
-            .map(item => (
-              <NewsCard
-                title={item.title}
-                description={item.description}
-                link={item.link}
-                date={item.date}
-                source={item.sourceName}
-                class="article-card"
-              />
-            ))}
+            /* Map each item to a NewsCard component */
+            .map(function(item) {
+              return (
+                <NewsCard
+                  title={item.title}
+                  description={item.description}
+                  link={item.link}
+                  date={item.date}
+                  source={item.sourceName}
+                  class="article-card"
+                />
+              );
+            })
+          }
         </div>
       </section>
     ) : null;
