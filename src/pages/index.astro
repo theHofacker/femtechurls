@@ -52,7 +52,7 @@ const categories = [
 ];
 
 // Default number of articles to show per section
-const articlesPerCategory = 3;
+const articlesPerCategory = 9;
 const articlesPerSource = 3;
 
 // Find a featured article (most recent from FemTech News & Innovation)
@@ -155,7 +155,10 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           </div>
 
           <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
-            {categoryNews.slice(0, articlesPerCategory).map(item => (
+            {categoryNews
+  .sort((a, b) => new Date(b.date) > new Date(a.date) ? 1 : -1)
+  .slice(0, articlesPerCategory)
+  .map(item => (
               <NewsCard
                 title={item.title}
                 description={item.description}
@@ -186,7 +189,11 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           </div>
           
           <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
-            {groupedBySource[sourceName].slice(0, articlesPerSource).map((item, index) => (
+            {groupedBySource[sourceName].map((item, index) => (
+  <div class="p-4 hover:bg-purple-50 transition-colors article-card">
+    {/* Article content */}
+  </div>
+))}
               <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
                 <a href={item.link} target="_blank" rel="noopener" class="block">
                   <div class="flex items-center text-xs text-gray-500 mb-1.5">
@@ -203,20 +210,14 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
               </div>
             ))}
           </div>
-          
-          {groupedBySource[sourceName].length > articlesPerSource && (
-            <div class="px-4 py-2.5 bg-gray-50 text-right border-t border-gray-100">
-              <button class="text-purple-600 text-sm font-medium hover:text-purple-800 focus:outline-none inline-flex items-center">
-                View all {groupedBySource[sourceName].length} articles
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
+
+
+          <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-y-auto">
+          {groupedBySource[sourceName].map((item) => (
+          <div class="p-4 hover:bg-purple-50 transition-colors article-card">
+         {/* Article content */}
     </div>
+    ))}
   </div>
 
   {Object.keys(groupedByCategory).length === 0 && Object.keys(groupedBySource).length === 0 && (
