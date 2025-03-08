@@ -17,7 +17,7 @@ const {
 <html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
@@ -27,32 +27,43 @@ const {
       <!-- Mobile sidebar overlay -->
       <div 
         id="sidebarOverlay" 
-        class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 hidden md:hidden transition-opacity duration-300 ease-in-out"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 z-30 hidden md:hidden transition-opacity duration-300 ease-in-out"
         aria-hidden="true"
       ></div>
       
       <!-- Sidebar area -->
-      <aside 
-        id="sidebar" 
-        class="w-64 bg-white border-r border-gray-200 transition-all duration-300 fixed h-full z-30 md:translate-x-0 md:static transform -translate-x-full"
-      >
+      <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out fixed md:sticky top-0 h-screen z-40 transform -translate-x-full md:translate-x-0">
         <Sidebar />
       </aside>
 
       <!-- Main content area -->
-      <div id="mainContent" class="flex-1 transition-all duration-300 w-full overflow-hidden">
+      <div id="mainContent" class="flex-1 w-full md:ml-64 transition-all duration-300">
         <!-- Header area -->
         <Header title={title} />
         
         <!-- Content area -->
         <main class="h-[calc(100vh-4rem)] overflow-y-auto">
-          <div class="container mx-auto max-w-7xl px-4 py-6">
+          <div class="container mx-auto max-w-7xl px-2 sm:px-4 py-6 sm:py-8">
             <slot />
           </div>
         </main>
       </div>
     </div>
-    <script src="/src/scripts/global-search.js"></script>
+
+    <!-- Initialize the global search on page load -->
+    <script>
+      // Import the initializeSearch function and run it when the page loads
+      import { initializeSearch } from './utils/globalSearch.js';
+      
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          await initializeSearch();
+          console.log('Global search initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize global search:', error);
+        }
+      });
+    </script>
   </body>
 </html>
 
@@ -74,15 +85,11 @@ const {
   // Handle responsive behavior
   const handleResize = () => {
     if (window.innerWidth < 768) {
-      // On mobile
       sidebar?.classList.add('-translate-x-full');
-      mainContent?.classList.remove('md:ml-64');
       sidebarOverlay?.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     } else {
-      // On desktop
       sidebar?.classList.remove('-translate-x-full');
-      mainContent?.classList.add('md:ml-64');
       sidebarOverlay?.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     }
@@ -97,4 +104,53 @@ const {
       toggleMobileSidebar();
     }
   });
+
+  // Fix for article cards getting cut off on mobile
+  // Ensure container width is properly set
+  const fixMobileCardDisplay = () => {
+    const articleCards = document.querySelectorAll('.article-card, .bg-white');
+    articleCards.forEach(card => {
+      // Make sure cards don't overflow their container on mobile
+      if (card instanceof HTMLElement) {
+        card.style.width = '100%';
+        card.style.maxWidth = '100%';
+      }
+    });
+  };
+
+  window.addEventListener('DOMContentLoaded', fixMobileCardDisplay);
+  window.addEventListener('resize', fixMobileCardDisplay);
 </script>
+
+<style is:global>
+  /* Fix for NewsCard styling on mobile */
+  @media (max-width: 767px) {
+    .grid {
+      padding-right: 0.5rem;
+      padding-left: 0.5rem;
+    }
+    
+    .bg-white, .article-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+  }
+  
+  /* Improve scrolling experience */
+  html, body {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+  }
+  
+  /* Fix sidebar scrolling */
+  #sidebar {
+    overscroll-behavior: contain;
+  }
+  
+  /* Fix search results dropdown scrolling */
+  #search-results-dropdown {
+    overscroll-behavior: contain;
+  }
