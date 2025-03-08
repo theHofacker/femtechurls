@@ -1,92 +1,72 @@
----
-import Header from '../components/Header.astro';
-import Sidebar from '../components/Sidebar.astro';
 
-interface Props {
-  title?: string;
-  description?: string;
-}
-
-const { 
-  title = "FemTechURLs",
-  description = "A curated collection of women's health technology articles"
-} = Astro.props;
----
-
-<!DOCTYPE html>
-<html lang="en" class="h-full">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title}</title>
-  </head>
-  <body class="h-screen bg-gray-50 flex flex-col">
-    <div class="flex flex-1 overflow-hidden">
-      <!-- Mobile sidebar overlay -->
-      <div 
-        id="sidebarOverlay" 
-        class="fixed inset-0 bg-gray-600 bg-opacity-75 z-20 hidden md:hidden transition-opacity duration-300 ease-in-out"
-        aria-hidden="true"
-      ></div>
-      
-      <!-- Sidebar area -->
-      <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out fixed h-screen z-30 transform -translate-x-full md:translate-x-0">
-        <Sidebar />
-      </aside>
-
-      <!-- Main content area -->
-      <div id="mainContent" class="flex-1 md:ml-64 transition-all duration-300 w-full">
-        <!-- Header area -->
-        <Header title={title} />
-        
-        <!-- Content area -->
-        <main class="h-[calc(100vh-4rem)] overflow-y-auto">
-          <div class="container mx-auto max-w-7xl px-4 py-8">
-            <slot />
-          </div>
-        </main>
-      </div>
-    </div>
-  </body>
-</html>
-
-<script>
-  const sidebar = document.getElementById('sidebar');
-  const mainContent = document.getElementById('mainContent');
-  const mobileToggleButton = document.getElementById('mobileSidebarToggle');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  
-  const toggleMobileSidebar = () => {
-    sidebar?.classList.toggle('-translate-x-full');
-    sidebarOverlay?.classList.toggle('hidden');
-    document.body.classList.toggle('overflow-hidden');
-  };
-  
-  mobileToggleButton?.addEventListener('click', toggleMobileSidebar);
-  sidebarOverlay?.addEventListener('click', toggleMobileSidebar);
-
-  // Handle responsive behavior
-  const handleResize = () => {
-    if (window.innerWidth < 768) {
-      sidebar?.classList.add('-translate-x-full');
-      sidebarOverlay?.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    } else {
-      sidebar?.classList.remove('-translate-x-full');
-      sidebarOverlay?.classList.add('hidden');
-      document.body.classList.remove('overflow-hidden');
-    }
-  };
-
-  window.addEventListener('resize', handleResize);
-  handleResize(); // Initial check
-
-  // Add event listener for the ESC key to close sidebar
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !sidebar?.classList.contains('-translate-x-full') && window.innerWidth < 768) {
-      toggleMobileSidebar();
-    }
-  });
-</script>
+ import Header from '../components/Header.astro';
+ import Sidebar from '../components/Sidebar.astro';
+ 
+ interface Props {
+   title?: string;
+   description?: string;
+ }
+ 
+ const { 
+   title = "FemTechURLs",
+   description = "A curated collection of tech articles for women in technology"
+ } = Astro.props;
+ ---
+ 
+ <!DOCTYPE html>
+ <html lang="en" class="h-full">
+   <head>
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     <meta name="description" content={description} />
+     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+     <title>{title}</title>
+   </head>
+   <body class="h-screen bg-gray-50 flex flex-col">
+     <div class="flex flex-1 overflow-hidden">
+       <!-- Sidebar area -->
+       <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out fixed h-screen z-10 transform md:translate-x-0">
+         <Sidebar />
+       </aside>
+ 
+       <!-- Main content area -->
+       <div id="mainContent" class="flex-1 md:ml-64 transition-all duration-300">
+         <!-- Header area -->
+         <Header title={title} />
+         
+         <!-- Content area -->
+         <main class="h-[calc(100vh-4rem)] overflow-y-auto">
+           <div class="container mx-auto px-4 py-8">
+             <slot />
+           </div>
+         </main>
+       </div>
+     </div>
+   </body>
+ </html>
+ 
+ <script>
+   const sidebar = document.getElementById('sidebar');
+   const mainContent = document.getElementById('mainContent');
+   const mobileToggleButton = document.getElementById('mobileSidebarToggle');
+   
+   const toggleMobileSidebar = () => {
+     sidebar?.classList.toggle('-translate-x-full');
+   };
+   
+   mobileToggleButton?.addEventListener('click', toggleMobileSidebar);
+ 
+   // Handle responsive behavior
+   const handleResize = () => {
+     if (window.innerWidth < 768) {
+       sidebar?.classList.add('-translate-x-full');
+       mainContent?.classList.remove('md:ml-64');
+     } else {
+       sidebar?.classList.remove('-translate-x-full');
+       mainContent?.classList.add('md:ml-64');
+     }
+   };
+ 
+   window.addEventListener('resize', handleResize);
+   handleResize(); // Initial check
+ </script>
