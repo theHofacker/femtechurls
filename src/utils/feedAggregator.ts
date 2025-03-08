@@ -49,38 +49,29 @@ const sourceHealthStore = new Map<string, SourceHealth>();
 // Cache configuration
 const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 
-// Expanded keywords for better filtering
+// Refined categories after removing non-FemTech sources
 const categoryKeywords = {
   'FemTech News & Innovation': ['femtech', 'women\'s health', 'technology', 'innovation', 'digital health', 'health tech', 'startup', 'product', 'launch'],
   'Reproductive & Maternal Health': ['pregnancy', 'fertility', 'menstrual', 'period', 'maternal', 'birth', 'mother', 'prenatal', 'postnatal', 'baby', 'breastfeeding', 'cycle'],
-  'Women\'s Health & Wellness': ['health', 'wellness', 'nutrition', 'fitness', 'mental health', 'menopause', 'hormones', 'selfcare', 'wellbeing', 'healthcare'],
-  'Women in Tech & Leadership': ['women in tech', 'leadership', 'diversity', 'inclusion', 'representation', 'tech industry', 'women leaders', 'women entrepreneurs'],
-  'Career & Professional Development': ['career', 'job', 'professional', 'skills', 'resume', 'interview', 'promotion', 'salary', 'negotiation', 'workplace'],
-  'Tech Education & Skills': ['education', 'learning', 'tutorial', 'coding', 'programming', 'development', 'software', 'engineering', 'tech skills']
+  'Women\'s Health & Wellness': ['health', 'wellness', 'nutrition', 'fitness', 'mental health', 'menopause', 'hormones', 'selfcare', 'wellbeing', 'healthcare']
 };
 
-// Women in tech and femtech specific keywords
+// Women's health specific keywords
 const femtechKeywords = [
-  'women', 'woman', 'female', 'gender', 'diversity', 'inclusion', 'equity',
-  'femtech', 'girls who code', 'women who code', 'ladies', 'she', 'her', 
-  'maternity', 'maternal', 'pregnancy', 'girl', 'feminine', 'gender gap',
-  'gender bias', 'glass ceiling', 'equal pay', 'representation', 'menstrual',
-  'fertility', 'menopause', 'reproductive', 'maternal'
+  'women', 'woman', 'female', 'health', 'wellness', 
+  'femtech', 'pregnancy', 'maternal', 'menstrual', 'cycle',
+  'menopause', 'fertility', 'reproductive', 'hormones',
+  'period', 'gynecology', 'pelvic', 'menstruation',
+  'birth control', 'contraception', 'breastfeeding'
 ];
 
-// Define our comprehensive list of sources organized by new categories
+// Define our focused list of sources specific to FemTech
 export const sources: Source[] = [
   // FemTech News & Innovation
   {
     name: 'FemTech Insider',
     type: 'rss',
     endpoint: 'https://femtechinsider.com/feed/',
-    category: 'FemTech News & Innovation'
-  },
-  {
-    name: 'FemTech Live',
-    type: 'rss',
-    endpoint: 'https://femtech.live/feed/',
     category: 'FemTech News & Innovation'
   },
   {
@@ -236,132 +227,6 @@ export const sources: Source[] = [
     type: 'rss',
     endpoint: 'https://rss.app/feeds/TkriSZ8NV31YR67P.xml',
     category: 'Women\'s Health & Wellness'
-  },
-  
-  // Women in Tech & Leadership
-  {
-    name: 'Women in Tech (UK)',
-    type: 'rss',
-    endpoint: 'https://womenintech.co.uk/feed/',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'Women in Cloud',
-    type: 'rss',
-    endpoint: 'https://womenincloud.com/feed/',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'AnitaB.org',
-    type: 'rss',
-    endpoint: 'https://anitab.org/feed/',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'Black Tech Women',
-    type: 'rss',
-    endpoint: 'https://medium.com/feed/blacktechwomen',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'Joylux - Women We Admire',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/RFDlQehrDn2nw7lC.xml',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'Women In Tech Dev',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=womenintech&per_page=10',
-    category: 'Women in Tech & Leadership'
-  },
-  {
-    name: 'Tech Leadership',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=leadership&per_page=10',
-    category: 'Women in Tech & Leadership'
-  },
-  
-  // Career & Professional Development
-  {
-    name: 'Ladies Get Paid',
-    type: 'rss',
-    endpoint: 'https://ladiesgetpaid.com/feed/',
-    category: 'Career & Professional Development'
-  },
-  {
-    name: 'Women in Product',
-    type: 'rss',
-    endpoint: 'https://www.womenpm.org/feed',
-    category: 'Career & Professional Development'
-  },
-  {
-    name: 'Maven Clinic - Career',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/V3sweXLyvLhqR2DX.xml',
-    category: 'Career & Professional Development'
-  },
-  {
-    name: 'She Can Code - Career Advice',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/qwHYGqXQ1ODPCGyj.xml',
-    category: 'Career & Professional Development'
-  },
-  {
-    name: 'Hire Tech Ladies',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/clQVJ9Ji7yPmBW2Z.xml',
-    category: 'Career & Professional Development'
-  },
-  {
-    name: 'Career Growth',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=career&per_page=10',
-    category: 'Career & Professional Development'
-  },
-  
-  // Tech Education & Skills
-  {
-    name: 'Code First Girls',
-    type: 'rss',
-    endpoint: 'https://codefirstgirls.com/feed/',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'Code Like A Girl',
-    type: 'rss',
-    endpoint: 'https://medium.com/feed/code-like-a-girl',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'Girls Who Code Tech Blog',
-    type: 'rss',
-    endpoint: 'https://girlswhocode.medium.com/feed',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'She Geeks Out',
-    type: 'rss',
-    endpoint: 'https://shegeeksout.com/feed/',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'She Can Code',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/6sobZsVsrj197cmH.xml',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'Coding Tutorials',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=tutorial&per_page=10',
-    category: 'Tech Education & Skills'
-  },
-  {
-    name: 'Programming Tips',
-    type: 'devto',
-    endpoint: 'https://dev.to/api/articles?tag=beginners&per_page=10',
-    category: 'Tech Education & Skills'
   }
 ];
 
@@ -382,7 +247,7 @@ export const sampleNewsItems: NewsItem[] = [
     link: "https://example.com/article2",
     description: "Venture capital funding for women's health technology startups has doubled in the past year.",
     date: new Date('2023-08-12'),
-    sourceName: "FemTech Live",
+    sourceName: "FemTech Health",
     category: "FemTech News & Innovation",
     guid: "sample-2"
   },
@@ -425,66 +290,6 @@ export const sampleNewsItems: NewsItem[] = [
     sourceName: "Maven Clinic",
     category: "Women's Health & Wellness",
     guid: "sample-6"
-  },
-  
-  // Women in Tech & Leadership
-  {
-    title: "Breaking the Glass Ceiling: Women Leaders in Health Tech",
-    link: "https://example.com/article7",
-    description: "Profiles of women who are transforming healthcare through innovative technology solutions.",
-    date: new Date('2023-07-20'),
-    sourceName: "Women in Tech",
-    category: "Women in Tech & Leadership",
-    guid: "sample-7"
-  },
-  {
-    title: "Diversity in FemTech: Why Representation Matters",
-    link: "https://example.com/article8",
-    description: "How diverse teams create more effective solutions for women's health challenges.",
-    date: new Date('2023-07-18'),
-    sourceName: "Black Tech Women",
-    category: "Women in Tech & Leadership",
-    guid: "sample-8"
-  },
-  
-  // Career & Professional Development
-  {
-    title: "Navigating Career Transitions in Health Technology",
-    link: "https://example.com/article9",
-    description: "Strategies for women looking to move into health tech from other industries.",
-    date: new Date('2023-07-15'),
-    sourceName: "Ladies Get Paid",
-    category: "Career & Professional Development",
-    guid: "sample-9"
-  },
-  {
-    title: "Salary Negotiation Tactics for Women in FemTech",
-    link: "https://example.com/article10",
-    description: "Expert advice on how to advocate for fair compensation in the growing FemTech sector.",
-    date: new Date('2023-07-12'),
-    sourceName: "Career Growth",
-    category: "Career & Professional Development",
-    guid: "sample-10"
-  },
-  
-  // Tech Education & Skills
-  {
-    title: "Building Your First FemTech App: A Beginner's Guide",
-    link: "https://example.com/article11",
-    description: "Step-by-step tutorial for creating a basic women's health tracking application.",
-    date: new Date('2023-07-08'),
-    sourceName: "Code Like A Girl",
-    category: "Tech Education & Skills",
-    guid: "sample-11"
-  },
-  {
-    title: "Data Science Skills for Women's Health Innovation",
-    link: "https://example.com/article12",
-    description: "Essential data analysis techniques being used to advance women's health research and products.",
-    date: new Date('2023-07-05'),
-    sourceName: "She Can Code",
-    category: "Tech Education & Skills",
-    guid: "sample-12"
   }
 ];
 
@@ -533,7 +338,7 @@ function updateSourceHealth(source: Source, status: 'active' | 'error' | 'using_
 }
 
 /**
- * Filters content to ensure it's relevant to both femtech and the specified category
+ * Filters content to ensure it's relevant to FemTech and the specified category
  * Uses a scoring system instead of binary matching
  */
 function filterContentByCategory(items: NewsItem[], category: string): NewsItem[] {
@@ -636,12 +441,6 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
  * Main function to fetch feed from a source
  */
 export async function fetchFeed(source: Source): Promise<NewsItem[]> {
-  // For development or preview in Bolt, always return sample data with simulated delay
-  if (process.env.NODE_ENV === 'development' || typeof window !== 'undefined') {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return sampleNewsItems.filter(item => item.sourceName === source.name || item.category === source.category);
-  }
-  
   // Check cache first
   const cached = getCachedFeed(source);
   if (cached) return cached;
