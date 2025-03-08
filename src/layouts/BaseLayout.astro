@@ -32,18 +32,21 @@ const {
       ></div>
       
       <!-- Sidebar area -->
-      <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out fixed h-screen z-30 transform -translate-x-full md:translate-x-0">
+      <aside 
+        id="sidebar" 
+        class="w-64 bg-white border-r border-gray-200 transition-all duration-300 fixed h-full z-30 md:translate-x-0 md:static transform -translate-x-full"
+      >
         <Sidebar />
       </aside>
 
       <!-- Main content area -->
-      <div id="mainContent" class="flex-1 md:ml-64 transition-all duration-300 w-full">
+      <div id="mainContent" class="flex-1 transition-all duration-300 w-full overflow-hidden">
         <!-- Header area -->
         <Header title={title} />
         
         <!-- Content area -->
         <main class="h-[calc(100vh-4rem)] overflow-y-auto">
-          <div class="container mx-auto max-w-7xl px-4 py-8">
+          <div class="container mx-auto max-w-7xl px-4 py-6">
             <slot />
           </div>
         </main>
@@ -70,11 +73,15 @@ const {
   // Handle responsive behavior
   const handleResize = () => {
     if (window.innerWidth < 768) {
+      // On mobile
       sidebar?.classList.add('-translate-x-full');
+      mainContent?.classList.remove('md:ml-64');
       sidebarOverlay?.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     } else {
+      // On desktop
       sidebar?.classList.remove('-translate-x-full');
+      mainContent?.classList.add('md:ml-64');
       sidebarOverlay?.classList.add('hidden');
       document.body.classList.remove('overflow-hidden');
     }
