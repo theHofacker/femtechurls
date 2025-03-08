@@ -1,0 +1,125 @@
+---
+// src/pages/search.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsCard from '../components/NewsCard.astro';
+import SkeletonCard from '../components/SkeletonCard.astro';
+import { searchNews } from '../utils/globalSearch';
+
+// Get the search query from URL parameters
+const query = Astro.url.searchParams.get('q') || '';
+
+// Search for news items with the query
+let results = [];
+try {
+  if (query) {
+    results = await searchNews(query);
+  }
+} catch (error) {
+  console.error('Error searching news:', error);
+}
+
+// Group results by source
+const groupedBySource = results.reduce((acc, item) => {
+  if (!acc[item.sourceName]) {
+    acc[item.sourceName] = [];
+  }
+  acc[item.sourceName].push(item);
+  return acc;
+}, {});
+
+// Get list of sources
+const sources = Object.keys(groupedBySource);
+---
+
+<BaseLayout title={`Search Results for "${query}" - FemTechURLs`}>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Search Results</h1>
+    <p class="text-gray-600">
+      {results.length} results found for "{query}"
+    </p>
+  </div>
+  
+  <!-- Search box for refining search -->
+  <div class="mb-8">
+    <form action="/search" method="get" class="flex gap-2">
+      <div class="flex-1 relative">
+        <input
+          type="search"
+          name="q"
+          value={query}
+          placeholder="Refine your search..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        />
+      </div>
+      <button 
+        type="submit"
+        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      >
+        Search
+      </button>
+    </form>
+  </div>
+  
+  {sources.length > 0 ? (
+    <div class="space-y-12">
+      {sources.map(source => (
+        <section>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{source}</h2>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {groupedBySource[source].map(item => (
+              <NewsCard
+                title={item.title}
+                description={item.description}
+                link={item.link}
+                date={item.date}
+                source={item.sourceName}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  ) : query ? (
+    <div class="text-center py-16">
+      <div class="text-gray-500 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <h2 class="text-xl font-medium mt-4">No results found</h2>
+        <p class="mt-2">Try different keywords or check your spelling</p>
+      </div>
+    </div>
+  ) : (
+    <div class="text-center py-16">
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    </div>
+  )}
+</BaseLayout>
+
+<script>
+  // This script enhances the search page with client-side functionality
+  
+  // Get elements
+  const searchForm = document.querySelector('form');
+  const searchInput = document.querySelector('input[name="q"]');
+  
+  // Focus the search input on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.focus();
+      // Position cursor at the end of the text
+      const length = searchInput.value.length;
+      searchInput.setSelectionRange(length, length);
+    }
+  });
+  
+  // Add event listener for form submission
+  searchForm?.addEventListener('submit', (event) => {
+    // This is just to ensure we always have the latest value
+    // The form will handle the navigation naturally
+  });
+</script>
