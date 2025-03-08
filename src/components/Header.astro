@@ -1,4 +1,6 @@
 ---
+import GlobalSearch from './GlobalSearch.astro';
+
 interface Props {
   title?: string;
 }
@@ -23,19 +25,7 @@ const { title = "FemTechURLs" } = Astro.props;
       </div>
 
       <div class="flex-1 max-w-lg mx-4 md:mx-8 hidden md:block">
-        <div class="relative">
-          <input
-            type="search"
-            id="search-input"
-            placeholder="Search articles..."
-            class="w-full pl-10 pr-4 py-2 rounded-lg bg-purple-700 text-white placeholder-purple-300 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-          />
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
-          </div>
-        </div>
+        <GlobalSearch />
       </div>
 
       <div class="flex items-center space-x-3">
@@ -50,7 +40,7 @@ const { title = "FemTechURLs" } = Astro.props;
         </button>
         
         <button 
-          id="customize-button" 
+          id="customize-button"
           class="px-3 py-2 flex items-center space-x-1 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-800"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,24 +58,14 @@ const { title = "FemTechURLs" } = Astro.props;
     class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
   >
     <div class="p-4 bg-purple-800">
-      <div class="relative">
-        <input
-          type="search"
-          id="mobile-search-input"
-          placeholder="Search articles..."
-          class="w-full pl-10 pr-4 py-3 rounded-lg bg-purple-700 text-white placeholder-purple-300 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-        />
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-          </svg>
-        </div>
+      <div class="relative flex items-center">
+        <GlobalSearch />
         <button
           id="close-mobile-search"
-          class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          class="ml-2 p-2 text-white hover:bg-purple-700 rounded-full"
           aria-label="Close Search"
         >
-          <svg class="h-6 w-6 text-purple-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -95,90 +75,40 @@ const { title = "FemTechURLs" } = Astro.props;
 </header>
 
 <script>
-  // DOM Elements
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  // Mobile search functionality
   const mobileSearchButton = document.getElementById('mobile-search-button');
   const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
   const closeMobileSearch = document.getElementById('close-mobile-search');
-  const mobileSearchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
-  const customizeButton = document.getElementById('customize-button');
-
-  // Handle search functionality
-  function handleSearch(value: string) {
-    const articles = document.querySelectorAll('.bg-white');
-    const sections = document.querySelectorAll('section');
-    value = value.toLowerCase().trim();
-    
-    sections.forEach(section => {
-      let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.bg-white');
-      
-      sectionArticles.forEach(article => {
-        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
-        
-        if (title.includes(value) || description.includes(value)) {
-          article.classList.remove('hidden');
-          hasVisibleArticles = true;
-        } else {
-          article.classList.add('hidden');
-        }
-      });
-      
-      if (hasVisibleArticles) {
-        section.classList.remove('hidden');
-      } else {
-        section.classList.add('hidden');
-      }
-    });
-  }
-
-  // Desktop search
-  searchInput?.addEventListener('input', (e) => {
-    const value = (e.target as HTMLInputElement).value;
-    handleSearch(value);
-    // Sync with mobile search input
-    if (mobileSearchInput) mobileSearchInput.value = value;
-  });
-
-  // Mobile search
+  
   mobileSearchButton?.addEventListener('click', () => {
     mobileSearchOverlay?.classList.remove('hidden');
-    mobileSearchInput?.focus();
-    // Sync the search value
-    if (searchInput?.value) {
-      mobileSearchInput.value = searchInput.value;
+    const mobileSearchInput = mobileSearchOverlay?.querySelector('input[type="search"]');
+    if (mobileSearchInput instanceof HTMLInputElement) {
+      mobileSearchInput.focus();
     }
   });
-
+  
   closeMobileSearch?.addEventListener('click', () => {
     mobileSearchOverlay?.classList.add('hidden');
   });
-
-  mobileSearchInput?.addEventListener('input', (e) => {
-    const value = (e.target as HTMLInputElement).value;
-    // Sync with desktop search input
-    if (searchInput) searchInput.value = value;
-    handleSearch(value);
-  });
-
+  
   // Close mobile search on escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !mobileSearchOverlay?.classList.contains('hidden')) {
       mobileSearchOverlay?.classList.add('hidden');
     }
   });
-
-  // Make sure customize button opens the customization modal
+  
+  // Customize button functionality
+  const customizeButton = document.getElementById('customize-button');
   customizeButton?.addEventListener('click', () => {
     const customizationModal = document.getElementById('customization-modal');
-    const customizationModalBackdrop = document.getElementById('customization-modal-backdrop');
+    const modalBackdrop = document.getElementById('customization-modal-backdrop');
     
-    if (customizationModal && customizationModalBackdrop) {
+    if (customizationModal && modalBackdrop) {
       customizationModal.classList.remove('hidden');
-      customizationModalBackdrop.classList.remove('hidden');
+      modalBackdrop.classList.remove('hidden');
       document.body.classList.add('overflow-hidden');
     }
   });
 </script>
-
