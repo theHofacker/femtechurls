@@ -50,13 +50,13 @@ const { title = "FemTechURLs" } = Astro.props;
         </button>
         
         <button 
-          id="filter-button"
+          id="customize-button" 
           class="px-3 py-2 flex items-center space-x-1 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-800"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          <span class="hidden sm:inline">Filter</span>
+          <span class="hidden sm:inline">Customize</span>
         </button>
       </div>
     </div>
@@ -92,208 +92,40 @@ const { title = "FemTechURLs" } = Astro.props;
       </div>
     </div>
   </div>
-
-  <!-- Filter Dropdown -->
-  <div id="filter-dropdown" class="hidden absolute right-4 md:right-8 top-16 mt-2 w-64 sm:w-72 bg-white rounded-lg shadow-lg z-50">
-    <div class="p-4">
-      <h3 class="text-sm font-semibold text-gray-900 mb-3">Filter Articles</h3>
-      
-      <div class="space-y-4">
-        <!-- Filter by Source -->
-        <div>
-          <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Sources</h4>
-          <div class="max-h-40 overflow-y-auto pr-2 space-y-2" id="source-filter-container">
-            <div class="flex items-center">
-              <input 
-                type="checkbox" 
-                id="source-all" 
-                class="h-4 w-4 text-purple-600 rounded border-gray-300" 
-                checked
-              />
-              <label for="source-all" class="ml-2 text-sm text-gray-700 font-medium">
-                All Sources
-              </label>
-            </div>
-            
-            <div class="border-t border-gray-200 my-2"></div>
-            
-            <div id="source-checkboxes" class="space-y-2">
-              <!-- Source checkboxes will be dynamically added here -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter by Category -->
-        <div>
-          <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Categories</h4>
-          <div class="max-h-40 overflow-y-auto pr-2 space-y-2" id="category-filter-container">
-            <div class="flex items-center">
-              <input 
-                type="checkbox" 
-                id="category-all" 
-                class="h-4 w-4 text-purple-600 rounded border-gray-300" 
-                checked
-              />
-              <label for="category-all" class="ml-2 text-sm text-gray-700 font-medium">
-                All Categories
-              </label>
-            </div>
-            
-            <div class="border-t border-gray-200 my-2"></div>
-            
-            <div id="category-checkboxes" class="space-y-2">
-              <!-- Category checkboxes will be dynamically added here -->
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <button 
-        id="apply-filters"
-        class="w-full mt-4 px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-      >
-        Apply Filters
-      </button>
-    </div>
-  </div>
 </header>
 
 <script>
-  // Globals
-  let searchQuery = '';
-  let selectedSources = [];
-  let selectedCategories = [];
-  
   // DOM Elements
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const mobileSearchButton = document.getElementById('mobile-search-button');
   const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
   const closeMobileSearch = document.getElementById('close-mobile-search');
   const mobileSearchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
-  const filterButton = document.getElementById('filter-button');
-  const filterDropdown = document.getElementById('filter-dropdown');
-  const sourceCheckboxesContainer = document.getElementById('source-checkboxes');
-  const categoryCheckboxesContainer = document.getElementById('category-checkboxes');
-  const allSourcesCheckbox = document.getElementById('source-all') as HTMLInputElement;
-  const allCategoriesCheckbox = document.getElementById('category-all') as HTMLInputElement;
-  const applyFiltersButton = document.getElementById('apply-filters');
+  const customizeButton = document.getElementById('customize-button');
 
-  // Get unique sources from the page
-  function getUniqueSources(): string[] {
-    const sources = new Set<string>();
-    document.querySelectorAll('.article-card, [data-source]').forEach(article => {
-      const sourceElement = article.querySelector('.text-purple-600, .text-purple-700');
-      const sourceName = sourceElement?.textContent || article.getAttribute('data-source');
-      if (sourceName) sources.add(sourceName);
-    });
-    return Array.from(sources).sort();
-  }
-
-  // Get unique categories from the page
-  function getUniqueCategories(): string[] {
-    // Define the fixed categories we want to use
-    return [
-      'FemTech News & Innovation',
-      'Reproductive & Maternal Health',
-      'Women\'s Health & Wellness',
-      'Women in Tech & Leadership',
-      'Career & Professional Development',
-      'Tech Education & Skills'
-    ];
-  }
-
-  // Create source checkboxes
-  function createSourceCheckboxes() {
-    if (!sourceCheckboxesContainer) return;
-    
-    const sources = getUniqueSources();
-    sourceCheckboxesContainer.innerHTML = sources.map((source, index) => `
-      <div class="flex items-center">
-        <input 
-          type="checkbox" 
-          id="source-${index}" 
-          class="source-checkbox h-4 w-4 text-purple-600 rounded border-gray-300" 
-          data-source="${source}"
-          checked
-        />
-        <label for="source-${index}" class="ml-2 text-sm text-gray-700 truncate max-w-[180px]">${source}</label>
-      </div>
-    `).join('');
-
-    // Add event listeners to new checkboxes
-    document.querySelectorAll('.source-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', updateAllSourcesCheckbox);
-    });
-  }
-
-  // Create category checkboxes
-  function createCategoryCheckboxes() {
-    if (!categoryCheckboxesContainer) return;
-    
-    const categories = getUniqueCategories();
-    categoryCheckboxesContainer.innerHTML = categories.map((category, index) => `
-      <div class="flex items-center">
-        <input 
-          type="checkbox" 
-          id="category-${index}" 
-          class="category-checkbox h-4 w-4 text-purple-600 rounded border-gray-300" 
-          data-category="${category}"
-          checked
-        />
-        <label for="category-${index}" class="ml-2 text-sm text-gray-700 truncate max-w-[180px]">${category}</label>
-      </div>
-    `).join('');
-
-    // Add event listeners to new checkboxes
-    document.querySelectorAll('.category-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', updateAllCategoriesCheckbox);
-    });
-  }
-
-  // Update "All Sources" checkbox
-  function updateAllSourcesCheckbox() {
-    const sourceCheckboxes = document.querySelectorAll('.source-checkbox') as NodeListOf<HTMLInputElement>;
-    const allChecked = Array.from(sourceCheckboxes).every(cb => cb.checked);
-    if (allSourcesCheckbox) allSourcesCheckbox.checked = allChecked;
-  }
-
-  // Update "All Categories" checkbox
-  function updateAllCategoriesCheckbox() {
-    const categoryCheckboxes = document.querySelectorAll('.category-checkbox') as NodeListOf<HTMLInputElement>;
-    const allChecked = Array.from(categoryCheckboxes).every(cb => cb.checked);
-    if (allCategoriesCheckbox) allCategoriesCheckbox.checked = allChecked;
-  }
-
-  // Handle "All Sources" checkbox
-  allSourcesCheckbox?.addEventListener('change', () => {
-    const sourceCheckboxes = document.querySelectorAll('.source-checkbox') as NodeListOf<HTMLInputElement>;
-    sourceCheckboxes.forEach(cb => {
-      cb.checked = allSourcesCheckbox.checked;
-    });
-  });
-
-  // Handle "All Categories" checkbox
-  allCategoriesCheckbox?.addEventListener('change', () => {
-    const categoryCheckboxes = document.querySelectorAll('.category-checkbox') as NodeListOf<HTMLInputElement>;
-    categoryCheckboxes.forEach(cb => {
-      cb.checked = allCategoriesCheckbox.checked;
-    });
-  });
-
-  // Perform search across the site
-  function performSearch(query: string) {
-    searchQuery = query.toLowerCase().trim();
-    
-    // Apply filtering logic that combines search + source/category filters
-    applyFilters();
-  }
-
-  // Update section visibility
-  function updateSectionVisibility() {
+  // Handle search functionality
+  function handleSearch(value: string) {
+    const articles = document.querySelectorAll('.bg-white');
     const sections = document.querySelectorAll('section');
+    value = value.toLowerCase().trim();
+    
     sections.forEach(section => {
-      const visibleArticles = section.querySelectorAll('.article-card:not(.hidden), [data-source]:not(.hidden)');
-      if (visibleArticles.length > 0) {
+      let hasVisibleArticles = false;
+      const sectionArticles = section.querySelectorAll('.bg-white');
+      
+      sectionArticles.forEach(article => {
+        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
+        
+        if (title.includes(value) || description.includes(value)) {
+          article.classList.remove('hidden');
+          hasVisibleArticles = true;
+        } else {
+          article.classList.add('hidden');
+        }
+      });
+      
+      if (hasVisibleArticles) {
         section.classList.remove('hidden');
       } else {
         section.classList.add('hidden');
@@ -301,67 +133,12 @@ const { title = "FemTechURLs" } = Astro.props;
     });
   }
 
-  // Apply all filters (search + source + category)
-  function applyFilters() {
-    // Collect selected sources
-    const sourceCheckboxes = document.querySelectorAll('.source-checkbox:checked') as NodeListOf<HTMLInputElement>;
-    selectedSources = Array.from(sourceCheckboxes).map(cb => cb.getAttribute('data-source') || '');
-    
-    // Collect selected categories
-    const categoryCheckboxes = document.querySelectorAll('.category-checkbox:checked') as NodeListOf<HTMLInputElement>;
-    selectedCategories = Array.from(categoryCheckboxes).map(cb => cb.getAttribute('data-category') || '');
-    
-    // Apply filters to articles
-    const articles = document.querySelectorAll('.article-card, [data-source]');
-    
-    articles.forEach(article => {
-      // Get article details for filtering
-      const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
-      const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
-      const sourceElement = article.querySelector('.text-purple-600, .text-purple-700');
-      const sourceName = sourceElement?.textContent || article.getAttribute('data-source') || '';
-      
-      // Get category from section or data attribute
-      let category = '';
-      const section = article.closest('section');
-      if (section) {
-        const sectionTitle = section.querySelector('h2')?.textContent || '';
-        // Check if the section title matches any of our categories
-        if (getUniqueCategories().includes(sectionTitle)) {
-          category = sectionTitle;
-        }
-      }
-      category = article.getAttribute('data-category') || category;
-      
-      // Check if article matches all filters
-      const matchesSearch = searchQuery === '' || 
-                           title.includes(searchQuery) || 
-                           description.includes(searchQuery);
-      
-      const matchesSource = selectedSources.length === 0 || 
-                           selectedSources.includes(sourceName);
-      
-      const matchesCategory = selectedCategories.length === 0 || 
-                             selectedCategories.includes(category) ||
-                             category === '';  // If category is unknown, still show
-      
-      if (matchesSearch && matchesSource && matchesCategory) {
-        article.classList.remove('hidden');
-      } else {
-        article.classList.add('hidden');
-      }
-    });
-
-    // Update visibility of sections
-    updateSectionVisibility();
-    
-    // Close dropdown
-    if (filterDropdown) filterDropdown.classList.add('hidden');
-  }
-
   // Desktop search
   searchInput?.addEventListener('input', (e) => {
-    performSearch((e.target as HTMLInputElement).value);
+    const value = (e.target as HTMLInputElement).value;
+    handleSearch(value);
+    // Sync with mobile search input
+    if (mobileSearchInput) mobileSearchInput.value = value;
   });
 
   // Mobile search
@@ -382,57 +159,25 @@ const { title = "FemTechURLs" } = Astro.props;
     const value = (e.target as HTMLInputElement).value;
     // Sync with desktop search input
     if (searchInput) searchInput.value = value;
-    performSearch(value);
+    handleSearch(value);
   });
 
   // Close mobile search on escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (!mobileSearchOverlay?.classList.contains('hidden')) {
-        mobileSearchOverlay?.classList.add('hidden');
-      }
-      if (!filterDropdown?.classList.contains('hidden')) {
-        filterDropdown?.classList.add('hidden');
-      }
+    if (e.key === 'Escape' && !mobileSearchOverlay?.classList.contains('hidden')) {
+      mobileSearchOverlay?.classList.add('hidden');
     }
   });
 
-  // Filter button functionality
-  filterButton?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isHidden = filterDropdown?.classList.contains('hidden');
+  // Make sure customize button opens the customization modal
+  customizeButton?.addEventListener('click', () => {
+    const customizationModal = document.getElementById('customization-modal');
+    const customizationModalBackdrop = document.getElementById('customization-modal-backdrop');
     
-    if (isHidden) {
-      // Create checkboxes before showing dropdown
-      createSourceCheckboxes();
-      createCategoryCheckboxes();
-      filterDropdown?.classList.remove('hidden');
-    } else {
-      filterDropdown?.classList.add('hidden');
+    if (customizationModal && customizationModalBackdrop) {
+      customizationModal.classList.remove('hidden');
+      customizationModalBackdrop.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
     }
   });
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (filterDropdown && 
-        !filterDropdown.contains(e.target as Node) && 
-        !filterButton?.contains(e.target as Node)) {
-      filterDropdown.classList.add('hidden');
-    }
-  });
-
-  // Apply filters
-  applyFiltersButton?.addEventListener('click', applyFilters);
-
-  // Initialize checkboxes on page load
-  window.addEventListener('load', () => {
-    createSourceCheckboxes();
-    createCategoryCheckboxes();
-    
-    // Apply any initial filters (for example, from URL parameters)
-    applyFilters();
-  });
-
-  // Expose the search function globally so it can be called from other components
-  window.siteSearch = performSearch;
 </script>
