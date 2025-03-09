@@ -50,46 +50,50 @@ const {
       </div>
     </div>
 
-    <!-- Import global search script -->
-    <script src="../utils/globalSearch.js"></script>
-    
+    <!-- Client-side scripts -->
     <script>
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const mobileToggleButton = document.getElementById('mobileSidebarToggle');
-      const sidebarOverlay = document.getElementById('sidebarOverlay');
-      
-      const toggleMobileSidebar = () => {
-        sidebar?.classList.toggle('-translate-x-full');
-        sidebarOverlay?.classList.toggle('hidden');
-        document.body.classList.toggle('overflow-hidden');
-      };
-      
-      mobileToggleButton?.addEventListener('click', toggleMobileSidebar);
-      sidebarOverlay?.addEventListener('click', toggleMobileSidebar);
+      // Mobile sidebar functionality
+      document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const mobileToggleButton = document.getElementById('mobileSidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        const toggleMobileSidebar = () => {
+          sidebar?.classList.toggle('-translate-x-full');
+          sidebarOverlay?.classList.toggle('hidden');
+          document.body.classList.toggle('overflow-hidden');
+        };
+        
+        mobileToggleButton?.addEventListener('click', toggleMobileSidebar);
+        sidebarOverlay?.addEventListener('click', toggleMobileSidebar);
 
-      // Handle responsive behavior
-      const handleResize = () => {
-        if (window.innerWidth < 768) {
-          sidebar?.classList.add('-translate-x-full');
-          sidebarOverlay?.classList.add('hidden');
-          document.body.classList.remove('overflow-hidden');
-        } else {
-          sidebar?.classList.remove('-translate-x-full');
-          sidebarOverlay?.classList.add('hidden');
-          document.body.classList.remove('overflow-hidden');
-        }
-      };
+        // Handle responsive behavior
+        const handleResize = () => {
+          if (window.innerWidth < 768) {
+            sidebar?.classList.add('-translate-x-full');
+            sidebarOverlay?.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+          } else {
+            sidebar?.classList.remove('-translate-x-full');
+            sidebarOverlay?.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+          }
+        };
 
-      window.addEventListener('resize', handleResize);
-      handleResize(); // Initial check
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial check
 
-      // Add event listener for the ESC key to close sidebar
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !sidebar?.classList.contains('-translate-x-full') && window.innerWidth < 768) {
-          toggleMobileSidebar();
-        }
+        // Add event listener for the ESC key to close sidebar
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+            toggleMobileSidebar();
+          }
+        });
       });
     </script>
+    
+    <!-- Global search script (client-side only) -->
+    <script is:inline src="/src/scripts/global-search.js"></script>
   </body>
 </html>
