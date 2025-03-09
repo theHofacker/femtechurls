@@ -262,14 +262,6 @@ function handleGlobalSearch(searchQuery) {
   });
 }
 
-// Export functions for use in other scripts
-window.globalSearch = {
-  search,
-  searchNews,
-  initializeSearch,
-  handleGlobalSearch
-};
-
 // Initialize search when the page loads
 document.addEventListener('DOMContentLoaded', () => {
   initializeSearch();
@@ -278,3 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Make the search function globally available
   window.performSearch = handleGlobalSearch;
 });
+
+// Export functions for use in other modules
+export {
+  searchNews,
+  initializeSearch,
+  handleGlobalSearch
+};
