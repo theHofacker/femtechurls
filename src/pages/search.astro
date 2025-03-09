@@ -3,7 +3,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import { searchNews } from '../utils/globalSearch';
+import { searchNews } from '../utils/globalSearch.ts';
 
 // Get the search query from URL parameters
 const query = Astro.url.searchParams.get('q') || '';
