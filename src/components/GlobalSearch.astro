@@ -36,151 +36,158 @@
 </div>
 
 <script>
-  import { initializeSearch, searchNews } from '../utils/globalSearch';
-  
-  // DOM elements
-  const searchInput = document.getElementById('global-search-input') as HTMLInputElement;
-  const searchResultsDropdown = document.getElementById('search-results-dropdown');
-  const searchResults = document.getElementById('search-results');
-  const searchLoading = document.getElementById('search-loading');
-  const noResults = document.getElementById('no-results');
-  
-  // Debounce function to limit API calls
-  function debounce(func, timeout = 300) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => { func.apply(this, args); }, timeout);
-    };
-  }
-  
-  // Display search results
-  function displayResults(items) {
-    if (!searchResults) return;
-    
-    searchResults.innerHTML = '';
-    
-    if (items.length === 0) {
-      if (noResults) noResults.classList.remove('hidden');
-      return;
-    }
-    
-    if (noResults) noResults.classList.add('hidden');
-    
-    // Limit the number of results to avoid overwhelming the UI
-    const displayItems = items.slice(0, 10);
-    
-    displayItems.forEach(item => {
-      const resultElement = document.createElement('div');
-      resultElement.className = 'p-3 hover:bg-gray-100 rounded cursor-pointer';
+  // We'll load the search functionality only on the client side
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      // Dynamically import the search module
+      const { searchNews, initializeSearch } = await import('../utils/globalSearch.js');
       
-      // Format the date
-      const date = item.date instanceof Date 
-        ? item.date.toLocaleDateString() 
-        : new Date(item.date).toLocaleDateString();
+      // DOM elements
+      const searchInput = document.getElementById('global-search-input');
+      const searchResultsDropdown = document.getElementById('search-results-dropdown');
+      const searchResults = document.getElementById('search-results');
+      const searchLoading = document.getElementById('search-loading');
+      const noResults = document.getElementById('no-results');
       
-      resultElement.innerHTML = `
-        <div class="flex items-start">
-          <div class="flex-1 min-w-0">
-            <a href="${item.link}" class="block">
-              <p class="text-sm font-medium text-gray-900 truncate">${item.title}</p>
-              <p class="text-xs text-gray-500 mt-1 truncate">${item.description || 'No description'}</p>
-              <div class="flex items-center mt-2">
-                <span class="text-xs font-medium text-purple-600">${item.sourceName}</span>
-                <span class="mx-1 text-gray-300">•</span>
-                <span class="text-xs text-gray-500">${date}</span>
+      // Initialize search
+      await initializeSearch();
+      
+      // Debounce function to limit API calls
+      function debounce(func, timeout = 300) {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+      }
+      
+      // Display search results
+      function displayResults(items) {
+        if (!searchResults) return;
+        
+        searchResults.innerHTML = '';
+        
+        if (items.length === 0) {
+          if (noResults) noResults.classList.remove('hidden');
+          return;
+        }
+        
+        if (noResults) noResults.classList.add('hidden');
+        
+        // Limit the number of results to avoid overwhelming the UI
+        const displayItems = items.slice(0, 10);
+        
+        displayItems.forEach(item => {
+          const resultElement = document.createElement('div');
+          resultElement.className = 'p-3 hover:bg-gray-100 rounded cursor-pointer';
+          
+          // Format the date
+          const date = item.date instanceof Date 
+            ? item.date.toLocaleDateString() 
+            : new Date(item.date).toLocaleDateString();
+          
+          resultElement.innerHTML = `
+            <div class="flex items-start">
+              <div class="flex-1 min-w-0">
+                <a href="${item.link}" class="block">
+                  <p class="text-sm font-medium text-gray-900 truncate">${item.title}</p>
+                  <p class="text-xs text-gray-500 mt-1 truncate">${item.description || 'No description'}</p>
+                  <div class="flex items-center mt-2">
+                    <span class="text-xs font-medium text-purple-600">${item.sourceName}</span>
+                    <span class="mx-1 text-gray-300">•</span>
+                    <span class="text-xs text-gray-500">${date}</span>
+                  </div>
+                </a>
               </div>
+            </div>
+          `;
+          
+          resultElement.addEventListener('click', () => {
+            window.location.href = item.link;
+          });
+          
+          searchResults.appendChild(resultElement);
+        });
+        
+        // Show "View all results" link if there are more results
+        if (items.length > 10) {
+          const viewAllElement = document.createElement('div');
+          viewAllElement.className = 'p-3 text-center border-t border-gray-200';
+          viewAllElement.innerHTML = `
+            <a href="/search?q=${encodeURIComponent(searchInput.value)}" class="text-sm font-medium text-purple-600 hover:text-purple-800">
+              View all ${items.length} results
             </a>
-          </div>
-        </div>
-      `;
+          `;
+          searchResults.appendChild(viewAllElement);
+        }
+      }
       
-      resultElement.addEventListener('click', () => {
-        window.location.href = item.link;
+      // Handle search input
+      const handleSearch = debounce(async (event) => {
+        if (!searchInput) return;
+        
+        const query = searchInput.value.trim();
+        
+        if (query === '') {
+          searchResultsDropdown?.classList.add('hidden');
+          return;
+        }
+        
+        // Show loading indicator
+        searchResultsDropdown?.classList.remove('hidden');
+        if (searchResults) searchResults.innerHTML = '';
+        if (noResults) noResults.classList.add('hidden');
+        if (searchLoading) searchLoading.classList.remove('hidden');
+        
+        try {
+          const results = await searchNews(query);
+          
+          // Hide loading indicator
+          if (searchLoading) searchLoading.classList.add('hidden');
+          
+          // Display results
+          displayResults(results);
+        } catch (error) {
+          console.error('Error searching news:', error);
+          if (searchLoading) searchLoading.classList.add('hidden');
+          if (searchResults) searchResults.innerHTML = '<div class="p-4 text-center text-red-500">An error occurred while searching</div>';
+        }
+      }, 300);
+      
+      // Add event listeners
+      searchInput?.addEventListener('input', handleSearch);
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (event) => {
+        if (searchResultsDropdown && 
+            !searchResultsDropdown.contains(event.target) && 
+            event.target !== searchInput) {
+          searchResultsDropdown.classList.add('hidden');
+        }
       });
       
-      searchResults.appendChild(resultElement);
-    });
-    
-    // Show "View all results" link if there are more results
-    if (items.length > 10) {
-      const viewAllElement = document.createElement('div');
-      viewAllElement.className = 'p-3 text-center border-t border-gray-200';
-      viewAllElement.innerHTML = `
-        <a href="/search?q=${encodeURIComponent(searchInput.value)}" class="text-sm font-medium text-purple-600 hover:text-purple-800">
-          View all ${items.length} results
-        </a>
-      `;
-      searchResults.appendChild(viewAllElement);
-    }
-  }
-  
-  // Handle search input
-  const handleSearch = debounce(async (event) => {
-    const query = searchInput.value.trim();
-    
-    if (query === '') {
-      searchResultsDropdown?.classList.add('hidden');
-      return;
-    }
-    
-    // Show loading indicator
-    searchResultsDropdown?.classList.remove('hidden');
-    if (searchResults) searchResults.innerHTML = '';
-    if (noResults) noResults.classList.add('hidden');
-    if (searchLoading) searchLoading.classList.remove('hidden');
-    
-    try {
-      const results = await searchNews(query);
+      // Close dropdown on escape key
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && searchResultsDropdown) {
+          searchResultsDropdown.classList.add('hidden');
+        }
+      });
       
-      // Hide loading indicator
-      if (searchLoading) searchLoading.classList.add('hidden');
-      
-      // Display results
-      displayResults(results);
+      // Initialize mobile search if it exists
+      const mobileSearchInput = document.getElementById('mobile-search-input');
+      if (mobileSearchInput && searchInput) {
+        // Keep mobile and desktop search in sync
+        mobileSearchInput.addEventListener('input', (event) => {
+          searchInput.value = mobileSearchInput.value;
+          handleSearch(event);
+        });
+        
+        searchInput.addEventListener('input', (event) => {
+          mobileSearchInput.value = searchInput.value;
+        });
+      }
     } catch (error) {
-      console.error('Error searching news:', error);
-      if (searchLoading) searchLoading.classList.add('hidden');
-      if (searchResults) searchResults.innerHTML = '<div class="p-4 text-center text-red-500">An error occurred while searching</div>';
-    }
-  }, 300);
-  
-  // Initialize search when component mounts
-  window.addEventListener('DOMContentLoaded', async () => {
-    // Pre-initialize search data in the background
-    await initializeSearch();
-  });
-  
-  // Add event listeners
-  searchInput?.addEventListener('input', handleSearch);
-  
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (event) => {
-    if (searchResultsDropdown && 
-        !searchResultsDropdown.contains(event.target as Node) && 
-        event.target !== searchInput) {
-      searchResultsDropdown.classList.add('hidden');
+      console.error('Error initializing search:', error);
     }
   });
-  
-  // Close dropdown on escape key
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && searchResultsDropdown) {
-      searchResultsDropdown.classList.add('hidden');
-    }
-  });
-  
-  // Initialize mobile search if it exists
-  const mobileSearchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
-  if (mobileSearchInput) {
-    // Keep mobile and desktop search in sync
-    mobileSearchInput.addEventListener('input', (event) => {
-      if (searchInput) searchInput.value = mobileSearchInput.value;
-      handleSearch(event);
-    });
-    
-    searchInput?.addEventListener('input', (event) => {
-      mobileSearchInput.value = searchInput.value;
-    });
-  }
 </script>
