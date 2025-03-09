@@ -10,6 +10,10 @@ const category = 'Women\'s Health & Wellness';
 const title = 'Women\'s Health & Wellness';
 const description = 'Articles and insights on women\'s overall health, menopause, hormone management, mental wellbeing, and lifestyle improvements.';
 
+
+// Initial number of cards to display per source
+const initialCardsToShow = 6;
+
 // Fetch news for this category with improved error handling
 let news;
 try {
@@ -34,9 +38,6 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
-// Default display settings
-const articlesPerCategory = 3;
-const articlesPerSource = 5;
 const sources = Object.keys(groupedBySource);
 ---
 
@@ -48,22 +49,40 @@ const sources = Object.keys(groupedBySource);
   
   {sources.length > 0 ? (
     <div class="space-y-12">
-      {sources.map(source => (
-        <section>
-          <h2 class="text-2xl font-bold text-gray-900 mb-6">{source}</h2>
-          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {groupedBySource[source].map(item => (
-              <NewsCard
-                title={item.title}
-                description={item.description}
-                link={item.link}
-                date={item.date}
-                source={item.sourceName}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
+      {sources.map(source => {
+        const sourceNews = groupedBySource[source];
+        const hasMoreItems = sourceNews.length > initialCardsToShow;
+        
+        return (
+          <section class="source-section" data-source={source}>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">{source}</h2>
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 source-news-grid">
+              {sourceNews.map((item, index) => (
+                <div class={`news-card-container ${index >= initialCardsToShow ? 'hidden' : ''}`}>
+                  <NewsCard
+                    title={item.title}
+                    description={item.description}
+                    link={item.link}
+                    date={item.date}
+                    source={item.sourceName}
+                  />
+                </div>
+              ))}
+            </div>
+            
+            {hasMoreItems && (
+              <div class="mt-8 text-center">
+                <button 
+                  class="load-more-btn px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                  data-source={source}
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   ) : (
     <div class="text-center py-16">
@@ -77,39 +96,95 @@ const sources = Object.keys(groupedBySource);
 </BaseLayout>
 
 <script>
-  // Handle search functionality
-  const searchInput = document.getElementById('search-input');
-  
-  function handleSearch(value: string) {
-    const articles = document.querySelectorAll('.bg-white');
-    const sections = document.querySelectorAll('section');
-    value = value.toLowerCase().trim();
+  // Handle Load More functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadMoreButtons = document.querySelectorAll('.load-more-btn');
     
-    sections.forEach(section => {
-      let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.bg-white');
-      
-      sectionArticles.forEach(article => {
-        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
+    loadMoreButtons.forEach(button => {
+      if (button instanceof HTMLElement) {
+        const sourceName = button.getAttribute('data-source');
+        let currentlyShown = 6; // Start with initial cards already shown
+        const increment = 6; // How many more to show each time
         
-        if (title.includes(value) || description.includes(value)) {
-          article.classList.remove('hidden');
-          hasVisibleArticles = true;
-        } else {
-          article.classList.add('hidden');
-        }
-      });
-      
-      if (hasVisibleArticles) {
-        section.classList.remove('hidden');
-      } else {
-        section.classList.add('hidden');
+        button.addEventListener('click', () => {
+          const section = button.closest('.source-section');
+          if (!section) return;
+          
+          const hiddenCards = section.querySelectorAll('.news-card-container.hidden:not(.search-hidden)');
+          const cardsToShow = Array.from(hiddenCards).slice(0, increment);
+          
+          // Show the next batch of cards
+          cardsToShow.forEach(card => {
+            card.classList.remove('hidden');
+          });
+          
+          // Update counter
+          currentlyShown += cardsToShow.length;
+          
+          // Hide the button if no more cards to show
+          if (hiddenCards.length <= increment) {
+            button.classList.add('hidden');
+          }
+          
+          // Update button text to show count
+          const totalCards = section.querySelectorAll('.news-card-container').length;
+          button.textContent = `Showing ${currentlyShown} of ${totalCards} - Load More`;
+        });
       }
     });
-  }
-  
-  searchInput?.addEventListener('input', (e) => {
-    handleSearch((e.target as HTMLInputElement).value);
+    
+    // Handle search functionality
+    const searchInput = document.getElementById('global-search-input');
+    
+    function handleSearch(value) {
+      const articles = document.querySelectorAll('.news-card-container');
+      const sections = document.querySelectorAll('.source-section');
+      value = value.toLowerCase().trim();
+      
+      // Reset visibility first (only for search filtering)
+      articles.forEach(article => {
+        article.classList.remove('search-hidden');
+      });
+      
+      if (value === '') return; // No search term, no filtering
+      
+      sections.forEach(section => {
+        let hasVisibleArticles = false;
+        const sectionArticles = section.querySelectorAll('.news-card-container:not(.hidden)');
+        
+        sectionArticles.forEach(article => {
+          const card = article.querySelector('.bg-white');
+          if (!card) return;
+          
+          const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+          const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
+          
+          if (title.includes(value) || description.includes(value)) {
+            hasVisibleArticles = true;
+          } else {
+            article.classList.add('search-hidden');
+          }
+        });
+        
+        // Show/hide the section based on matching articles
+        if (hasVisibleArticles) {
+          section.classList.remove('hidden');
+        } else {
+          section.classList.add('hidden');
+        }
+      });
+    }
+    
+    searchInput?.addEventListener('input', (e) => {
+      if (e.target instanceof HTMLInputElement) {
+        handleSearch(e.target.value);
+      }
+    });
   });
 </script>
+
+<style>
+  .search-hidden {
+    display: none;
+  }
+</style>
