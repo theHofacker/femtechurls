@@ -102,24 +102,17 @@ const sources = Object.keys(groupedBySource);
 
 <script>
   // This script enhances the search page with client-side functionality
-  
-  // Get elements
-  const searchForm = document.querySelector('form');
-  const searchInput = document.querySelector('input[name="q"]');
-  
-  // Focus the search input on page load
-  window.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Get elements
+    const searchForm = document.querySelector('form');
+    const searchInput = document.querySelector('input[name="q"]');
+    
+    // Focus the search input on page load
     if (searchInput instanceof HTMLInputElement) {
       searchInput.focus();
       // Position cursor at the end of the text
       const length = searchInput.value.length;
       searchInput.setSelectionRange(length, length);
     }
-  });
-  
-  // Add event listener for form submission
-  searchForm?.addEventListener('submit', (event) => {
-    // This is just to ensure we always have the latest value
-    // The form will handle the navigation naturally
   });
 </script>
