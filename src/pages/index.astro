@@ -30,7 +30,7 @@ const groupedByCategory = news.reduce((acc, item) => {
   }
   acc[item.category].push(item);
   return acc;
-}, {} as Record<string, typeof news>);
+}, {} as Record<string, Array<typeof news[0]>>);
 
 // Group news by source
 const groupedBySource = news.reduce((acc, item) => {
