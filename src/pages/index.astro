@@ -640,9 +640,47 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
             button.classList.add('hidden');
           }
           
-          // Update button text to show count
+// Update button text to show count
           button.textContent = `Showing ${currentlyShown} of ${totalItems} - Load More`;
         });
       }
     });
   });
+</script>
+
+<style>
+  /* Add these styles to your component for smoother scrolling */
+  .article-grid {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
+  }
+  
+  .article-grid::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .article-grid::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 1);
+  }
+  
+  .article-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+  }
+  
+  .toggle-checkbox:checked {
+    right: 0;
+    border-color: #9061F9;
+  }
+  .toggle-checkbox:checked + .toggle-label {
+    background-color: #9061F9;
+  }
+
+  .article-card-container.hidden {
+    display: none;
+  }
+
+  .search-hidden {
+    display: none;
+  }
+</style>
