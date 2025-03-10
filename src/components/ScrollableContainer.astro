@@ -1,0 +1,111 @@
+---
+// src/components/ScrollableContainer.astro
+// A reusable component for scrollable content with shadow indicators
+
+interface Props {
+  maxHeight?: string;
+  className?: string;
+}
+
+const { 
+  maxHeight = "400px",
+  className = ""
+} = Astro.props;
+---
+
+<div class={`scrollable-container ${className}`}>
+  <div class="relative">
+    <div 
+      class="scrollable-content overflow-y-auto relative"
+      style={`max-height: ${maxHeight};`}
+    >
+      <slot />
+    </div>
+      
+    <div 
+      class="scroll-shadow-top absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none opacity-0 transition-opacity duration-200"
+      data-scroll-shadow="top"
+    ></div>
+      
+    <div 
+      class="scroll-shadow-bottom absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none transition-opacity duration-200"
+      data-scroll-shadow="bottom"
+    ></div>
+  </div>
+</div>
+
+<script>
+  // Initialize scroll shadows
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollableContainers = document.querySelectorAll('.scrollable-container');
+      
+    scrollableContainers.forEach(container => {
+      const scrollableContent = container.querySelector('.scrollable-content');
+      const shadowTop = container.querySelector('[data-scroll-shadow="top"]');
+      const shadowBottom = container.querySelector('[data-scroll-shadow="bottom"]');
+        
+      if (scrollableContent && shadowTop && shadowBottom) {
+        // Initial check
+        updateScrollShadows(scrollableContent, shadowTop, shadowBottom);
+          
+        // Add event listener
+        scrollableContent.addEventListener('scroll', () => {
+          updateScrollShadows(scrollableContent, shadowTop, shadowBottom);
+        });
+      }
+    });
+  });
+    
+  function updateScrollShadows(scrollElement, shadowTop, shadowBottom) {
+    // Show top shadow when not at the top
+    if (scrollElement.scrollTop > 10) {
+      shadowTop.classList.add('opacity-100');
+      shadowTop.classList.remove('opacity-0');
+    } else {
+      shadowTop.classList.add('opacity-0');
+      shadowTop.classList.remove('opacity-100');
+    }
+      
+    // Show bottom shadow when not at the bottom
+    const isAtBottom = scrollElement.scrollHeight - scrollElement.scrollTop <= scrollElement.clientHeight + 10;
+      
+    if (!isAtBottom) {
+      shadowBottom.classList.add('opacity-100');
+      shadowBottom.classList.remove('opacity-0');
+    } else {
+      shadowBottom.classList.add('opacity-0');
+      shadowBottom.classList.remove('opacity-100');
+    }
+  }
+</script>
+
+<style>
+  .scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
+    padding-bottom: 8px;
+  }
+
+  .scrollable-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollable-content::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 1);
+    border-radius: 3px;
+  }
+
+  .scrollable-content::-webkit-scrollbar-thumb {
+    background-color: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+  }
+
+  .scrollable-content::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(139, 92, 246, 0.5);
+  }
+
+  [data-scroll-shadow="top"].opacity-100,
+  [data-scroll-shadow="bottom"].opacity-100 {
+    opacity: 1;
+  }
+</style>
