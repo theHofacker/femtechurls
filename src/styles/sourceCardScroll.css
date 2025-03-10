@@ -35,7 +35,6 @@
 .source-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -93,4 +92,16 @@
 
 .article-card.new-article {
   animation: highlight 2s ease-out;
+}
+
+/* Ensure the article grid takes up necessary space */
+.article-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Handle any hidden articles that need to be shown */
+.article-card.hidden {
+  display: block !important;
 }
