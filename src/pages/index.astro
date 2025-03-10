@@ -107,8 +107,10 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
       const categoryNews = groupedByCategory[category.id] || [];
       const totalArticles = categoryNews.length;
       const hasMoreItems = totalArticles > articlesPerCategory;
-      
-      return categoryNews.length > 0 ? (
+
+      if (categoryNews.length === 0) return null; // Explicitly return null for empty categories
+
+      return (
         <section id={category.slug} class="article-section">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
@@ -592,7 +594,6 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
     
     // Close modal after saving
     closeModal();
-      });
   });
 
   // Add classes on page load
@@ -639,11 +640,12 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
             button.classList.add('hidden');
           }
           
-// Update button text to show count
+          // Update button text to show count
           button.textContent = `Showing ${currentlyShown} of ${totalItems} - Load More`;
         });
       }
     });
+  });
 </script>
 
 <style>
