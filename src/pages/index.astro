@@ -163,9 +163,9 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   </div>
 
   <!-- Source-based view (initially shown) -->
-  <div id="source-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div id="source-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {Object.keys(groupedBySource).sort().map((sourceName) => (
-      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden source-card" data-source={sourceName}>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden source-card" data-source={sourceName}>
         <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
           <h2 class="text-lg font-bold text-white flex items-center">
             {sourceName}
@@ -175,7 +175,7 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           </h2>
         </div>
         
-        <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
+        <div class="divide-y divide-gray-100 article-grid">
           {groupedBySource[sourceName]
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .map((item, index) => (
@@ -335,11 +335,16 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   </div>
 </BaseLayout>
 
-<style>
-  /* Add these styles to your component for smoother scrolling */
+<!-- Add this script to your index.astro page -->
+<script src="../scripts/sourceCardScroll.js"></script>
+
+<style is:global>
+  /* Include the essential styles inline for immediate loading, then the full stylesheet will be loaded */
   .article-grid {
     scrollbar-width: thin;
     scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
+    position: relative;
+    padding-bottom: 8px;
   }
   
   .article-grid::-webkit-scrollbar {
@@ -348,6 +353,7 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   
   .article-grid::-webkit-scrollbar-track {
     background: rgba(243, 244, 246, 1);
+    border-radius: 3px;
   }
   
   .article-grid::-webkit-scrollbar-thumb {
@@ -355,22 +361,15 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
     border-radius: 3px;
   }
   
-  .toggle-checkbox:checked {
-    right: 0;
-    border-color: #9061F9;
-  }
-  .toggle-checkbox:checked + .toggle-label {
-    background-color: #9061F9;
-  }
-
-  .article-card-container.hidden {
-    display: none;
-  }
-
-  .search-hidden {
-    display: none;
+  /* Scroll indicators */
+  [data-scroll-shadow="top"].opacity-100,
+  [data-scroll-shadow="bottom"].opacity-100 {
+    opacity: 1;
   }
 </style>
+
+<!-- Import the full stylesheet -->
+<link rel="stylesheet" href="../styles/sourceCardScroll.css">
 
 <script>
   // Define categories for script access
@@ -646,41 +645,3 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
       }
     });
   });
-</script>
-
-<style>
-  /* Add these styles to your component for smoother scrolling */
-  .article-grid {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
-  }
-  
-  .article-grid::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .article-grid::-webkit-scrollbar-track {
-    background: rgba(243, 244, 246, 1);
-  }
-  
-  .article-grid::-webkit-scrollbar-thumb {
-    background-color: rgba(139, 92, 246, 0.3);
-    border-radius: 3px;
-  }
-  
-  .toggle-checkbox:checked {
-    right: 0;
-    border-color: #9061F9;
-  }
-  .toggle-checkbox:checked + .toggle-label {
-    background-color: #9061F9;
-  }
-
-  .article-card-container.hidden {
-    display: none;
-  }
-
-  .search-hidden {
-    display: none;
-  }
-</style>
