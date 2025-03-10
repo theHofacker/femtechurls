@@ -4,7 +4,7 @@
  * Enhanced scroll functionality for Source Cards on the home page
  * - Adds smooth scrolling to source cards
  * - Adds top and bottom shadow indicators for scroll position
- * - Shows "View All" link for sources with many articles
+ * - Shows all articles in a scrollable container
  */
 document.addEventListener('DOMContentLoaded', () => {
   // Only run this code on the home page
@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param {HTMLElement} articleGrid - The scrollable article container
  */
 function setupScrollableCard(card, articleGrid) {
+  // Show all articles first (remove hidden class)
+  const hiddenArticles = articleGrid.querySelectorAll('.article-card.hidden');
+  hiddenArticles.forEach(article => {
+    article.classList.remove('hidden');
+  });
+
   // Add scroll shadow indicators
   const shadowTop = document.createElement('div');
   shadowTop.className = 'absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none opacity-0 transition-opacity duration-200';
@@ -49,25 +55,6 @@ function setupScrollableCard(card, articleGrid) {
   scrollContainer.appendChild(shadowTop);
   scrollContainer.appendChild(shadowBottom);
     
-  // Add a 'View All' button at the bottom of card if there are many articles
-  const articleCount = articleGrid.querySelectorAll('.article-card').length;
-    
-  if (articleCount > 5) {
-    const sourceName = card.getAttribute('data-source');
-      
-    // Create view all button
-    const viewAllContainer = document.createElement('div');
-    viewAllContainer.className = 'p-3 text-center border-t border-gray-200 bg-white';
-    viewAllContainer.innerHTML = `
-      <a href="/search?q=${encodeURIComponent(sourceName)}" class="text-sm font-medium text-purple-600 hover:text-purple-800">
-        View all ${articleCount} articles
-      </a>
-    `;
-      
-    // Add it after the scroll container
-    scrollContainer.parentNode.insertBefore(viewAllContainer, scrollContainer.nextSibling);
-  }
-    
   // Setup scroll event listener to control shadow visibility
   articleGrid.addEventListener('scroll', () => {
     updateScrollShadows(articleGrid, shadowTop, shadowBottom);
@@ -76,7 +63,7 @@ function setupScrollableCard(card, articleGrid) {
   // Initial check for shadows
   updateScrollShadows(articleGrid, shadowTop, shadowBottom);
     
-  // Set a nicer height for the scrollable area
+  // Set appropriate height for the scrollable area
   articleGrid.style.maxHeight = '400px';
   articleGrid.style.overflowY = 'auto';
 }
