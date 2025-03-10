@@ -105,6 +105,9 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   <div id="category-content" class="space-y-12 hidden">
     {categories.map(category => {
       const categoryNews = groupedByCategory[category.id] || [];
+      const totalArticles = categoryNews.length;
+      const hasMoreItems = totalArticles > articlesPerCategory;
+      
       return categoryNews.length > 0 ? (
         <section id={category.slug} class="article-section">
           <div class="flex items-center justify-between mb-6">
@@ -123,21 +126,35 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
             {categoryNews
               /* Sort by date, newest first */
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              /* Take the specified number of articles */
-              .slice(0, articlesPerCategory)
-              /* Map each item to a NewsCard component */
-              .map(item => (
-                <NewsCard
-                  title={item.title}
-                  description={item.description}
-                  link={item.link}
-                  date={item.date}
-                  source={item.sourceName}
-                  class="article-card"
-                />
+              /* Map each item to a NewsCard component, with hidden class for items beyond initial count */
+              .map((item, index) => (
+                <div class={`article-card-container ${index >= articlesPerCategory ? 'hidden' : ''}`}>
+                  <NewsCard
+                    title={item.title}
+                    description={item.description}
+                    link={item.link}
+                    date={item.date}
+                    source={item.sourceName}
+                    class="article-card"
+                  />
+                </div>
               ))
             }
           </div>
+          
+          {/* Add Load More button if there are more items */}
+          {hasMoreItems && (
+            <div class="mt-8 text-center">
+              <button 
+                class="load-more-category-btn px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                data-category={category.id}
+                data-shown={articlesPerCategory}
+                data-total={totalArticles}
+              >
+                Load More
+              </button>
+            </div>
+          )}
         </section>
       ) : null;
     })}
@@ -343,6 +360,14 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   .toggle-checkbox:checked + .toggle-label {
     background-color: #9061F9;
   }
+
+  .article-card-container.hidden {
+    display: none;
+  }
+
+  .search-hidden {
+    display: none;
+  }
 </style>
 
 <script>
@@ -354,29 +379,39 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   ];
 
   // Handle search functionality
-  const searchInput = document.getElementById('search-input');
+  const searchInput = document.getElementById('global-search-input');
   
   function handleSearch(value) {
-    const articles = document.querySelectorAll('.article-card');
+    const articles = document.querySelectorAll('.article-card-container, .article-card');
     const sections = document.querySelectorAll('.article-section');
     value = value.toLowerCase().trim();
     
+    // Reset visibility first (only for search filtering)
+    articles.forEach(article => {
+      article.classList.remove('search-hidden');
+    });
+    
+    if (value === '') return; // No search term, no filtering
+    
     sections.forEach(section => {
       let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.article-card');
+      const sectionArticles = section.querySelectorAll('.article-card-container:not(.hidden), .article-card:not(.hidden)');
       
       sectionArticles.forEach(article => {
-        const title = article.querySelector('h3')?.textContent?.toLowerCase() || '';
-        const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
+        const card = article.querySelector('.bg-white') || article;
+        if (!card) return;
+        
+        const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
         
         if (title.includes(value) || description.includes(value)) {
-          article.classList.remove('hidden');
           hasVisibleArticles = true;
         } else {
-          article.classList.add('hidden');
+          article.classList.add('search-hidden');
         }
       });
       
+      // Show/hide the section based on matching articles
       if (hasVisibleArticles) {
         section.classList.remove('hidden');
       } else {
@@ -386,7 +421,9 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   }
 
   searchInput?.addEventListener('input', (e) => {
-    handleSearch(e.target.value);
+    if (e.target instanceof HTMLInputElement) {
+      handleSearch(e.target.value);
+    }
   });
 
   // Modal functionality
@@ -555,6 +592,8 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
     
     // Close modal after saving
     closeModal();
+      });
+    });
   });
 
   // Add classes on page load
@@ -568,5 +607,38 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
       }
     });
   });
-</script>
-      });
+
+  // Handle Load More functionality for category view
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadMoreCategoryButtons = document.querySelectorAll('.load-more-category-btn');
+    
+    loadMoreCategoryButtons.forEach(button => {
+      if (button instanceof HTMLElement) {
+        const categoryId = button.getAttribute('data-category');
+        let currentlyShown = parseInt(button.getAttribute('data-shown') || '9', 10);
+        const totalItems = parseInt(button.getAttribute('data-total') || '0', 10);
+        const increment = 6; // Show 6 more items at a time
+        
+        button.addEventListener('click', () => {
+          const section = button.closest('.article-section');
+          if (!section) return;
+          
+          const hiddenCards = section.querySelectorAll('.article-card-container.hidden:not(.search-hidden)');
+          const cardsToShow = Array.from(hiddenCards).slice(0, increment);
+          
+          // Show the next batch of cards
+          cardsToShow.forEach(card => {
+            card.classList.remove('hidden');
+          });
+          
+          // Update counter
+          currentlyShown += cardsToShow.length;
+          button.setAttribute('data-shown', currentlyShown.toString());
+          
+          // Hide the button if no more cards to show
+          if (currentlyShown >= totalItems || hiddenCards.length <= increment) {
+            button.classList.add('hidden');
+          }
+          
+          // Update button text to show count
+          button.textContent = `Showing ${currentlyShown} of ${totalItems} - Load More`;
