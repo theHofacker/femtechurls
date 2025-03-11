@@ -1,80 +1,64 @@
 /**
  * Global search functionality for FemTechURLs
- * This module provides search capabilities across the current page
+ * This module provides search capabilities across all content
  */
 
-// Store for news items from current page
-let globalNewsItems = [];
+import { fetchAllNews } from './feedAggregator';
+
+// Store for news items from data sources
+let allNewsItems = [];
+let isSearchInitialized = false;
+let isSearchLoading = false;
+
+// Store for news items extracted from the current page
+let pageNewsItems = [];
 
 /**
- * Add news items to the search index
+ * Initialize the search data by fetching from data sources
+ */
+export async function initializeSearch() {
+  if (isSearchInitialized || isSearchLoading) return isSearchInitialized;
+  
+  isSearchLoading = true;
+  
+  try {
+    // Fetch all news items from all sources
+    allNewsItems = await fetchAllNews();
+    isSearchInitialized = true;
+    
+    // Also extract items from the current page (for on-page filtering)
+    if (typeof document !== 'undefined') {
+      const pageItems = extractNewsItemsFromPage();
+      addItemsToPageSearch(pageItems);
+    }
+    
+    console.log(`Global search initialized with ${allNewsItems.length} news items from sources and ${pageNewsItems.length} from page`);
+    return true;
+  } catch (error) {
+    console.error('Error initializing global search:', error);
+    return false;
+  } finally {
+    isSearchLoading = false;
+  }
+}
+
+/**
+ * Add news items to the page search index
  * @param {Array} items - Array of news items to add
  */
-function addItemsToGlobalSearch(items) {
+function addItemsToPageSearch(items) {
   if (!Array.isArray(items)) return;
   
   // Add only if not already in the store (prevent duplicates)
   items.forEach(item => {
-    const exists = globalNewsItems.some(existing => 
+    const exists = pageNewsItems.some(existing => 
       existing.link === item.link || existing.title === item.title
     );
     
     if (!exists) {
-      globalNewsItems.push(item);
+      pageNewsItems.push(item);
     }
   });
-}
-
-/**
- * Search across all indexed news items
- * @param {string} query - Search query
- * @param {Object} options - Search options (limit, category, source)
- * @returns {Array} - Array of matching news items
- */
-function search(query, options = {}) {
-  const { limit = 10, category = null, source = null } = options;
-  
-  if (!query || query.length < 2) return [];
-  
-  const lowerQuery = query.toLowerCase().trim();
-  
-  // Filter items based on query, category, and source
-  const results = globalNewsItems.filter(item => {
-    const titleMatch = item.title?.toLowerCase().includes(lowerQuery);
-    const descMatch = item.description?.toLowerCase().includes(lowerQuery);
-    const sourceMatch = !source || item.sourceName === source;
-    const categoryMatch = !category || item.category === category;
-    
-    return (titleMatch || descMatch) && sourceMatch && categoryMatch;
-  });
-  
-  // Sort by relevance (title matches are more relevant than description matches)
-  results.sort((a, b) => {
-    const aTitleMatch = a.title?.toLowerCase().includes(lowerQuery);
-    const bTitleMatch = b.title?.toLowerCase().includes(lowerQuery);
-    
-    // Sort by title match first
-    if (aTitleMatch && !bTitleMatch) return -1;
-    if (!aTitleMatch && bTitleMatch) return 1;
-    
-    // If both match title or both don't match title, sort by date
-    const aDate = new Date(a.date);
-    const bDate = new Date(b.date);
-    return bDate.getTime() - aDate.getTime(); // Newer first
-  });
-  
-  // Return limited results
-  return results.slice(0, limit);
-}
-
-/**
- * Search across all indexed news items
- * @param {string} query - Search query
- * @param {Object} options - Search options (limit, category, source)
- * @returns {Array} - Array of matching news items
- */
-function searchNews(query, options = {}) {
-  return search(query, options);
 }
 
 /**
@@ -82,6 +66,9 @@ function searchNews(query, options = {}) {
  * @returns {Array} - Array of news items
  */
 function extractNewsItemsFromPage() {
+  // Only run in browser environment
+  if (typeof document === 'undefined') return [];
+  
   // Try to get news items from the page
   const newsItems = [];
   
@@ -164,60 +151,94 @@ function extractNewsItemsFromPage() {
 }
 
 /**
- * Initialize the search data
+ * Search across all news items (both from data sources and page)
+ * @param {string} query - Search query
+ * @param {Object} options - Search options (limit, category, source)
+ * @returns {Array} - Array of matching news items
  */
-function initializeSearch() {
-  // Extract news items from the page
-  const newsItems = extractNewsItemsFromPage();
+export async function searchNews(query, options = {}) {
+  console.log(`Searching for: "${query}"`);
   
-  // Add to global search
-  addItemsToGlobalSearch(newsItems);
+  const { limit = 50, category = null, source = null } = options;
   
-  return true;
+  // Make sure search is initialized
+  if (!isSearchInitialized && !isSearchLoading) {
+    console.log("Initializing search...");
+    await initializeSearch();
+  }
+  
+  // If still loading, return empty array
+  if (isSearchLoading) {
+    console.log("Search still initializing, returning empty results");
+    return [];
+  }
+  
+  // If query is empty, return all items (up to limit)
+  if (!query || query.trim() === '') {
+    console.log("Empty query, returning all items");
+    return allNewsItems.slice(0, limit);
+  }
+  
+  const normalizedQuery = query.toLowerCase().trim();
+  console.log(`Normalized query: "${normalizedQuery}"`);
+  console.log(`Searching through ${allNewsItems.length} items`);
+  
+  // Sample a few items to debug
+  if (allNewsItems.length > 0) {
+    console.log("Sample item 1:", {
+      title: allNewsItems[0].title,
+      description: allNewsItems[0].description?.substring(0, 50) + "...",
+      source: allNewsItems[0].sourceName
+    });
+  }
+  
+  // Filter items based on query, category, and source
+  const results = allNewsItems.filter(item => {
+    // Check for matches in various fields
+    const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
+    const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
+    const sourceMatch = (source === null) || (item.sourceName === source);
+    const categoryMatch = (category === null) || (item.category === category);
+    
+    // For debugging a specific search term
+    if (normalizedQuery === 'cycle' && (titleMatch || descriptionMatch)) {
+      console.log("Match found for 'cycle' in:", {
+        title: item.title,
+        matched: titleMatch ? "title" : descriptionMatch ? "description" : "other",
+        source: item.sourceName
+      });
+    }
+    
+    return (titleMatch || descriptionMatch) && sourceMatch && categoryMatch;
+  });
+  
+  // Sort by relevance
+  const sortedResults = results.sort((a, b) => {
+    const aTitleMatch = (a.title || '').toLowerCase().includes(normalizedQuery);
+    const bTitleMatch = (b.title || '').toLowerCase().includes(normalizedQuery);
+    
+    // Sort by title match first
+    if (aTitleMatch && !bTitleMatch) return -1;
+    if (!aTitleMatch && bTitleMatch) return 1;
+    
+    // If both match title or both don't match title, sort by date
+    const aDate = new Date(a.date);
+    const bDate = new Date(b.date);
+    return bDate.getTime() - aDate.getTime(); // Newer first
+  });
+  
+  console.log(`Found ${sortedResults.length} results for "${query}"`);
+  return sortedResults.slice(0, limit);
 }
 
 /**
- * Set up search input functionality
- */
-function initSearchInput() {
-  const searchInput = document.getElementById('global-search-input');
-  const mobileSearchInput = document.getElementById('mobile-search-input');
-  
-  if (searchInput) {
-    searchInput.addEventListener('input', handleSearchInput);
-  }
-  
-  if (mobileSearchInput) {
-    mobileSearchInput.addEventListener('input', handleSearchInput);
-  }
-}
-
-/**
- * Handle search input events
- * @param {Event} event - Input event
- */
-function handleSearchInput(event) {
-  const query = event.target.value;
-  
-  // Sync the other search input if it exists
-  const isDesktop = event.target.id === 'global-search-input';
-  const otherInput = isDesktop 
-    ? document.getElementById('mobile-search-input')
-    : document.getElementById('global-search-input');
-  
-  if (otherInput) {
-    otherInput.value = query;
-  }
-  
-  // Perform search on the current page
-  handleGlobalSearch(query);
-}
-
-/**
- * Handle global search across the site
+ * Handle global search across the current page
  * @param {string} searchQuery - Search query
  */
-function handleGlobalSearch(searchQuery) {
+export function handleGlobalSearch(searchQuery) {
+  // Only run in browser environment
+  if (typeof document === 'undefined') return;
+  
   searchQuery = searchQuery.toLowerCase().trim();
   
   // Articles can be in different structures depending on the page
@@ -262,18 +283,98 @@ function handleGlobalSearch(searchQuery) {
   });
 }
 
-// Initialize search when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  initializeSearch();
-  initSearchInput();
-  
-  // Make the search function globally available
-  window.performSearch = handleGlobalSearch;
-});
+/**
+ * Get all news items
+ */
+export function getAllNewsItems() {
+  return allNewsItems;
+}
 
-// Export functions for use in other modules
-export {
-  searchNews,
-  initializeSearch,
-  handleGlobalSearch
-};
+/**
+ * Search specifically for categories
+ */
+export async function searchByCategory(categoryId, query) {
+  if (!isSearchInitialized && !isSearchLoading) {
+    await initializeSearch();
+  }
+  
+  let filtered = allNewsItems.filter(item => item.category === categoryId);
+  
+  if (query && query.trim() !== '') {
+    const normalizedQuery = query.toLowerCase().trim();
+    filtered = filtered.filter(item => {
+      const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
+      const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
+      
+      return titleMatch || descriptionMatch;
+    });
+  }
+  
+  return filtered;
+}
+
+/**
+ * Search specifically for sources
+ */
+export async function searchBySource(sourceName, query) {
+  if (!isSearchInitialized && !isSearchLoading) {
+    await initializeSearch();
+  }
+  
+  let filtered = allNewsItems.filter(item => item.sourceName === sourceName);
+  
+  if (query && query.trim() !== '') {
+    const normalizedQuery = query.toLowerCase().trim();
+    filtered = filtered.filter(item => {
+      const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
+      const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
+      
+      return titleMatch || descriptionMatch;
+    });
+  }
+  
+  return filtered;
+}
+
+// Initialize search when the page loads in browser environment
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize search data
+    initializeSearch();
+    
+    // Set up search input functionality
+    const searchInput = document.getElementById('global-search-input');
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    
+    if (searchInput) {
+      searchInput.addEventListener('input', (event) => {
+        const query = event.target.value;
+        
+        // Sync with mobile input if it exists
+        if (mobileSearchInput) {
+          mobileSearchInput.value = query;
+        }
+        
+        // Perform search on the current page
+        handleGlobalSearch(query);
+      });
+    }
+    
+    if (mobileSearchInput) {
+      mobileSearchInput.addEventListener('input', (event) => {
+        const query = event.target.value;
+        
+        // Sync with desktop input if it exists
+        if (searchInput) {
+          searchInput.value = query;
+        }
+        
+        // Perform search on the current page
+        handleGlobalSearch(query);
+      });
+    }
+    
+    // Make the search function globally available
+    window.performSearch = handleGlobalSearch;
+  });
+}
