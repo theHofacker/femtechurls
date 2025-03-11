@@ -7,12 +7,14 @@ import { searchNews } from '../utils/globalSearch.ts';
 
 // Get the search query from URL parameters
 const query = Astro.url.searchParams.get('q') || '';
+console.log('Search query:', query); // Debugging log
 
 // Search for news items with the query
 let results = [];
 try {
   if (query) {
     results = await searchNews(query);
+    console.log(`Found ${results.length} results for query: ${query}`); // Debugging log
   }
 } catch (error) {
   console.error('Error searching news:', error);
@@ -114,5 +116,19 @@ const sources = Object.keys(groupedBySource);
       const length = searchInput.value.length;
       searchInput.setSelectionRange(length, length);
     }
+    
+    // Add explicit form submission handling
+    if (searchForm) {
+      searchForm.addEventListener('submit', (e) => {
+        // Only submit if search has content
+        if (searchInput instanceof HTMLInputElement && !searchInput.value.trim()) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+    }
+
+    // Add debug info
+    console.log('Search page loaded with query:', searchInput?.value);
   });
 </script>
