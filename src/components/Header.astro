@@ -53,25 +53,32 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 
   <!-- Mobile Search Overlay -->
-  <!-- Adding a data attribute to help with scripting -->
+  <!-- Replace your existing mobile search overlay with this improved version -->
 <div
   id="mobile-search-overlay"
   class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
-  data-mobile-search-container
 >
   <div class="p-4 bg-purple-800">
     <div class="relative flex items-center">
-      <input
-        type="search"
-        id="mobile-search-input"
-        placeholder="Search all content..."
-        class="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-      />
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-        </svg>
-      </div>
+      <!-- Explicit form with correct action and method -->
+      <form action="/search" method="get" class="flex-1">
+        <div class="relative">
+          <input
+            type="search"
+            id="mobile-search-input"
+            name="q"
+            placeholder="Search all content..."
+            class="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+          />
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <!-- Add an explicit submit button that's accessible but visually hidden -->
+          <button type="submit" class="sr-only">Search</button>
+        </div>
+      </form>
       <button
         id="close-mobile-search"
         class="ml-3 p-2 text-white hover:bg-purple-700 rounded-full"
