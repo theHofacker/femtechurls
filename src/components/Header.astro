@@ -53,25 +53,37 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 
   <!-- Mobile Search Overlay -->
-  <div
-    id="mobile-search-overlay"
-    class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
-  >
-    <div class="p-4 bg-purple-800">
-      <div class="relative flex items-center">
-        <GlobalSearch />
-        <button
-          id="close-mobile-search"
-          class="ml-2 p-2 text-white hover:bg-purple-700 rounded-full"
-          aria-label="Close Search"
-        >
-          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+  <!-- Adding a data attribute to help with scripting -->
+<div
+  id="mobile-search-overlay"
+  class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
+  data-mobile-search-container
+>
+  <div class="p-4 bg-purple-800">
+    <div class="relative flex items-center">
+      <input
+        type="search"
+        id="mobile-search-input"
+        placeholder="Search all content..."
+        class="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+        </svg>
       </div>
+      <button
+        id="close-mobile-search"
+        class="ml-3 p-2 text-white hover:bg-purple-700 rounded-full"
+        aria-label="Close Search"
+      >
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
   </div>
+</div>
 </header>
 
 <script>
