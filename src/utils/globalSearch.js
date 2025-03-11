@@ -177,6 +177,14 @@ function initializeSearch() {
 }
 
 /**
+ * Get all news items (for search page)
+ * @returns {Array} - Array of all news items
+ */
+function getAllNewsItems() {
+  return globalNewsItems;
+}
+
+/**
  * Set up search input functionality
  */
 function initSearchInput() {
@@ -275,5 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
 export {
   searchNews,
   initializeSearch,
-  handleGlobalSearch
+  handleGlobalSearch,
+  getAllNewsItems  // Add this export to fix the compilation error
 };
