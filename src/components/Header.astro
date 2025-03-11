@@ -53,14 +53,14 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 
   <!-- Mobile Search Overlay -->
-<!-- Replace your mobile search overlay with this simpler version -->
+<!-- Mobile Search Overlay - Replace your existing mobile search overlay with this -->
 <div
   id="mobile-search-overlay"
   class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
 >
   <div class="p-4 bg-purple-800">
     <div class="relative flex items-center">
-      <!-- Use the exact same form structure as your GlobalSearch component -->
+      <!-- Use an explicit form with action and method -->
       <form action="/search" method="get" class="flex-grow">
         <div class="relative w-full">
           <input
@@ -97,35 +97,32 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 </div>
 
+<!-- Keep your existing mobile search script -->
 <script>
-  // Simple mobile search functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    const mobileSearchButton = document.getElementById('mobile-search-button');
-    const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
-    const closeMobileSearch = document.getElementById('close-mobile-search');
-    const mobileSearchInput = document.getElementById('mobile-search-input');
-    
-    // Toggle mobile search overlay
-    mobileSearchButton?.addEventListener('click', () => {
-      mobileSearchOverlay?.classList.remove('hidden');
-      if (mobileSearchInput) {
-        setTimeout(() => mobileSearchInput.focus(), 100);
-      }
-    });
-    
-    // Close mobile search
-    closeMobileSearch?.addEventListener('click', () => {
-      mobileSearchOverlay?.classList.add('hidden');
-    });
-    
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && mobileSearchOverlay && !mobileSearchOverlay.classList.contains('hidden')) {
-        mobileSearchOverlay.classList.add('hidden');
-      }
-    });
+  // Mobile search functionality
+  const mobileSearchButton = document.getElementById('mobile-search-button');
+  const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
+  const closeMobileSearch = document.getElementById('close-mobile-search');
+  
+  mobileSearchButton?.addEventListener('click', () => {
+    mobileSearchOverlay?.classList.remove('hidden');
+    const mobileSearchInput = mobileSearchOverlay?.querySelector('input[type="search"]');
+    if (mobileSearchInput instanceof HTMLInputElement) {
+      mobileSearchInput.focus();
+    }
   });
-</script>
+  
+  closeMobileSearch?.addEventListener('click', () => {
+    mobileSearchOverlay?.classList.add('hidden');
+  });
+  
+  // Close mobile search on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !mobileSearchOverlay?.classList.contains('hidden')) {
+      mobileSearchOverlay?.classList.add('hidden');
+    }
+  });
+  </script>
 </header>
 
 <script>
