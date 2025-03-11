@@ -52,10 +52,6 @@ try {
   console.error('Error searching news:', error);
 }
 
-// Add a debug section to display raw data (only in development)
-const isDevMode = import.meta.env.MODE === 'development';
-const debugItems = isDevMode ? (results.length > 0 ? results.slice(0, 3) : await getAllNewsItems().then(items => items.slice(0, 3))) : [];
-
 // Group results by source
 const groupedBySource = results.reduce((acc, item) => {
   if (!acc[item.sourceName]) {
@@ -133,30 +129,6 @@ const sources = Object.keys(groupedBySource);
         <SkeletonCard />
         <SkeletonCard />
         <SkeletonCard />
-      </div>
-    </div>
-  )}
-  
-  {/* Debug section - only visible in development */}
-  {isDevMode && (
-    <div class="mt-16 p-4 bg-gray-100 rounded-lg">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">Debug Information</h2>
-      <div class="mb-4">
-        <p><strong>Query:</strong> "{query}"</p>
-        <p><strong>Results count:</strong> {results.length}</p>
-      </div>
-      
-      <h3 class="font-bold mb-2">Sample Data Items:</h3>
-      <div class="space-y-4">
-        {debugItems.map((item, i) => (
-          <div class="p-4 bg-white rounded shadow-sm">
-            <p><strong>Item {i+1}</strong></p>
-            <p><strong>Title:</strong> {item.title}</p>
-            <p><strong>Source:</strong> {item.sourceName}</p>
-            <p><strong>Category:</strong> {item.category}</p>
-            <p><strong>Description:</strong> {item.description?.substring(0, 100)}...</p>
-          </div>
-        ))}
       </div>
     </div>
   )}
