@@ -84,6 +84,63 @@ const { title = "FemTechURLs" } = Astro.props;
     </div>
   </div>
 </div>
+
+<!-- Add this script to your Header.astro file, just before the closing </Header> tag -->
+<script>
+  // Enhanced mobile search functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    // Mobile search functionality
+    const mobileSearchButton = document.getElementById('mobile-search-button');
+    const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
+    const closeMobileSearch = document.getElementById('close-mobile-search');
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    
+    if (mobileSearchButton && mobileSearchOverlay) {
+      mobileSearchButton.addEventListener('click', function() {
+        mobileSearchOverlay.classList.remove('hidden');
+        mobileSearchOverlay.classList.add('active');
+        
+        // Focus the input after a slight delay to ensure overlay is visible
+        setTimeout(function() {
+          if (mobileSearchInput) {
+            mobileSearchInput.focus();
+          }
+        }, 100);
+      });
+    }
+    
+    if (closeMobileSearch && mobileSearchOverlay) {
+      closeMobileSearch.addEventListener('click', function() {
+        mobileSearchOverlay.classList.add('hidden');
+        mobileSearchOverlay.classList.remove('active');
+      });
+    }
+    
+    // Add form handling for the mobile search input
+    if (mobileSearchInput) {
+      // Wrap in a form if not already in one
+      const existingForm = mobileSearchInput.closest('form');
+      
+      if (!existingForm) {
+        const form = document.createElement('form');
+        form.setAttribute('action', '/search');
+        form.setAttribute('method', 'get');
+        
+        // Replace the input with the form
+        const parent = mobileSearchInput.parentNode;
+        parent.removeChild(mobileSearchInput);
+        
+        // Add a name attribute to the input if it doesn't have one
+        if (!mobileSearchInput.getAttribute('name')) {
+          mobileSearchInput.setAttribute('name', 'q');
+        }
+        
+        form.appendChild(mobileSearchInput);
+        parent.appendChild(form);
+      }
+    }
+  });
+</script>
 </header>
 
 <script>
