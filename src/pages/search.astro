@@ -1,52 +1,34 @@
 ---
-// src/pages/search.astro with improved debugging (JavaScript version)
+// src/pages/search.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import { searchNews, getAllNewsItems, initializeSearch } from '../utils/globalSearch.js';
+import { fetchNews } from '../utils/feedAggregator';
 
 // Get the search query from URL parameters
 const query = Astro.url.searchParams.get('q') || '';
-console.log('Search page loaded with query:', query);
-
-// Pre-initialize search to ensure data is loaded
-try {
-  await initializeSearch();
-  console.log('Search initialized on server');
-} catch (error) {
-  console.error('Error initializing search:', error);
-}
+console.log('Search query:', query);
 
 // Search for news items with the query
 let results = [];
 try {
   if (query) {
-    console.log(`Searching for "${query}" on server`);
-    results = await searchNews(query);
-    console.log(`Found ${results.length} results for "${query}" on server`);
+    // Fetch all news items and filter them
+    const allNews = await fetchNews();
     
-    // If no results with exact search, try a more flexible approach
-    if (results.length === 0) {
-      console.log('No exact matches, trying flexible search');
+    // Simple search function
+    const normalizedQuery = query.toLowerCase().trim();
+    
+    results = allNews.filter(item => {
+      const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
+      const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
+      const sourceMatch = (item.sourceName || '').toLowerCase().includes(normalizedQuery);
+      const categoryMatch = (item.category || '').toLowerCase().includes(normalizedQuery);
       
-      // Get all items to search manually
-      const allItems = await getAllNewsItems();
-      
-      // Break query into words for more flexible matching
-      const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
-      
-      results = allItems.filter(item => {
-        const title = (item.title || '').toLowerCase();
-        const description = (item.description || '').toLowerCase();
-        
-        // Check if any query word is in the title or description
-        return queryWords.some(word => 
-          title.includes(word) || description.includes(word)
-        );
-      });
-      
-      console.log(`Flexible search found ${results.length} results`);
-    }
+      return titleMatch || descriptionMatch || sourceMatch || categoryMatch;
+    });
+    
+    console.log(`Found ${results.length} results for query: ${query}`);
   }
 } catch (error) {
   console.error('Error searching news:', error);
@@ -148,11 +130,5 @@ const sources = Object.keys(groupedBySource);
       const length = searchInput.value.length;
       searchInput.setSelectionRange(length, length);
     }
-    
-    // Log details about the search
-    console.log('Client-side search page loaded');
-    console.log('Search query:', searchInput?.value);
-    console.log('Result sections:', document.querySelectorAll('section').length);
-    console.log('Result cards:', document.querySelectorAll('.grid > div').length);
   });
 </script>
