@@ -53,30 +53,35 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 
   <!-- Mobile Search Overlay -->
-  <!-- Replace your existing mobile search overlay with this improved version -->
+<!-- Replace your mobile search overlay with this simpler version -->
 <div
   id="mobile-search-overlay"
   class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
 >
   <div class="p-4 bg-purple-800">
     <div class="relative flex items-center">
-      <!-- Explicit form with correct action and method -->
-      <form action="/search" method="get" class="flex-1">
-        <div class="relative">
+      <!-- Use the exact same form structure as your GlobalSearch component -->
+      <form action="/search" method="get" class="flex-grow">
+        <div class="relative w-full">
           <input
             type="search"
             id="mobile-search-input"
             name="q"
             placeholder="Search all content..."
-            class="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            class="w-full pl-10 pr-4 py-3 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
             </svg>
           </div>
-          <!-- Add an explicit submit button that's accessible but visually hidden -->
-          <button type="submit" class="sr-only">Search</button>
+          <!-- Add a visible search button -->
+          <button 
+            type="submit" 
+            class="absolute inset-y-0 right-0 px-4 py-2 bg-purple-600 text-white rounded-r-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            Search
+          </button>
         </div>
       </form>
       <button
@@ -92,60 +97,33 @@ const { title = "FemTechURLs" } = Astro.props;
   </div>
 </div>
 
-<!-- Add this script to your Header.astro file, just before the closing </Header> tag -->
 <script>
-  // Enhanced mobile search functionality
+  // Simple mobile search functionality
   document.addEventListener('DOMContentLoaded', function() {
-    // Mobile search functionality
     const mobileSearchButton = document.getElementById('mobile-search-button');
     const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
     const closeMobileSearch = document.getElementById('close-mobile-search');
     const mobileSearchInput = document.getElementById('mobile-search-input');
     
-    if (mobileSearchButton && mobileSearchOverlay) {
-      mobileSearchButton.addEventListener('click', function() {
-        mobileSearchOverlay.classList.remove('hidden');
-        mobileSearchOverlay.classList.add('active');
-        
-        // Focus the input after a slight delay to ensure overlay is visible
-        setTimeout(function() {
-          if (mobileSearchInput) {
-            mobileSearchInput.focus();
-          }
-        }, 100);
-      });
-    }
-    
-    if (closeMobileSearch && mobileSearchOverlay) {
-      closeMobileSearch.addEventListener('click', function() {
-        mobileSearchOverlay.classList.add('hidden');
-        mobileSearchOverlay.classList.remove('active');
-      });
-    }
-    
-    // Add form handling for the mobile search input
-    if (mobileSearchInput) {
-      // Wrap in a form if not already in one
-      const existingForm = mobileSearchInput.closest('form');
-      
-      if (!existingForm) {
-        const form = document.createElement('form');
-        form.setAttribute('action', '/search');
-        form.setAttribute('method', 'get');
-        
-        // Replace the input with the form
-        const parent = mobileSearchInput.parentNode;
-        parent.removeChild(mobileSearchInput);
-        
-        // Add a name attribute to the input if it doesn't have one
-        if (!mobileSearchInput.getAttribute('name')) {
-          mobileSearchInput.setAttribute('name', 'q');
-        }
-        
-        form.appendChild(mobileSearchInput);
-        parent.appendChild(form);
+    // Toggle mobile search overlay
+    mobileSearchButton?.addEventListener('click', () => {
+      mobileSearchOverlay?.classList.remove('hidden');
+      if (mobileSearchInput) {
+        setTimeout(() => mobileSearchInput.focus(), 100);
       }
-    }
+    });
+    
+    // Close mobile search
+    closeMobileSearch?.addEventListener('click', () => {
+      mobileSearchOverlay?.classList.add('hidden');
+    });
+    
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileSearchOverlay && !mobileSearchOverlay.classList.contains('hidden')) {
+        mobileSearchOverlay.classList.add('hidden');
+      }
+    });
   });
 </script>
 </header>
