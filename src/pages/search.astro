@@ -1,9 +1,9 @@
 ---
-// src/pages/search.astro with improved debugging
+// src/pages/search.astro with improved debugging (JavaScript version)
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import { searchNews, getAllNewsItems, initializeSearch } from '../utils/globalSearch.ts';
+import { searchNews, getAllNewsItems, initializeSearch } from '../utils/globalSearch.js';
 
 // Get the search query from URL parameters
 const query = Astro.url.searchParams.get('q') || '';
