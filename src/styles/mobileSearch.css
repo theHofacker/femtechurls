@@ -1,36 +1,16 @@
 /* src/styles/mobileSearch.css */
 
-/* Enhanced mobile search styles */
-
-/* Handle hidden elements in search */
-.search-hidden {
-  display: none !important;
-}
+/* Mobile search styles that complement existing styles without overriding them */
 
 /* Improve mobile search visibility */
 #mobile-search-overlay {
   z-index: 50;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
-/* Ensure search results dropdown is visible on mobile */
-#search-results-dropdown,
-.search-results-dropdown {
-  z-index: 60;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 /* Make sure search input is usable on all devices */
 input[type="search"] {
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 8px;
-  font-size: 16px; /* Prevents iOS zoom on focus */
-  width: 100%;
 }
 
 /* Fix for iOS Safari search input styling */
@@ -40,49 +20,36 @@ input[type="search"] {
   }
   
   /* Fix for iOS touch targets */
-  button, 
-  a, 
-  input[type="search"] {
+  #mobile-search-overlay button, 
+  #mobile-search-overlay a, 
+  #mobile-search-input {
     min-height: 44px; /* Apple recommended minimum touch target size */
   }
 }
 
-/* Ensure cards display correctly during search on mobile */
+/* Mobile-specific fixes */
 @media (max-width: 767px) {
-  .article-card,
-  .article-card-container,
-  .news-card-container {
-    width: 100%;
+  /* Ensure search dropdown appears correctly */
+  #search-results-dropdown {
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 60;
   }
   
-  /* Handle scrolling when searching */
-  .source-card .article-grid {
-    max-height: 350px !important;
-  }
-  
-  /* Improve search input on mobile */
-  #mobile-search-overlay input[type="search"] {
-    width: 100%;
-    padding: 12px 16px;
-    background-color: white;
+  /* Make sure search input is properly styled */
+  #mobile-search-input {
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
   
   /* Ensure close button is visible and tappable */
   #close-mobile-search {
-    padding: 12px;
+    padding: 8px;
     margin-left: 8px;
   }
-}
-
-/* Ensure transition is smooth for search results */
-.source-card,
-.article-section,
-.article-card,
-.article-card-container {
-  transition: opacity 0.3s ease;
-}
-
-/* Consistent styling for hidden elements */
-.hidden {
-  display: none !important;
+  
+  /* Make search overlay fully visible when active */
+  #mobile-search-overlay.active {
+    display: block !important;
+  }
 }
