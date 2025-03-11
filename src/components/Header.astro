@@ -188,3 +188,82 @@ const { title = "FemTechURLs" } = Astro.props;
     }
   });
 </script>
+
+// Add this script to your Header.astro file for debugging mobile search issues
+
+// Debug script for mobile search - uncomment when needed
+/*
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Debug mobile search functionality
+    function debugMobileSearch() {
+      // Get all relevant elements
+      const mobileSearchButton = document.getElementById('mobile-search-button');
+      const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
+      const mobileSearchInput = document.getElementById('mobile-search-input');
+      const closeButton = document.getElementById('close-mobile-search');
+      const mobileSearchForm = mobileSearchInput ? mobileSearchInput.closest('form') : null;
+      
+      // Log elements found
+      console.log('Mobile search button found:', !!mobileSearchButton);
+      console.log('Mobile search overlay found:', !!mobileSearchOverlay);
+      console.log('Mobile search input found:', !!mobileSearchInput);
+      console.log('Close button found:', !!closeButton);
+      console.log('Mobile search form found:', !!mobileSearchForm);
+      
+      if (mobileSearchForm) {
+        console.log('Form action:', mobileSearchForm.getAttribute('action'));
+        console.log('Form method:', mobileSearchForm.getAttribute('method'));
+      }
+      
+      if (mobileSearchInput) {
+        console.log('Input name:', mobileSearchInput.getAttribute('name'));
+        
+        // Add event listener for input changes
+        mobileSearchInput.addEventListener('input', function() {
+          console.log('Mobile search input value:', this.value);
+        });
+        
+        // Add event listener for form submission
+        if (mobileSearchForm) {
+          mobileSearchForm.addEventListener('submit', function(e) {
+            console.log('Form submitted with value:', mobileSearchInput.value);
+            
+            // Uncomment to prevent submission for testing
+            // e.preventDefault();
+            
+            // Log the URL that would be navigated to
+            const searchParams = new URLSearchParams();
+            searchParams.append('q', mobileSearchInput.value);
+            console.log('Would navigate to:', `${mobileSearchForm.getAttribute('action')}?${searchParams.toString()}`);
+          });
+        }
+      }
+      
+      // Test opening the search overlay
+      if (mobileSearchButton && mobileSearchOverlay) {
+        mobileSearchButton.addEventListener('click', function() {
+          console.log('Mobile search button clicked');
+          console.log('Overlay visible after click:', !mobileSearchOverlay.classList.contains('hidden'));
+          
+          // Check if input gets focused
+          setTimeout(function() {
+            console.log('Input focused after overlay open:', document.activeElement === mobileSearchInput);
+          }, 200);
+        });
+      }
+      
+      // Test closing the search overlay
+      if (closeButton && mobileSearchOverlay) {
+        closeButton.addEventListener('click', function() {
+          console.log('Close button clicked');
+          console.log('Overlay hidden after click:', mobileSearchOverlay.classList.contains('hidden'));
+        });
+      }
+    }
+    
+    // Run the debug function
+    debugMobileSearch();
+  });
+</script>
+*/
