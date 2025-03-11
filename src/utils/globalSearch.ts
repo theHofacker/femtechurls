@@ -28,24 +28,61 @@ export async function initializeSearch(): Promise<boolean> {
 
 // Search function that filters news items based on query
 export async function searchNews(query: string): Promise<NewsItem[]> {
+  console.log(`Searching for: "${query}"`);
+  
+  // Make sure search is initialized
   if (!isSearchInitialized && !isSearchLoading) {
+    console.log("Initializing search...");
     await initializeSearch();
   }
   
-  // If search is still loading, return empty array
-  if (isSearchLoading) return [];
+  // If still loading, return empty array
+  if (isSearchLoading) {
+    console.log("Search still initializing, returning empty results");
+    return [];
+  }
   
   // If query is empty, return all items
-  if (!query || query.trim() === '') return allNewsItems;
+  if (!query || query.trim() === '') {
+    console.log("Empty query, returning all items:", allNewsItems.length);
+    return allNewsItems;
+  }
   
   const normalizedQuery = query.toLowerCase().trim();
+  console.log(`Normalized query: "${normalizedQuery}"`);
+  console.log(`Searching through ${allNewsItems.length} items`);
   
-  return allNewsItems.filter(item => {
-    const titleMatch = item.title.toLowerCase().includes(normalizedQuery);
-    const descriptionMatch = item.description?.toLowerCase().includes(normalizedQuery);
+  // Sample a few items to debug
+  if (allNewsItems.length > 0) {
+    console.log("Sample item 1:", {
+      title: allNewsItems[0].title,
+      description: allNewsItems[0].description?.substring(0, 50) + "...",
+      source: allNewsItems[0].sourceName
+    });
+  }
+  
+  // More thorough search algorithm
+  const results = allNewsItems.filter(item => {
+    // Check for matches in various fields with logging
+    const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
+    const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
+    const sourceMatch = (item.sourceName || '').toLowerCase().includes(normalizedQuery);
+    const categoryMatch = (item.category || '').toLowerCase().includes(normalizedQuery);
     
-    return titleMatch || descriptionMatch;
+    // For debugging a specific search term
+    if (normalizedQuery === 'cycle' && (titleMatch || descriptionMatch)) {
+      console.log("Match found for 'cycle' in:", {
+        title: item.title,
+        matched: titleMatch ? "title" : descriptionMatch ? "description" : "other",
+        source: item.sourceName
+      });
+    }
+    
+    return titleMatch || descriptionMatch || sourceMatch || categoryMatch;
   });
+  
+  console.log(`Found ${results.length} results for "${query}"`);
+  return results;
 }
 
 // Get all news items (useful for direct access)
