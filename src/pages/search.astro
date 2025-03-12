@@ -1,5 +1,5 @@
 ---
-// src/pages/search.astro - No external JS/CSS dependencies
+// src/pages/search.astro - No external dependencies
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
@@ -116,6 +116,7 @@ const sources = Object.keys(groupedBySource);
   )}
 </BaseLayout>
 
+<!-- Inline script to avoid missing js file errors -->
 <script>
   // Simple script to focus search input
   document.addEventListener('DOMContentLoaded', () => {
