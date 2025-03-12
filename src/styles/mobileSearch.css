@@ -27,6 +27,11 @@ input[type="search"] {
   }
 }
 
+/* Handle hidden elements in search */
+.search-hidden {
+  display: none !important;
+}
+
 /* Mobile-specific fixes */
 @media (max-width: 767px) {
   /* Ensure search dropdown appears correctly */
