@@ -116,9 +116,76 @@ const {
     <!-- Add these before the closing body tag -->
     <link rel="stylesheet" href="/src/styles/mobileSearch.css">
     <script src="/src/scripts/mobileSearchFix.js"></script>
+
+    <!-- Add this before the closing </body> tag in BaseLayout.astro -->
+
+<!-- Fix for missing resources and mobile search -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get search inputs
+    const desktopSearchInput = document.getElementById('global-search-input');
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    const mobileSearchForm = mobileSearchInput ? mobileSearchInput.closest('form') : null;
+    
+    // If both inputs exist, ensure they work together
+    if (desktopSearchInput && mobileSearchInput) {
+      // When desktop search changes, update mobile
+      desktopSearchInput.addEventListener('input', function() {
+        mobileSearchInput.value = this.value;
+      });
+      
+      // When mobile search changes, update desktop
+      mobileSearchInput.addEventListener('input', function() {
+        desktopSearchInput.value = this.value;
+      });
+    }
+    
+    // Ensure mobile form submits correctly
+    if (mobileSearchForm) {
+      mobileSearchForm.addEventListener('submit', function(e) {
+        // If the form already has action="/search" and method="get", let it submit naturally
+        if (this.getAttribute('action') === '/search' && this.getAttribute('method') === 'get') {
+          return true;
+        }
+        
+        // Otherwise prevent default and handle manually
+        e.preventDefault();
+        
+        // Get the search value
+        const searchValue = mobileSearchInput.value.trim();
+        if (searchValue) {
+          // Redirect to the search page with the query
+          window.location.href = `/search?q=${encodeURIComponent(searchValue)}`;
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Basic fixes for search functionality */
+  .search-hidden {
+    display: none !important;
+  }
+  
+  /* Mobile search overlay improvements */
+  @media (max-width: 768px) {
+    #mobile-search-overlay {
+      z-index: 50;
+    }
+    
+    #mobile-search-input {
+      -webkit-appearance: none;
+      font-size: 16px; /* Prevents zooming on iOS */
+      border-radius: 8px;
+    }
+    
+    #mobile-search-overlay button, 
+    #mobile-search-overlay a, 
+    #mobile-search-input {
+      min-height: 44px; /* Better touch targets */
+    }
+  }
+</style>
     </body>
   </html>
-<link rel="stylesheet" href="/src/styles/mobileSearch.css">
-<script src="/src/scripts/mobileSearchFix.js"></script>
-  </body>
-</html>
