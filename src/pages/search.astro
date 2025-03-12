@@ -12,26 +12,60 @@ console.log('Search query:', query);
 // Search for news items with the query
 let results = [];
 try {
+  // Fetch all news items
+  console.log('Fetching news items...');
+  const allNews = await fetchNews();
+  console.log(`Fetched ${allNews.length} news items`);
+  
+  // Log a few sample items to verify data structure
+  if (allNews.length > 0) {
+    console.log('Sample item:', {
+      title: allNews[0].title,
+      description: allNews[0].description?.substring(0, 50) + '...',
+      source: allNews[0].sourceName
+    });
+  }
+  
   if (query) {
-    // Fetch all news items and filter them
-    const allNews = await fetchNews();
-    
     // Simple search function
     const normalizedQuery = query.toLowerCase().trim();
+    console.log('Normalized query:', normalizedQuery);
     
     results = allNews.filter(item => {
-      const titleMatch = (item.title || '').toLowerCase().includes(normalizedQuery);
-      const descriptionMatch = (item.description || '').toLowerCase().includes(normalizedQuery);
-      const sourceMatch = (item.sourceName || '').toLowerCase().includes(normalizedQuery);
-      const categoryMatch = (item.category || '').toLowerCase().includes(normalizedQuery);
+      // Check for null/undefined before toLowerCase
+      const title = (item.title || '').toLowerCase();
+      const description = (item.description || '').toLowerCase();
+      const sourceName = (item.sourceName || '').toLowerCase();
+      const category = (item.category || '').toLowerCase();
+      
+      const titleMatch = title.includes(normalizedQuery);
+      const descriptionMatch = description.includes(normalizedQuery);
+      const sourceMatch = sourceName.includes(normalizedQuery);
+      const categoryMatch = category.includes(normalizedQuery);
       
       return titleMatch || descriptionMatch || sourceMatch || categoryMatch;
     });
     
     console.log(`Found ${results.length} results for query: ${query}`);
+    
+    // If searching for 'cycle', log any item containing that in title/description
+    if (normalizedQuery === 'cycle') {
+      allNews.forEach(item => {
+        const title = (item.title || '').toLowerCase();
+        const desc = (item.description || '').toLowerCase();
+        
+        if (title.includes('cycle') || desc.includes('cycle')) {
+          console.log('Item with "cycle":', {
+            title: item.title,
+            source: item.sourceName
+          });
+        }
+      });
+    }
   }
 } catch (error) {
   console.error('Error searching news:', error);
+  console.error('Error details:', error.message);
 }
 
 // Group results by source
@@ -103,6 +137,11 @@ const sources = Object.keys(groupedBySource);
         </svg>
         <h2 class="text-xl font-medium mt-4">No results found</h2>
         <p class="mt-2">Try different keywords or check your spelling</p>
+        <p class="mt-6 text-sm">
+          <strong>Debugging info:</strong><br />
+          Query: "{query}"<br />
+          Total items: {typeof window !== 'undefined' && window.allNewsCount || 'Unknown'}<br />
+        </p>
       </div>
     </div>
   ) : (
@@ -130,5 +169,10 @@ const sources = Object.keys(groupedBySource);
       const length = searchInput.value.length;
       searchInput.setSelectionRange(length, length);
     }
+    
+    // For debugging - check console
+    console.log('Search page loaded on client');
+    console.log('Search query:', searchInput?.value);
+    console.log('Result sections:', document.querySelectorAll('section').length);
   });
 </script>
