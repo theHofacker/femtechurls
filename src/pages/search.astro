@@ -1,5 +1,5 @@
 ---
-// src/pages/search.astro - Simplified version
+// src/pages/search.astro - No external JS/CSS dependencies
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
@@ -7,16 +7,14 @@ import { fetchNews } from '../utils/feedAggregator';
 
 // Get the search query from URL parameters
 const query = Astro.url.searchParams.get('q') || '';
-console.log('Search query:', query);
 
 // Search for news items with the query
 let results = [];
 try {
   // Fetch all news items
   const allNews = await fetchNews();
-  console.log(`Fetched ${allNews.length} news items`);
   
-  if (query) {
+  if (query && query.trim() !== '') {
     // Simple search function
     const normalizedQuery = query.toLowerCase().trim();
     
@@ -31,8 +29,6 @@ try {
              sourceName.includes(normalizedQuery) || 
              category.includes(normalizedQuery);
     });
-    
-    console.log(`Found ${results.length} results for query: ${query}`);
   }
 } catch (error) {
   console.error('Error searching news:', error);
@@ -121,15 +117,11 @@ const sources = Object.keys(groupedBySource);
 </BaseLayout>
 
 <script>
-  // This script enhances the search page with client-side functionality
+  // Simple script to focus search input
   document.addEventListener('DOMContentLoaded', () => {
-    // Get elements
     const searchInput = document.querySelector('input[name="q"]');
-    
-    // Focus the search input on page load
     if (searchInput instanceof HTMLInputElement) {
       searchInput.focus();
-      // Position cursor at the end of the text
       const length = searchInput.value.length;
       searchInput.setSelectionRange(length, length);
     }
