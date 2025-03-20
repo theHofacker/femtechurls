@@ -223,6 +223,12 @@ export const sources: Source[] = [
     category: 'Women\'s Health & Wellness'
   },
   {
+    name: 'Women\'s Health Gov',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/6gH5uGajqWMYV91g.xml', // New RSS feed URL
+    category: 'Women\'s Health & Wellness'
+  },
+  {
     name: 'Ovia - Health & Wellness',
     type: 'rss',
     endpoint: 'https://rss.app/feeds/TkriSZ8NV31YR67P.xml',
