@@ -77,7 +77,7 @@ export const sources: Source[] = [
   {
     name: 'HIT Consultant',
     type: 'rss',
-    endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
+    endpoint: 'https://rss.app/feeds/I5yo4dxTLPKUWigK.xml',
     category: 'FemTech News & Innovation'
   },
   {
