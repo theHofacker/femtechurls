@@ -71,7 +71,7 @@ export const sources: Source[] = [
   {
     name: 'FemTech Insider',
     type: 'rss',
-    endpoint: 'https://femtechinsider.com/feed/',
+    endpoint: 'https://rss.app/feeds/uhlIq3S7nRyF31Zu.xml',
     category: 'FemTech News & Innovation'
   },
   {
