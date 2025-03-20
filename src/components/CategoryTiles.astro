@@ -1,0 +1,99 @@
+---
+// src/components/CategoryTiles.astro
+interface CategoryTile {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string; // SVG path or icon class
+  color: string; // Tailwind color class
+}
+
+interface Props {
+  categories: CategoryTile[];
+  activeCategoryId?: string;
+  baseUrl?: string; // Base URL for category links
+}
+
+const { categories, activeCategoryId, baseUrl = '' } = Astro.props;
+
+// Generate URL for a category
+const getCategoryUrl = (category: CategoryTile) => {
+  if (baseUrl) {
+    return `${baseUrl}/${category.id.toLowerCase().replace(/\s+/g, '-')}`;
+  }
+  return `#${category.id.toLowerCase().replace(/\s+/g, '-')}`;
+};
+---
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-8">
+  {categories.map((category) => {
+    const isActive = activeCategoryId === category.id;
+    const bgColorClass = isActive ? category.color : 'bg-white hover:bg-gray-50';
+    const textColorClass = isActive ? 'text-white' : `text-${category.color.replace('bg-', '')}`;
+    const borderColorClass = `border-${category.color.replace('bg-', '')}`;
+    
+    return (
+      <a 
+        href={getCategoryUrl(category)}
+        class={`category-tile ${bgColorClass} ${textColorClass} border ${borderColorClass} rounded-lg p-4 transition-all duration-200 shadow-sm hover:shadow flex flex-col items-center text-center`}
+        data-category-id={category.id}
+      >
+        {category.icon && (
+          <div class="mb-2">
+            {category.icon.startsWith('<') ? (
+              <Fragment set:html={category.icon} />
+            ) : (
+              <i class={`${category.icon} text-2xl`}></i>
+            )}
+          </div>
+        )}
+        <h3 class="font-medium text-sm">{category.name}</h3>
+        {category.description && (
+          <p class="text-xs mt-1 opacity-80">{category.description}</p>
+        )}
+      </a>
+    );
+  })}
+</div>
+
+<script>
+  // Client-side filtering logic (optional)
+  document.addEventListener('DOMContentLoaded', () => {
+    const categoryTiles = document.querySelectorAll('.category-tile');
+    
+    categoryTiles.forEach(tile => {
+      tile.addEventListener('click', (e) => {
+        const categoryId = tile.getAttribute('data-category-id');
+        const isHashLink = tile.getAttribute('href').startsWith('#');
+        
+        // Only prevent default for hash links (in-page filtering)
+        if (isHashLink) {
+          e.preventDefault();
+          
+          // Find all articles
+          const articles = document.querySelectorAll('.article-card, .news-card-container');
+          
+          // Show/hide based on category
+          articles.forEach(article => {
+            const articleCategory = article.getAttribute('data-category');
+            
+            if (categoryId === 'all' || articleCategory === categoryId) {
+              article.classList.remove('hidden');
+            } else {
+              article.classList.add('hidden');
+            }
+          });
+          
+          // Update active state
+          categoryTiles.forEach(t => {
+            t.classList.remove('active');
+            // Reset colors as needed
+          });
+          
+          tile.classList.add('active');
+          // Update colors for active state
+        }
+      });
+    });
+  });
+</script>
