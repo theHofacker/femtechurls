@@ -379,6 +379,115 @@ function filterContentByCategory(items: NewsItem[], category: string): NewsItem[
   });
 }
 
+// Add or update these functions in your feedAggregator.ts/js file
+
+/**
+ * Extract image URL from RSS item
+ * This function attempts to find an image URL from various sources in the RSS item
+ */
+function extractImageFromRSSItem(item) {
+  // Check for media:content
+  if (item.media && item.media.$.url) {
+    return item.media.$.url;
+  }
+  
+  // Check for enclosure
+  if (item.enclosure && item.enclosure.url) {
+    return item.enclosure.url;
+  }
+  
+  // Check for image in content
+  if (item.content) {
+    const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/i);
+    if (imgMatch && imgMatch[1]) {
+      return imgMatch[1];
+    }
+  }
+  
+  // Check for image in contentEncoded
+  if (item.contentEncoded) {
+    const imgMatch = item.contentEncoded.match(/<img[^>]+src="([^">]+)"/i);
+    if (imgMatch && imgMatch[1]) {
+      return imgMatch[1];
+    }
+  }
+  
+  // Check for image in description
+  if (item.description) {
+    const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/i);
+    if (imgMatch && imgMatch[1]) {
+      return imgMatch[1];
+    }
+  }
+  
+  // Return null if no image found
+  return null;
+}
+
+// Update your fetchFromRSS function to include image extraction
+async function fetchFromRSS(source) {
+  try {
+    const response = await fetch(source.endpoint);
+    if (!response.ok) {
+      throw new Error(`RSS feed error: ${response.status}`);
+    }
+    
+    const text = await response.text();
+    const feed = await rssParser.parseString(text);
+    
+    let items = feed.items.map(item => {
+      // Extract image from item
+      const imageUrl = extractImageFromRSSItem(item);
+      
+      return {
+        title: item.title || 'Untitled',
+        link: item.link || '',
+        description: item.contentSnippet || item.content || '',
+        date: item.isoDate ? new Date(item.isoDate) : new Date(),
+        sourceName: source.name,
+        category: source.category,
+        guid: item.guid || item.link || '',
+        image: imageUrl // Add the image URL to the item
+      };
+    });
+    
+    // Apply category filtering for general tech sources
+    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
+    if (generalTechSources.includes(source.name)) {
+      items = filterContentByCategory(items, source.category);
+    }
+    
+    return items;
+  } catch (error) {
+    console.error(`Error fetching RSS feed from ${source.name}:`, error);
+    updateSourceHealth(source, 'error');
+    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
+  }
+}
+
+// Update the NewsItem interface to include the image property
+export interface NewsItem {
+  title: string;
+  link: string;
+  description: string;
+  date: Date;
+  sourceName: string;
+  category: string;
+  guid: string;
+  image?: string; // Add optional image property
+}
+
+// Update your rssParser configuration to include media content
+const rssParser = new Parser({
+  customFields: {
+    item: [
+      ['media:content', 'media'],
+      ['content:encoded', 'contentEncoded'],
+      'enclosure'
+    ]
+  }
+});
+
 /**
  * Fetch from DEV.to API
  */
