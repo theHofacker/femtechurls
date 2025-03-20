@@ -67,11 +67,34 @@ const femtechKeywords = [
   'birth control', 'contraception', 'breastfeeding'
 ];
 
-// Extract image URL from RSS item
+// Replace your current extractImageFromRSSItem function with this improved version
+
+/**
+ * Extract image URL from RSS item
+ * Updated to handle RSS.app feed format specifically
+ */
 function extractImageFromRSSItem(item) {
+  // Check for RSS.app specific image format first
+  if (item['content:encoded']) {
+    const imgMatch = item['content:encoded'].match(/<img[^>]+src="([^">]+)"/i);
+    if (imgMatch && imgMatch[1]) {
+      return imgMatch[1];
+    }
+  }
+  
+  // Check for thumbnail in media:group (common in RSS.app)
+  if (item['media:group'] && item['media:group']['media:thumbnail'] && item['media:group']['media:thumbnail'].$.url) {
+    return item['media:group']['media:thumbnail'].$.url;
+  }
+  
   // Check for media:content
-  if (item.media && item.media.$.url) {
-    return item.media.$.url;
+  if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
+    return item['media:content'].$.url;
+  }
+  
+  // Check for media:content as array
+  if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$ && item['media:content'][0].$.url) {
+    return item['media:content'][0].$.url;
   }
   
   // Check for enclosure
@@ -87,20 +110,17 @@ function extractImageFromRSSItem(item) {
     }
   }
   
-  // Check for image in contentEncoded
-  if (item.contentEncoded) {
-    const imgMatch = item.contentEncoded.match(/<img[^>]+src="([^">]+)"/i);
-    if (imgMatch && imgMatch[1]) {
-      return imgMatch[1];
-    }
-  }
-  
   // Check for image in description
   if (item.description) {
     const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/i);
     if (imgMatch && imgMatch[1]) {
       return imgMatch[1];
     }
+  }
+  
+  // Additional check for RSS.app image format from itunes:image
+  if (item['itunes:image'] && item['itunes:image'].href) {
+    return item['itunes:image'].href;
   }
   
   // Return null if no image found
