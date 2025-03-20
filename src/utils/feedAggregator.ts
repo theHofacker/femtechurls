@@ -1,13 +1,20 @@
 import { parseISO, format, formatDistanceToNow } from 'date-fns';
 import Parser from 'rss-parser';
 
-// Initialize RSS parser
+// Initialize RSS parser with expanded customFields
 const rssParser = new Parser({
   customFields: {
     item: [
-      ['media:content', 'media'],
-      ['content:encoded', 'contentEncoded'],
-      'enclosure'
+      ['media:content', 'media:content'],
+      ['media:group', 'media:group'],
+      ['media:thumbnail', 'media:thumbnail'],
+      ['content:encoded', 'content:encoded'],
+      ['itunes:image', 'itunes:image'],
+      'enclosure',
+      'image'
+    ],
+    feed: [
+      'image'
     ]
   }
 });
