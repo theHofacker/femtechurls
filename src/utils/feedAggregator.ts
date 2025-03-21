@@ -556,7 +556,6 @@ async function fetchFromDevTo(source: Source): Promise<NewsItem[]> {
 /**
  * Fetch from RSS feed
  */
-// Add this at the top of your fetchFromRSS function in feedAggregator.ts
 
 async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
   try {
@@ -599,20 +598,6 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
     // Debug: Log a summary of items with images
     const withImages = items.filter(item => !!item.image).length;
     console.log(`${source.name}: Found ${withImages} items with images out of ${items.length} total`);
-    
-    // Apply category filtering for general tech sources
-    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
-    if (generalTechSources.includes(source.name)) {
-      items = filterContentByCategory(items, source.category);
-    }
-    
-    return items;
-  } catch (error) {
-    console.error(`Error fetching RSS feed from ${source.name}:`, error);
-    updateSourceHealth(source, 'error');
-    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
-  }
-}
     
     // Apply category filtering for general tech sources
     const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
