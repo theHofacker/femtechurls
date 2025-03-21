@@ -478,6 +478,8 @@ async function fetchFromDevTo(source: Source): Promise<NewsItem[]> {
 /**
  * Fetch from RSS feed
  */
+// Add this at the top of your fetchFromRSS function in feedAggregator.ts
+
 async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
   try {
     const response = await fetch(source.endpoint);
@@ -486,11 +488,23 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
     }
     
     const text = await response.text();
+    
+    // Debug: Log a sample of the raw RSS content
+    console.log(`Raw RSS sample from ${source.name}:`, text.substring(0, 300) + '...');
+    
     const feed = await rssParser.parseString(text);
+    
+    // Debug: Log the first item structure
+    if (feed.items && feed.items.length > 0) {
+      console.log(`First item from ${source.name}:`, JSON.stringify(feed.items[0], null, 2).substring(0, 500) + '...');
+    }
     
     let items = feed.items.map(item => {
       // Extract image from the item
       const imageUrl = extractImageFromRSSItem(item);
+      
+      // Debug: Log whether we found an image
+      console.log(`Image found for "${item.title?.substring(0, 30)}...": ${imageUrl || 'No image found'}`);
       
       return {
         title: item.title || 'Untitled',
@@ -503,6 +517,24 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
         image: imageUrl // Add image URL to the item
       };
     });
+    
+    // Debug: Log a summary of items with images
+    const withImages = items.filter(item => !!item.image).length;
+    console.log(`${source.name}: Found ${withImages} items with images out of ${items.length} total`);
+    
+    // Apply category filtering for general tech sources
+    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
+    if (generalTechSources.includes(source.name)) {
+      items = filterContentByCategory(items, source.category);
+    }
+    
+    return items;
+  } catch (error) {
+    console.error(`Error fetching RSS feed from ${source.name}:`, error);
+    updateSourceHealth(source, 'error');
+    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
+  }
+}
     
     // Apply category filtering for general tech sources
     const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
