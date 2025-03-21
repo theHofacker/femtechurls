@@ -1,0 +1,170 @@
+---
+// src/pages/image-debug.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { fetchNewsByCategory, fetchFeed, sources } from '../utils/feedAggregator';
+
+// Fetch sample feed items for testing
+const debugResults = {};
+
+// Try to fetch from each feed source
+for (const source of sources.slice(0, 3)) { // Just test a few sources to avoid too many requests
+  try {
+    const items = await fetchFeed(source);
+    debugResults[source.name] = {
+      success: true,
+      count: items.length,
+      itemsWithImages: items.filter(item => !!item.image).length,
+      sampleItems: items.slice(0, 2).map(item => ({
+        title: item.title.substring(0, 30) + '...',
+        hasImage: !!item.image,
+        imageUrl: item.image || 'None',
+        description: (item.description || '').substring(0, 50) + '...'
+      }))
+    };
+  } catch (error) {
+    debugResults[source.name] = {
+      success: false,
+      error: error.message
+    };
+  }
+}
+---
+
+<BaseLayout title="Image Debug Page">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Image Extraction Debug Page</h1>
+    <p class="mb-4">This page shows the results of image extraction from RSS feeds.</p>
+    
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4">RSS Feed Test Results</h2>
+      
+      {Object.entries(debugResults).map(([sourceName, result]) => (
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+          <h3 class="text-lg font-bold">{sourceName}</h3>
+          
+          {result.success ? (
+            <div>
+              <p class="text-green-600 font-medium">Feed fetched successfully</p>
+              <p>Total items: {result.count}</p>
+              <p>Items with images: {result.itemsWithImages} ({Math.round(result.itemsWithImages / result.count * 100)}%)</p>
+              
+              <div class="mt-4">
+                <h4 class="font-medium">Sample Items:</h4>
+                <div class="space-y-2 mt-2">
+                  {result.sampleItems.map(item => (
+                    <div class="border border-gray-200 p-3 rounded">
+                      <p><span class="font-medium">Title:</span> {item.title}</p>
+                      <p><span class="font-medium">Has Image:</span> {item.hasImage ? 'Yes' : 'No'}</p>
+                      <p><span class="font-medium">Image URL:</span> <code class="text-xs break-all">{item.imageUrl}</code></p>
+                      
+                      {item.hasImage && (
+                        <div class="mt-2">
+                          <h5 class="text-sm font-medium">Image Preview:</h5>
+                          <img 
+                            src={item.imageUrl} 
+                            alt="Preview" 
+                            class="w-full max-w-md h-32 object-cover mt-1 border rounded"
+                            onerror="this.onerror=null; this.src='https://placehold.co/600x400/e9d5ff/4a044e?text=Failed to Load'; this.parentNode.querySelector('p').textContent = 'Image failed to load'"
+                          />
+                          <p class="text-xs mt-1 text-green-600">Image loaded successfully</p>
+                        </div>
+                      )}
+                      
+                      <p class="mt-2"><span class="font-medium">Description:</span> {item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p class="text-red-600 font-medium">Failed to fetch feed</p>
+              <p class="text-sm mt-1">Error: {result.error}</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4">Image Tests</h2>
+      
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h3 class="text-lg font-bold mb-3">Direct Image URL Tests</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Test some image URLs from RSS.app -->
+          <div class="border border-gray-200 p-3 rounded">
+            <p class="font-medium">RSS.app Image Test:</p>
+            <img 
+              src="https://us-tuna-sounds-images.voicemod.net/5f6d5288-89a0-4ea9-bdf7-d0ed877c0da7-1643288395951.png" 
+              alt="Test" 
+              class="w-full h-32 object-cover mt-2 rounded"
+              onerror="this.onerror=null; this.src='https://placehold.co/600x400/e9d5ff/4a044e?text=Failed'; this.nextElementSibling.textContent = 'Failed to load image'"
+            />
+            <p class="text-xs mt-1 text-green-600">Status: Loading...</p>
+          </div>
+          
+          <!-- Test another URL format -->
+          <div class="border border-gray-200 p-3 rounded">
+            <p class="font-medium">Generic Image Test:</p>
+            <img 
+              src="https://picsum.photos/800/400" 
+              alt="Test" 
+              class="w-full h-32 object-cover mt-2 rounded"
+              onerror="this.onerror=null; this.src='https://placehold.co/600x400/e9d5ff/4a044e?text=Failed'; this.nextElementSibling.textContent = 'Failed to load image'"
+            />
+            <p class="text-xs mt-1 text-green-600">Status: Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+      <h2 class="text-xl font-bold mb-4">RSS.app Image Format Information</h2>
+      
+      <div class="prose max-w-none">
+        <p>RSS.app typically encodes images in one of these formats:</p>
+        <ul>
+          <li><code>media:content</code> with a URL attribute</li>
+          <li><code>content:encoded</code> with HTML containing image tags</li>
+          <li><code>enclosure</code> elements with image URLs</li>
+          <li>Regular <code>img</code> tags in the description</li>
+        </ul>
+        
+        <p class="mt-4 font-medium">Debugging Steps:</p>
+        <ol>
+          <li>Check browser console for errors (especially CORS issues)</li>
+          <li>Verify that image URLs are valid and accessible</li>
+          <li>Check for mixed content issues (HTTP vs HTTPS)</li>
+          <li>Verify that image URLs are being correctly extracted from feeds</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Update image status when loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('img');
+    
+    images.forEach(img => {
+      img.addEventListener('load', function() {
+        const statusEl = this.nextElementSibling;
+        if (statusEl && statusEl.tagName === 'P') {
+          statusEl.textContent = 'Image loaded successfully';
+          statusEl.className = 'text-xs mt-1 text-green-600';
+        }
+      });
+      
+      img.addEventListener('error', function() {
+        const statusEl = this.nextElementSibling;
+        if (statusEl && statusEl.tagName === 'P') {
+          statusEl.textContent = 'Failed to load image';
+          statusEl.className = 'text-xs mt-1 text-red-600';
+        }
+      });
+    });
+  });
+</script>
