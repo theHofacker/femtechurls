@@ -80,57 +80,135 @@ const femtechKeywords = [
  * Extract image URL from RSS item
  * Updated to handle RSS.app feed format specifically
  */
+/**
+ * Extract image URL from RSS item with extensive pattern matching
+ */
 function extractImageFromRSSItem(item) {
-  // Check for RSS.app specific image format first
+  // Log the item structure to understand what's available
+  console.log('Extracting image from item with keys:', Object.keys(item));
+
+  // Check for direct image URL in media:content
+  if (item['media:content']) {
+    console.log('Found media:content:', typeof item['media:content']);
+    
+    // Handle media:content as an object
+    if (typeof item['media:content'] === 'object' && item['media:content'].$ && item['media:content'].$.url) {
+      console.log('Found image in media:content object:', item['media:content'].$.url);
+      return item['media:content'].$.url;
+    }
+    
+    // Handle media:content as an array
+    if (Array.isArray(item['media:content']) && item['media:content'][0]) {
+      if (item['media:content'][0].$ && item['media:content'][0].$.url) {
+        console.log('Found image in media:content array:', item['media:content'][0].$.url);
+        return item['media:content'][0].$.url;
+      }
+    }
+  }
+  
+  // Check for RSS.app specific content:encoded pattern
   if (item['content:encoded']) {
-    const imgMatch = item['content:encoded'].match(/<img[^>]+src="([^">]+)"/i);
+    console.log('Found content:encoded, length:', item['content:encoded'].length);
+    
+    // Try to find image in various patterns
+    const patterns = [
+      /<img[^>]+src="([^">]+)"/i,
+      /<figure[^\>]*>[\\s\\S]*?<img[^\>]+src="([^"\>]+)"[^\>]*>[\\s\\S]*?<\/figure>/i,
+      /<div class="rss-app-image"[^\>]*>[\\s\\S]*?<img[^\>]+src="([^"\>]+)"[^\>]*>/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = item['content:encoded'].match(pattern);
+      if (match && match[1]) {
+        console.log('Found image in content:encoded using pattern:', match[1]);
+        return match[1];
+      }
+    }
+  }
+  
+  // Check for media:thumbnail
+  if (item['media:thumbnail']) {
+    if (typeof item['media:thumbnail'] === 'object' && item['media:thumbnail'].$ && item['media:thumbnail'].$.url) {
+      console.log('Found image in media:thumbnail:', item['media:thumbnail'].$.url);
+      return item['media:thumbnail'].$.url;
+    }
+  }
+  
+  // Check for media:group containing thumbnails (common in RSS.app)
+  if (item['media:group']) {
+    console.log('Found media:group:', typeof item['media:group']);
+    
+    if (item['media:group']['media:thumbnail'] && item['media:group']['media:thumbnail'].$ && 
+        item['media:group']['media:thumbnail'].$.url) {
+      console.log('Found image in media:group/media:thumbnail:', item['media:group']['media:thumbnail'].$.url);
+      return item['media:group']['media:thumbnail'].$.url;
+    }
+  }
+  
+  // Check for enclosure
+  if (item.enclosure) {
+    if (typeof item.enclosure === 'object' && item.enclosure.url) {
+      console.log('Found image in enclosure:', item.enclosure.url);
+      return item.enclosure.url;
+    }
+    
+    if (Array.isArray(item.enclosure) && item.enclosure[0] && item.enclosure[0].url) {
+      console.log('Found image in enclosure array:', item.enclosure[0].url);
+      return item.enclosure[0].url;
+    }
+  }
+  
+  // Check for image in item.content
+  if (item.content) {
+    const imgMatch = typeof item.content === 'string' ? item.content.match(/<img[^>]+src="([^">]+)"/i) : null;
     if (imgMatch && imgMatch[1]) {
+      console.log('Found image in content:', imgMatch[1]);
       return imgMatch[1];
     }
   }
   
-  // Check for thumbnail in media:group (common in RSS.app)
-  if (item['media:group'] && item['media:group']['media:thumbnail'] && item['media:group']['media:thumbnail'].$.url) {
-    return item['media:group']['media:thumbnail'].$.url;
-  }
-  
-  // Check for media:content
-  if (item['media:content'] && item['media:content'].$ && item['media:content'].$.url) {
-    return item['media:content'].$.url;
-  }
-  
-  // Check for media:content as array
-  if (Array.isArray(item['media:content']) && item['media:content'][0] && item['media:content'][0].$ && item['media:content'][0].$.url) {
-    return item['media:content'][0].$.url;
-  }
-  
-  // Check for enclosure
-  if (item.enclosure && item.enclosure.url) {
-    return item.enclosure.url;
-  }
-  
-  // Check for image in content
-  if (item.content) {
-    const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/i);
+  // Check for image in contentSnippet
+  if (item.contentSnippet) {
+    const imgMatch = typeof item.contentSnippet === 'string' ? 
+      item.contentSnippet.match(/<img[^>]+src="([^">]+)"/i) : null;
     if (imgMatch && imgMatch[1]) {
+      console.log('Found image in contentSnippet:', imgMatch[1]);
       return imgMatch[1];
     }
   }
   
   // Check for image in description
   if (item.description) {
-    const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/i);
+    const imgMatch = typeof item.description === 'string' ? 
+      item.description.match(/<img[^>]+src="([^">]+)"/i) : null;
     if (imgMatch && imgMatch[1]) {
+      console.log('Found image in description:', imgMatch[1]);
       return imgMatch[1];
     }
   }
   
-  // Additional check for RSS.app image format from itunes:image
+  // Check for itunes:image
   if (item['itunes:image'] && item['itunes:image'].href) {
+    console.log('Found image in itunes:image:', item['itunes:image'].href);
     return item['itunes:image'].href;
   }
   
-  // Return null if no image found
+  // Try to find image in any other object property that might contain an image URL
+  for (const key in item) {
+    if (
+      typeof item[key] === 'string' && 
+      (
+        item[key].startsWith('http') && 
+        (item[key].endsWith('.jpg') || item[key].endsWith('.jpeg') || 
+         item[key].endsWith('.png') || item[key].endsWith('.gif'))
+      )
+    ) {
+      console.log(`Found potential image URL in item.${key}:`, item[key]);
+      return item[key];
+    }
+  }
+  
+  console.log('No image found in item');
   return null;
 }
 
