@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import CategoryTiles from '../../components/CategoryTiles.astro';
+import { fetchNewsByCategory } from '../../utils/feedAggregator';
+
+// Category configuration
+const category = 'Cardiovascular';
+const title = 'Cardiovascular Health';
+const description = 'Latest news and resources on cardiovascular health for women.';
+
+// Define all health subcategories for the category tiles
+const healthCategories = [
+  { id: 'all', name: 'All Health Topics', color: 'bg-purple-600' },
+  { id: 'Cardiovascular', name: 'Cardiovascular', color: 'bg-red-600' },
+  { id: 'Menstrual health', name: 'Menstrual Health', color: 'bg-pink-600' },
+  // Add other health categories here
+];
+
+// Fetch news for this category
+const news = await fetchNewsByCategory(category);
+
+// Group by source for display
+const groupedBySource = news.reduce((acc, item) => {
+  if (!acc[item.sourceName]) {
+    acc[item.sourceName] = [];
+  }
+  acc[item.sourceName].push(item);
+  return acc;
+}, {});
+
+const sources = Object.keys(groupedBySource);
+---
+
+<BaseLayout title={`${title} - FemTechURLs`}>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
+    <p class="text-gray-600">{description}</p>
+  </div>
+  
+  <!-- Category Tiles -->
+  <CategoryTiles 
+    categories={healthCategories} 
+    activeCategoryId={category} 
+    baseUrl="/health"
+  />
+  
+  {sources.length > 0 ? (
+    <div class="space-y-12">
+      {sources.map(source => (
+        <section>
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">{source}</h2>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {groupedBySource[source].map(item => (
+              <NewsCard
+                title={item.title}
+                description={item.description}
+                link={item.link}
+                date={item.date}
+                source={item.sourceName}
+                image={item.image}
+                category={category}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  ) : (
+    <div class="text-center py-16">
+      <p>No articles found for this category yet. Check back soon!</p>
+    </div>
+  )}
+</BaseLayout>
