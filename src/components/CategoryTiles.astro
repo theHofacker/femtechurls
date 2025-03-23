@@ -25,7 +25,7 @@ const getCategoryUrl = (category: CategoryTile) => {
 };
 ---
 
-<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-8">
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-8">
   {categories.map((category) => {
     const isActive = activeCategoryId === category.id;
     const bgColorClass = isActive ? category.color : 'bg-white hover:bg-gray-50';
@@ -37,6 +37,8 @@ const getCategoryUrl = (category: CategoryTile) => {
         href={getCategoryUrl(category)}
         class={`category-tile ${bgColorClass} ${textColorClass} border ${borderColorClass} rounded-lg p-4 transition-all duration-200 shadow-sm hover:shadow flex flex-col items-center text-center`}
         data-category-id={category.id}
+        aria-current={isActive ? 'page' : undefined}
+        aria-label={`Filter by ${category.name} category`}
       >
         {category.icon && (
           <div class="mb-2">
