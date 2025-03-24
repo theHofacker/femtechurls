@@ -41,6 +41,13 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
+// Updated categories to display
+ const categories = [
+   { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
+   { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
+   { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' }
+ ];
+
 // Default number of articles to show per section
 const articlesPerCategory = 9;
 const articlesPerSource = 3;
