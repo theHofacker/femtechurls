@@ -90,30 +90,21 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
   </div>
 
   <div class="flex justify-end mb-6">
-    <div class="bg-white border border-gray-200 rounded-lg inline-flex">
-      <button 
-        id="category-view" 
-        class="px-4 py-2 text-sm font-medium rounded-l-lg text-gray-700 hover:bg-gray-50 focus:outline-none"
-      >
-        Group by Category
-      </button>
-      <button 
-        id="source-view" 
-        class="px-4 py-2 text-sm font-medium rounded-r-lg bg-purple-100 text-purple-800 focus:outline-none"
-      >
-        Group by Source
-      </button>
-    </div>
+  <div class="bg-white border border-gray-200 rounded-lg inline-flex">
     <button 
-      id="customize-button" 
-      class="ml-3 px-4 py-2 bg-purple-600 text-white rounded-lg inline-flex items-center hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      id="category-view" 
+      class="px-4 py-2 text-sm font-medium rounded-l-lg text-gray-700 hover:bg-gray-50 focus:outline-none"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-      </svg>
-      Customize
+      Group by Category
+    </button>
+    <button 
+      id="source-view" 
+      class="px-4 py-2 text-sm font-medium rounded-r-lg bg-purple-100 text-purple-800 focus:outline-none"
+    >
+      Group by Source
     </button>
   </div>
+</div>
 
   <!-- Category-based view (initially hidden) -->
   <div id="category-content" class="space-y-12 hidden">
