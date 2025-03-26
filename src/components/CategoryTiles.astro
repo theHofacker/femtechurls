@@ -6,6 +6,7 @@ interface CategoryTile {
   description?: string;
   icon?: string; // SVG path or icon class
   color: string; // Tailwind color class
+  slug?: string;
 }
 
 interface Props {
@@ -16,13 +17,13 @@ interface Props {
 
 const { categories, activeCategoryId, baseUrl = '' } = Astro.props;
 
-// Generate URL for a category - add better URL sanitization
+// Generate URL for a category
 const getCategoryUrl = (category: CategoryTile) => {
   if (baseUrl) {
-    // Replace ampersands and spaces, and convert to lowercase
-    const slug = category.id.toLowerCase()
-                         .replace(/&/g, '')
-                         .replace(/\s+/g, '-');
+    // Use explicit slug if provided, otherwise generate one
+    const slug = category.slug || category.id.toLowerCase()
+                                          .replace(/&/g, '')
+                                          .replace(/\s+/g, '-');
     return `${baseUrl}${slug}`;
   }
   return `#${category.id.toLowerCase().replace(/\s+/g, '-')}`;
