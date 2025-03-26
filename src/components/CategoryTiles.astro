@@ -16,10 +16,14 @@ interface Props {
 
 const { categories, activeCategoryId, baseUrl = '' } = Astro.props;
 
-// Generate URL for a category
+// Generate URL for a category - add better URL sanitization
 const getCategoryUrl = (category: CategoryTile) => {
   if (baseUrl) {
-    return `${baseUrl}/${category.id.toLowerCase().replace(/\s+/g, '-')}`;
+    // Replace ampersands and spaces, and convert to lowercase
+    const slug = category.id.toLowerCase()
+                         .replace(/&/g, '')
+                         .replace(/\s+/g, '-');
+    return `${baseUrl}${slug}`;
   }
   return `#${category.id.toLowerCase().replace(/\s+/g, '-')}`;
 };
