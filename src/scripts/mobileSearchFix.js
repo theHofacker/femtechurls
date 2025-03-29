@@ -1,5 +1,5 @@
 // src/scripts/mobileSearchFix.js
-// Mobile search fix that works with the global search
+// Mobile search fix that bridges mobile and desktop search functionality
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeMobileSearch = document.getElementById('close-mobile-search');
   
   // Log what we found for debugging
-  console.log('Desktop search input:', !!desktopSearchInput);
-  console.log('Mobile search input:', !!mobileSearchInput);
-  console.log('Mobile search button:', !!mobileSearchButton);
-  console.log('Mobile search overlay:', !!mobileSearchOverlay);
+  console.log('Desktop search input found:', !!desktopSearchInput);
+  console.log('Mobile search input found:', !!mobileSearchInput);
+  console.log('Mobile search button found:', !!mobileSearchButton);
+  console.log('Mobile search overlay found:', !!mobileSearchOverlay);
   
   // Make sure mobile search opens correctly
   if (mobileSearchButton && mobileSearchOverlay) {
@@ -49,6 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
+  // Synchronize mobile and desktop search inputs
+  if (desktopSearchInput && mobileSearchInput) {
+    // When desktop search changes, update mobile
+    desktopSearchInput.addEventListener('input', function() {
+      mobileSearchInput.value = this.value;
+    });
+    
+    // When mobile search changes, update desktop
+    mobileSearchInput.addEventListener('input', function() {
+      desktopSearchInput.value = this.value;
+    });
+  }
+  
   // Ensure the search form submits properly
   const mobileSearchForm = mobileSearchInput ? mobileSearchInput.closest('form') : null;
   if (mobileSearchForm) {
@@ -68,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Allow form to submit naturally if it has the right action and method
       if (this.getAttribute('action') === '/search' && this.getAttribute('method') === 'get') {
-        console.log('Form has correct action and method, letting it submit naturally');
+        console.log('Form has correct action and method, submitting naturally');
         return true;
       }
       
