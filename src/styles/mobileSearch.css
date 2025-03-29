@@ -57,4 +57,15 @@ input[type="search"] {
   #mobile-search-overlay.active {
     display: block !important;
   }
+  
+  /* Make sure search results are scrollable */
+  .search-results-container {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  /* Improve form button styling */
+  button[type="submit"] {
+    min-width: 60px;
+  }
 }
