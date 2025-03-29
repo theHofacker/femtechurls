@@ -1,5 +1,5 @@
 ---
-// src/pages/search.astro - No external dependencies
+// src/pages/search.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
@@ -89,6 +89,8 @@ const sources = Object.keys(groupedBySource);
                 link={item.link}
                 date={item.date}
                 source={item.sourceName}
+                image={item.image}
+                category={item.category}
               />
             ))}
           </div>
@@ -116,9 +118,8 @@ const sources = Object.keys(groupedBySource);
   )}
 </BaseLayout>
 
-<!-- Inline script to avoid missing js file errors -->
 <script>
-  // Simple script to focus search input
+  // Focus search input on page load
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.querySelector('input[name="q"]');
     if (searchInput instanceof HTMLInputElement) {
