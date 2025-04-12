@@ -5,11 +5,13 @@ import Sidebar from '../components/Sidebar.astro';
 interface Props {
   title?: string;
   description?: string;
+  category?: string; // Add category prop
 }
 
 const { 
   title = "FemTechURLs",
-  description = "A curated collection of women's health technology articles"
+  description = "A curated collection of women's health technology articles",
+  category = "FemTech News & Innovation" // Default category
 } = Astro.props;
 ---
 
@@ -39,8 +41,8 @@ const {
 
       <!-- Main content area -->
       <div id="mainContent" class="flex-1 md:ml-64 transition-all duration-300 w-full">
-        <!-- Header area -->
-        <Header title={title} />
+        <!-- Header area - Pass category to Header -->
+        <Header title={title} category={category} />
         
         <!-- Content area -->
         <main class="h-[calc(100vh-4rem)] overflow-y-auto">
