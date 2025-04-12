@@ -3,17 +3,173 @@ import GlobalSearch from './GlobalSearch.astro';
 
 interface Props {
   title?: string;
+  category?: string; // Add category prop to determine color scheme
 }
 
-const { title = "FemTechURLs" } = Astro.props;
+// Default to FemTech News category if no category specified
+const { 
+  title = "FemTechURLs", 
+  category = "FemTech News & Innovation" 
+} = Astro.props;
+
+// Define color schemes for different categories
+const colorSchemes = {
+  "FemTech News & Innovation": {
+    bg: "bg-purple-800",
+    text: "text-white",
+    buttonHover: "hover:bg-purple-700",
+    buttonFocus: "focus:ring-purple-400",
+    searchBg: "bg-purple-700",
+    searchBorder: "border-purple-600",
+    searchPlaceholder: "placeholder-purple-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-purple-400",
+    mobileOverlayBg: "bg-purple-900"
+  },
+  "Cardiovascular": {
+    bg: "bg-red-800",
+    text: "text-white",
+    buttonHover: "hover:bg-red-700",
+    buttonFocus: "focus:ring-red-400",
+    searchBg: "bg-red-700",
+    searchBorder: "border-red-600",
+    searchPlaceholder: "placeholder-red-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-red-400",
+    mobileOverlayBg: "bg-red-900"
+  },
+  "Menstrual health": {
+    bg: "bg-pink-700",
+    text: "text-white",
+    buttonHover: "hover:bg-pink-600",
+    buttonFocus: "focus:ring-pink-400",
+    searchBg: "bg-pink-600",
+    searchBorder: "border-pink-500",
+    searchPlaceholder: "placeholder-pink-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-pink-400",
+    mobileOverlayBg: "bg-pink-800"
+  },
+  "Maternal health": {
+    bg: "bg-blue-800",
+    text: "text-white",
+    buttonHover: "hover:bg-blue-700",
+    buttonFocus: "focus:ring-blue-400",
+    searchBg: "bg-blue-700",
+    searchBorder: "border-blue-600",
+    searchPlaceholder: "placeholder-blue-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-blue-400",
+    mobileOverlayBg: "bg-blue-900"
+  },
+  "Perimenopause": {
+    bg: "bg-orange-700",
+    text: "text-white",
+    buttonHover: "hover:bg-orange-600",
+    buttonFocus: "focus:ring-orange-400",
+    searchBg: "bg-orange-600",
+    searchBorder: "border-orange-500",
+    searchPlaceholder: "placeholder-orange-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-orange-400",
+    mobileOverlayBg: "bg-orange-800"
+  },
+  "Cancer": {
+    bg: "bg-amber-700",
+    text: "text-white",
+    buttonHover: "hover:bg-amber-600",
+    buttonFocus: "focus:ring-amber-400",
+    searchBg: "bg-amber-600",
+    searchBorder: "border-amber-500",
+    searchPlaceholder: "placeholder-amber-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-amber-400",
+    mobileOverlayBg: "bg-amber-800"
+  },
+  "Brain health": {
+    bg: "bg-cyan-700",
+    text: "text-white",
+    buttonHover: "hover:bg-cyan-600",
+    buttonFocus: "focus:ring-cyan-400",
+    searchBg: "bg-cyan-600",
+    searchBorder: "border-cyan-500",
+    searchPlaceholder: "placeholder-cyan-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-cyan-400",
+    mobileOverlayBg: "bg-cyan-800"
+  },
+  "Autoimmune": {
+    bg: "bg-emerald-700",
+    text: "text-white",
+    buttonHover: "hover:bg-emerald-600",
+    buttonFocus: "focus:ring-emerald-400",
+    searchBg: "bg-emerald-600",
+    searchBorder: "border-emerald-500",
+    searchPlaceholder: "placeholder-emerald-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-emerald-400",
+    mobileOverlayBg: "bg-emerald-800"
+  },
+  "Mental health": {
+    bg: "bg-violet-700",
+    text: "text-white",
+    buttonHover: "hover:bg-violet-600",
+    buttonFocus: "focus:ring-violet-400",
+    searchBg: "bg-violet-600",
+    searchBorder: "border-violet-500",
+    searchPlaceholder: "placeholder-violet-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-violet-400",
+    mobileOverlayBg: "bg-violet-800"
+  },
+  "State of FemTech": {
+    bg: "bg-indigo-700",
+    text: "text-white",
+    buttonHover: "hover:bg-indigo-600",
+    buttonFocus: "focus:ring-indigo-400",
+    searchBg: "bg-indigo-600",
+    searchBorder: "border-indigo-500",
+    searchPlaceholder: "placeholder-indigo-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-indigo-400",
+    mobileOverlayBg: "bg-indigo-800"
+  },
+  "Future of FemTech": {
+    bg: "bg-sky-700",
+    text: "text-white",
+    buttonHover: "hover:bg-sky-600",
+    buttonFocus: "focus:ring-sky-400",
+    searchBg: "bg-sky-600",
+    searchBorder: "border-sky-500",
+    searchPlaceholder: "placeholder-sky-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-sky-400",
+    mobileOverlayBg: "bg-sky-800"
+  },
+  "Organizations": {
+    bg: "bg-teal-700",
+    text: "text-white",
+    buttonHover: "hover:bg-teal-600",
+    buttonFocus: "focus:ring-teal-400",
+    searchBg: "bg-teal-600",
+    searchBorder: "border-teal-500",
+    searchPlaceholder: "placeholder-teal-300",
+    searchRing: "focus:ring-white",
+    iconColor: "text-teal-400",
+    mobileOverlayBg: "bg-teal-800"
+  }
+};
+
+// Get the color scheme for the current category (or use default)
+const colors = colorSchemes[category] || colorSchemes["FemTech News & Innovation"];
 ---
 
-<header class="bg-purple-800 text-white shadow h-16">
+<header class={`${colors.bg} ${colors.text} shadow h-16`}>
   <div class="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-full">
       <div class="flex items-center">
         <button 
-          class="md:hidden p-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          class={`md:hidden p-2 rounded-lg ${colors.buttonHover} focus:outline-none focus:ring-2 ${colors.buttonFocus}`}
           id="mobileSidebarToggle"
           aria-label="Toggle Mobile Menu"
         >
@@ -25,13 +181,29 @@ const { title = "FemTechURLs" } = Astro.props;
       </div>
 
       <div class="flex-1 max-w-lg mx-4 md:mx-8 hidden md:block">
-        <GlobalSearch />
-       </div>
+        <div class="relative">
+          <form action="/search" method="get">
+            <input
+              type="text"
+              id="global-search-input"
+              name="q"
+              placeholder="Search all content..."
+              class={`w-full pl-10 pr-4 py-2 rounded-lg ${colors.searchBg} ${colors.text} ${colors.searchPlaceholder} ${colors.searchBorder} border focus:outline-none focus:ring-2 ${colors.searchRing} focus:border-transparent`}
+            />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class={`h-5 w-5 ${colors.iconColor}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <button type="submit" class="hidden">Search</button>
+          </form>
+        </div>
+      </div>
 
       <div class="flex items-center space-x-3">
         <button 
           id="mobile-search-button"
-          class="md:hidden p-2 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          class={`md:hidden p-2 rounded-lg ${colors.buttonHover} focus:outline-none focus:ring-2 ${colors.buttonFocus}`}
           aria-label="Toggle Search"
         >
           <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,7 +213,7 @@ const { title = "FemTechURLs" } = Astro.props;
         
         <button 
           id="customize-button"
-          class="px-3 py-2 flex items-center space-x-1 bg-purple-700 text-white rounded-lg hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-800"
+          class={`px-3 py-2 flex items-center space-x-1 ${colors.buttonHover} bg-opacity-80 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 ${colors.buttonFocus} focus:ring-offset-2`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -52,89 +224,47 @@ const { title = "FemTechURLs" } = Astro.props;
     </div>
   </div>
 
-  <!-- In Header.astro - Mobile Search Overlay section -->
-<div
-  id="mobile-search-overlay"
-  class="fixed inset-0 bg-purple-900 bg-opacity-50 z-50 hidden md:hidden"
->
-  <div class="p-4 bg-purple-800">
-    <div class="relative flex items-center">
-      <!-- Extra simple form with minimal attributes -->
-      <form action="/search" method="get" class="flex-grow">
-        <div class="relative w-full">
-          <input
-            type="search"
-            id="mobile-search-input"
-            name="q"
-            placeholder="Search all content..."
-            class="w-full pl-10 pr-14 py-3 rounded-lg bg-white text-gray-800 placeholder-gray-500 border border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
+  <!-- Mobile Search Overlay -->
+  <div
+    id="mobile-search-overlay"
+    class={`fixed inset-0 ${colors.mobileOverlayBg} bg-opacity-50 z-50 hidden md:hidden`}
+  >
+    <div class={`p-4 ${colors.bg}`}>
+      <div class="relative flex items-center">
+        <form action="/search" method="get" class="flex-grow">
+          <div class="relative w-full">
+            <input
+              type="text"
+              id="mobile-search-input"
+              name="q"
+              placeholder="Search all content..."
+              class={`w-full pl-10 pr-14 py-3 rounded-lg ${colors.searchBg} ${colors.text} ${colors.searchPlaceholder} ${colors.searchBorder} border focus:outline-none focus:ring-2 ${colors.searchRing} focus:border-transparent`}
+            />
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class={`h-5 w-5 ${colors.iconColor}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <button 
+              type="submit" 
+              class={`absolute inset-y-0 right-0 px-4 py-2 ${colors.buttonHover} text-white rounded-r-lg focus:outline-none focus:ring-2 ${colors.buttonFocus}`}
+            >
+              Search
+            </button>
           </div>
-          <button 
-            type="submit" 
-            class="absolute inset-y-0 right-0 px-4 py-2 bg-purple-600 text-white rounded-r-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            Search
-          </button>
-        </div>
-      </form>
-      <button
-        id="close-mobile-search"
-        class="ml-3 p-2 text-white hover:bg-purple-700 rounded-full"
-        aria-label="Close Search"
-      >
-        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+        </form>
+        <button
+          id="close-mobile-search"
+          class="ml-3 p-2 text-white hover:bg-opacity-50 rounded-full"
+          aria-label="Close Search"
+        >
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
-</div>
-
-
-<!-- Self-contained script for mobile search functionality -->
-<script>
-  // Basic mobile search toggle
-  (function() {
-    // Get DOM elements
-    const mobileSearchButton = document.getElementById('mobile-search-button');
-    const mobileSearchOverlay = document.getElementById('mobile-search-overlay');
-    const closeMobileSearch = document.getElementById('close-mobile-search');
-    const mobileSearchInput = document.getElementById('mobile-search-input');
-    
-    // Open mobile search
-    if (mobileSearchButton && mobileSearchOverlay) {
-      mobileSearchButton.addEventListener('click', function() {
-        mobileSearchOverlay.classList.remove('hidden');
-        
-        // Focus the input after overlay appears
-        if (mobileSearchInput) {
-          setTimeout(function() {
-            mobileSearchInput.focus();
-          }, 100);
-        }
-      });
-    }
-    
-    // Close mobile search
-    if (closeMobileSearch && mobileSearchOverlay) {
-      closeMobileSearch.addEventListener('click', function() {
-        mobileSearchOverlay.classList.add('hidden');
-      });
-    }
-    
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && mobileSearchOverlay && !mobileSearchOverlay.classList.contains('hidden')) {
-        mobileSearchOverlay.classList.add('hidden');
-      }
-    });
-  })();
-</script>
 </header>
 
 <script>
@@ -145,7 +275,7 @@ const { title = "FemTechURLs" } = Astro.props;
   
   mobileSearchButton?.addEventListener('click', () => {
     mobileSearchOverlay?.classList.remove('hidden');
-    const mobileSearchInput = mobileSearchOverlay?.querySelector('input[type="search"]');
+    const mobileSearchInput = mobileSearchOverlay?.querySelector('input[type="text"]');
     if (mobileSearchInput instanceof HTMLInputElement) {
       mobileSearchInput.focus();
     }
