@@ -5,13 +5,11 @@ import Sidebar from '../components/Sidebar.astro';
 interface Props {
   title?: string;
   description?: string;
-  category?: string; // Add category prop
 }
 
 const { 
   title = "FemTechURLs",
-  description = "A curated collection of women's health technology articles",
-  category = "FemTech News & Innovation" // Default category
+  description = "A curated collection of women's health technology articles"
 } = Astro.props;
 ---
 
@@ -22,7 +20,6 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/src/styles/mobileSearch.css">
     <title>{title}</title>
   </head>
   <body class="h-screen bg-gray-50 flex flex-col">
@@ -41,8 +38,8 @@ const {
 
       <!-- Main content area -->
       <div id="mainContent" class="flex-1 md:ml-64 transition-all duration-300 w-full">
-        <!-- Header area - Pass category to Header -->
-        <Header title={title} category={category} />
+        <!-- Header area -->
+        <Header title={title} />
         
         <!-- Content area -->
         <main class="h-[calc(100vh-4rem)] overflow-y-auto">
@@ -96,19 +93,13 @@ const {
       });
     </script>
     
-    <!-- Global search script -->
-    <script is:inline src="/src/scripts/global-search.js"></script>
-
-    <!-- Mobile search fix -->
-    <script src="/src/scripts/mobileSearchFix.js"></script>
-
-    <!-- Fix for missing resources and mobile search -->
+    <!-- Search functionality script -->
     <script>
+      // Basic search functionality
       document.addEventListener('DOMContentLoaded', function() {
         // Get search inputs
         const desktopSearchInput = document.getElementById('global-search-input');
         const mobileSearchInput = document.getElementById('mobile-search-input');
-        const mobileSearchForm = mobileSearchInput ? mobileSearchInput.closest('form') : null;
         
         // If both inputs exist, ensure they work together
         if (desktopSearchInput && mobileSearchInput) {
@@ -122,53 +113,7 @@ const {
             desktopSearchInput.value = this.value;
           });
         }
-        
-        // Ensure mobile form submits correctly
-        if (mobileSearchForm) {
-          mobileSearchForm.addEventListener('submit', function(e) {
-            // If the form already has action="/search" and method="get", let it submit naturally
-            if (this.getAttribute('action') === '/search' && this.getAttribute('method') === 'get') {
-              return true;
-            }
-            
-            // Otherwise prevent default and handle manually
-            e.preventDefault();
-            
-            // Get the search value
-            const searchValue = mobileSearchInput.value.trim();
-            if (searchValue) {
-              // Redirect to the search page with the query
-              window.location.href = `/search?q=${encodeURIComponent(searchValue)}`;
-            }
-          });
-        }
       });
     </script>
-
-    <style>
-      /* Basic fixes for search functionality */
-      .search-hidden {
-        display: none !important;
-      }
-      
-      /* Mobile search overlay improvements */
-      @media (max-width: 768px) {
-        #mobile-search-overlay {
-          z-index: 50;
-        }
-        
-        #mobile-search-input {
-          -webkit-appearance: none;
-          font-size: 16px; /* Prevents zooming on iOS */
-          border-radius: 8px;
-        }
-        
-        #mobile-search-overlay button, 
-        #mobile-search-overlay a, 
-        #mobile-search-input {
-          min-height: 44px; /* Better touch targets */
-        }
-      }
-    </style>
   </body>
 </html>

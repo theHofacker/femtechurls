@@ -58,28 +58,131 @@ const sourceHealthStore = new Map<string, SourceHealth>();
 // Cache configuration
 const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
 
-// Refined categories after removing non-FemTech sources
-const categoryKeywords = {
-  'FemTech News & Innovation': ['femtech', 'women\'s health', 'technology', 'innovation', 'digital health', 'health tech', 'startup', 'product', 'launch'],
-  'Reproductive & Maternal Health': ['pregnancy', 'fertility', 'menstrual', 'period', 'maternal', 'birth', 'mother', 'prenatal', 'postnatal', 'baby', 'breastfeeding', 'cycle'],
-  'Women\'s Health & Wellness': ['health', 'wellness', 'nutrition', 'fitness', 'mental health', 'menopause', 'hormones', 'selfcare', 'wellbeing', 'healthcare']
-};
-
-// Women's health specific keywords
-const femtechKeywords = [
-  'women', 'woman', 'female', 'health', 'wellness', 
-  'femtech', 'pregnancy', 'maternal', 'menstrual', 'cycle',
-  'menopause', 'fertility', 'reproductive', 'hormones',
-  'period', 'gynecology', 'pelvic', 'menstruation',
-  'birth control', 'contraception', 'breastfeeding'
+// Define our focused list of sources specific to FemTech
+// NOTE: For some sources, you'll need to create RSS.app feeds if direct RSS isn't available
+export const sources: Source[] = [
+  // FemTech News & Innovation sources - specified websites
+  {
+    name: 'FemTech Insider',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/uhlIq3S7nRyF31Zu.xml',
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'FemTech World',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/jOTNliF6GonuLXLj.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'FemTech Live',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/jhn1Rq9JDn4YBi50.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'Women of Wearables',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/fgP1gfw7eQhLARM0.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'Future Fem Health',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/z5MUcYQ7ocqlPkf0.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'Women/'s Health Gov',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/6gH5uGajqWMYV91g.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'FemTech Health',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/M1VCLwRreb8msGIC.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'FemTech Canada',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/t4UKcveeIrnzb3zT.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'Femovate',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/Rv8Y9GNYRATPw4fD.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  },
+  {
+    name: 'WHAM Report',
+    type: 'rss',
+    endpoint: 'https://rss.app/feeds/CaRW8onXU3HLDrGy.xml', // Replace with actual RSS URL or RSS.app feed
+    category: 'FemTech News & Innovation'
+  }
 ];
 
-// Replace your current extractImageFromRSSItem function with this improved version
+// Sample data for fallbacks
+export const sampleNewsItems: NewsItem[] = [
+  // FemTech News & Innovation
+  {
+    title: "The Growing Landscape of FemTech Innovations in 2023",
+    link: "https://example.com/article1",
+    description: "An exploration of the latest technologies transforming women's health and wellbeing.",
+    date: new Date('2023-08-15'),
+    sourceName: "FemTech Insider",
+    category: "FemTech News & Innovation",
+    guid: "sample-1"
+  },
+  {
+    title: "Investment in FemTech Reaches Record High",
+    link: "https://example.com/article2",
+    description: "Venture capital funding for women's health technology startups has doubled in the past year.",
+    date: new Date('2023-08-12'),
+    sourceName: "FemTech Health",
+    category: "FemTech News & Innovation",
+    guid: "sample-2"
+  },
+  {
+    title: "New Research Reveals Link Between Diet and Menstrual Health",
+    link: "https://example.com/article3",
+    description: "Study finds certain foods may improve symptoms of menstrual discomfort for many women.",
+    date: new Date('2023-08-10'),
+    sourceName: "FemTech World",
+    category: "FemTech News & Innovation",
+    guid: "sample-3"
+  },
+  {
+    title: "The Science of Fertility Tracking: Beyond the Calendar Method",
+    link: "https://example.com/article4",
+    description: "Modern approaches to understanding your fertility window using technology and biomarkers.",
+    date: new Date('2023-08-05'),
+    sourceName: "FemTech Focus",
+    category: "FemTech News & Innovation",
+    guid: "sample-4"
+  },
+  {
+    title: "Managing Menopause Symptoms: New Approaches",
+    link: "https://example.com/article5",
+    description: "Innovative techniques and lifestyle changes to address common menopause challenges.",
+    date: new Date('2023-08-03'),
+    sourceName: "Future Fem Health",
+    category: "FemTech News & Innovation",
+    guid: "sample-5"
+  },
+  {
+    title: "The Connection Between Stress and Women's Health",
+    link: "https://example.com/article6",
+    description: "How chronic stress affects women differently and strategies for better stress management.",
+    date: new Date('2023-07-28'),
+    sourceName: "Women of Wearables",
+    category: "FemTech News & Innovation",
+    guid: "sample-6"
+  }
+];
 
-/**
- * Extract image URL from RSS item
- * Updated to handle RSS.app feed format specifically
- */
 /**
  * Extract image URL from RSS item with extensive pattern matching
  */
@@ -212,240 +315,6 @@ function extractImageFromRSSItem(item) {
   return null;
 }
 
-// Define our focused list of sources specific to FemTech
-export const sources: Source[] = [
-  // FemTech News & Innovation
-  {
-    name: 'FemTech Insider',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/uhlIq3S7nRyF31Zu.xml',
-    category: 'FemTech News & Innovation'
-  },
-  {
-    name: 'HIT Consultant',
-    type: 'rss',
-    endpoint: 'https://hitconsultant.net/tag/femtech/feed/',
-    category: 'FemTech News & Innovation'
-  },
-  {
-    name: 'Med-Tech Insights FemTech',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/bnx9o8imYxcim0YF.xml',
-    category: 'FemTech News & Innovation'
-  },
-  {
-    name: 'FemTech Health',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/M1VCLwRreb8msGIC.xml',
-    category: 'FemTech News & Innovation'
-  },
-  {
-    name: 'Femovate',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/3C8HedhSEAyT0e3A.xml',
-    category: 'FemTech News & Innovation'
-  },
-  
-  // Reproductive & Maternal Health
-  {
-    name: 'Flo Health - Menstrual Cycle',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/IR2Vq1nmmF752hpE.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Flo Health - Getting Pregnant',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/FRkZlECyVfI6BSgV.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Flo Health - Being a Mom',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/ReM4oFcyMw3jOcuQ.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Maven Clinic - Health',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/O0yCyMe0OiKaBgOs.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Joylux',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/alBRVrwCSbiQ9cFP.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Nurx Health',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/fkRtN3NueMrY6Jip.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Willow - Breastfeeding',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/sQUko7g3kYHPFXlt.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Willow - Expert Guidance',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/b8uAF4AEWcZcHFky.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Clue - Menstrual Cycle',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/N8Hm5TN5V2o3PaXs.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Clue - Fertility',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/uT03fffyFYm7RDVv.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Clue - Birth Control',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/qbffgMx68SwysLQx.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Ovia - Life During Pregnancy',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/4bXDcc46TVje86D5.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Ovia - Pregnancy by Week',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/KZoE71UAa9W63VW6.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  {
-    name: 'Ovia - Your Body After Baby',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/IHCX9FuSffL3Qc22.xml',
-    category: 'Reproductive & Maternal Health'
-  },
-  
-  // Women's Health & Wellness
-  {
-    name: 'Maven Clinic - Insights',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/0jmcOyjdyOVJ849e.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Future Fem Health',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/z5MUcYQ7ocqlPkf0.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Balance - Menopause',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/vndruuaeiVu6IiKv.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Clue - Issues & Conditions',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/CZbPvlVppu7sAXJN.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Clue - Dating & Pleasure',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/1jAnZxeBMZMkvmfc.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Clue - Life & Culture',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/E3ktXXU0vd4nbO3a.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Ovia - Health & Wellness',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/TkriSZ8NV31YR67P.xml',
-    category: 'Women\'s Health & Wellness'
-  },
-  {
-    name: 'Women\'s Health Gov',
-    type: 'rss',
-    endpoint: 'https://rss.app/feeds/6gH5uGajqWMYV91g.xml',
-    category: 'Women\'s Health & Wellness'
-  }
-];
-
-// Sample data for fallbacks
-export const sampleNewsItems: NewsItem[] = [
-  // FemTech News & Innovation
-  {
-    title: "The Growing Landscape of FemTech Innovations in 2023",
-    link: "https://example.com/article1",
-    description: "An exploration of the latest technologies transforming women's health and wellbeing.",
-    date: new Date('2023-08-15'),
-    sourceName: "FemTech Insider",
-    category: "FemTech News & Innovation",
-    guid: "sample-1"
-  },
-  {
-    title: "Investment in FemTech Reaches Record High",
-    link: "https://example.com/article2",
-    description: "Venture capital funding for women's health technology startups has doubled in the past year.",
-    date: new Date('2023-08-12'),
-    sourceName: "FemTech Health",
-    category: "FemTech News & Innovation",
-    guid: "sample-2"
-  },
-  
-  // Reproductive & Maternal Health
-  {
-    title: "New Research Reveals Link Between Diet and Menstrual Health",
-    link: "https://example.com/article3",
-    description: "Study finds certain foods may improve symptoms of menstrual discomfort for many women.",
-    date: new Date('2023-08-10'),
-    sourceName: "Flo Health",
-    category: "Reproductive & Maternal Health",
-    guid: "sample-3"
-  },
-  {
-    title: "The Science of Fertility Tracking: Beyond the Calendar Method",
-    link: "https://example.com/article4",
-    description: "Modern approaches to understanding your fertility window using technology and biomarkers.",
-    date: new Date('2023-08-05'),
-    sourceName: "Clue",
-    category: "Reproductive & Maternal Health",
-    guid: "sample-4"
-  },
-  
-  // Women's Health & Wellness
-  {
-    title: "Managing Menopause Symptoms: New Approaches",
-    link: "https://example.com/article5",
-    description: "Innovative techniques and lifestyle changes to address common menopause challenges.",
-    date: new Date('2023-08-03'),
-    sourceName: "Balance",
-    category: "Women's Health & Wellness",
-    guid: "sample-5"
-  },
-  {
-    title: "The Connection Between Stress and Women's Health",
-    link: "https://example.com/article6",
-    description: "How chronic stress affects women differently and strategies for better stress management.",
-    date: new Date('2023-07-28'),
-    sourceName: "Maven Clinic",
-    category: "Women's Health & Wellness",
-    guid: "sample-6"
-  }
-];
-
 /**
  * Gets cached feed data if available and not expired
  */
@@ -491,42 +360,6 @@ function updateSourceHealth(source: Source, status: 'active' | 'error' | 'using_
 }
 
 /**
- * Filters content to ensure it's relevant to FemTech and the specified category
- * Uses a scoring system instead of binary matching
- */
-function filterContentByCategory(items: NewsItem[], category: string): NewsItem[] {
-  return items.filter(item => {
-    const titleLower = item.title.toLowerCase();
-    const descLower = item.description.toLowerCase();
-    
-    // Calculate relevance score
-    let relevanceScore = 0;
-    
-    // Check for femtech keywords
-    for (const keyword of femtechKeywords) {
-      if (titleLower.includes(keyword)) relevanceScore += 3; // Title matches are more important
-      if (descLower.includes(keyword)) relevanceScore += 1;
-    }
-    
-    // Check for category keywords
-    for (const keyword of categoryKeywords[category] || []) {
-      if (titleLower.includes(keyword)) relevanceScore += 2;
-      if (descLower.includes(keyword)) relevanceScore += 1;
-    }
-    
-    // General tech sources need a higher threshold
-    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
-    
-    // Different thresholds based on source type
-    if (generalTechSources.includes(item.sourceName)) {
-      return relevanceScore >= 4; // Higher threshold for general sources
-    } else {
-      return relevanceScore >= 2; // Lower threshold for women-specific sources
-    }
-  });
-}
-
-/**
  * Fetch from DEV.to API
  */
 async function fetchFromDevTo(source: Source): Promise<NewsItem[]> {
@@ -556,7 +389,6 @@ async function fetchFromDevTo(source: Source): Promise<NewsItem[]> {
 /**
  * Fetch from RSS feed
  */
-
 async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
   try {
     const response = await fetch(source.endpoint);
@@ -598,18 +430,12 @@ async function fetchFromRSS(source: Source): Promise<NewsItem[]> {
     // Debug: Log a summary of items with images
     const withImages = items.filter(item => !!item.image).length;
     console.log(`${source.name}: Found ${withImages} items with images out of ${items.length} total`);
-    
-    // Apply category filtering for general tech sources
-    const generalTechSources = ['TechCrunch', 'Wired', 'The Verge', 'VentureBeat'];
-    if (generalTechSources.includes(source.name)) {
-      items = filterContentByCategory(items, source.category);
-    }
-    
+
     return items;
   } catch (error) {
     console.error(`Error fetching RSS feed from ${source.name}:`, error);
     updateSourceHealth(source, 'error');
-    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
+    return sampleNewsItems.filter(item => item.sourceName === source.name || item.category === source.category).slice(0, 5);
   }
 }
 
@@ -641,7 +467,7 @@ export async function fetchFeed(source: Source): Promise<NewsItem[]> {
   } catch (error) {
     console.error(`Error fetching from ${source.name}:`, error);
     updateSourceHealth(source, 'error');
-    return sampleNewsItems.filter(item => item.category === source.category).slice(0, 5);
+    return sampleNewsItems.filter(item => item.sourceName === source.name || item.category === source.category).slice(0, 5);
   }
 }
 
@@ -652,20 +478,6 @@ export async function fetchNewsByCategory(category: string): Promise<NewsItem[]>
   const categorySources = sources.filter(source => source.category === category);
   
   if (categorySources.length === 0) {
-    return sampleNewsItems.filter(item => item.category === category);
-  }
-  
-  const promises = categorySources.map(source => fetchFeed(source));
-  
-  try {
-    const results = await Promise.allSettled(promises);
-    const fulfilled = results
-      .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
-      .map(result => result.value);
-    
-    return fulfilled.flat();
-  } catch (error) {
-    console.error(`Error fetching news for category ${category}:`, error);
     return sampleNewsItems.filter(item => item.category === category);
   }
 }
@@ -767,3 +579,17 @@ export function formatDate(date: Date | string): string {
     return 'Unknown date';
   }
 }
+  }
+
+const promises = categorySources.map(source => fetchFeed(source));
+
+try {
+  const results = await Promise.allSettled(promises);
+  const fulfilled = results
+    .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
+    .map(result => result.value);
+
+  return fulfilled.flat();
+} catch (error) {
+  console.error(`Error fetching news for category ${category}:`, error);
+  return sampleNewsItems.filter(item => item.category === category);

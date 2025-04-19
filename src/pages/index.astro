@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsCard from '../components/NewsCard.astro';
 import SkeletonCard from '../components/SkeletonCard.astro';
-import CategoryTiles from '../components/CategoryTiles.astro';
 import { fetchNews } from '../utils/feedAggregator';
 
 // Fetch all news items with improved error handling
@@ -24,15 +23,6 @@ try {
   news = sampleNewsItems;
 }
 
-// Group news by category
-const groupedByCategory = news.reduce((acc, item) => {
-  if (!acc[item.category]) {
-    acc[item.category] = [];
-  }
-  acc[item.category].push(item);
-  return acc;
-}, {} as Record<string, Array<typeof news[0]>>);
-
 // Group news by source
 const groupedBySource = news.reduce((acc, item) => {
   if (!acc[item.sourceName]) {
@@ -42,177 +32,75 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
-// Updated categories to display
- const categories = [
-   { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
-   { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
-   { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' }
- ];
+// Sort sources alphabetically for consistent display
+const sources = Object.keys(groupedBySource).sort();
 
-// Default number of articles to show per section
-const articlesPerCategory = 9;
-const articlesPerSource = 3;
-
-// Find a featured article (most recent from FemTech News & Innovation)
-const featuredNews = groupedByCategory['FemTech News & Innovation'] || [];
-const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length > 0 ? news[0] : null);
+// Initial number of cards to display per source
+const initialCardsToShow = 6;
 ---
 
 <BaseLayout title="FemTechURLs">
-  <!-- Category Tiles navigation -->
-<CategoryTiles 
-  categories={[
-    { 
-      id: 'FemTech News & Innovation', 
-      name: 'FemTech News & Innovation',
-      slug: 'femtech-news-innovation', // Explicit slug that matches your actual file name
-      color: 'bg-purple-600',
-      icon: '...'
-    },
-    { 
-      id: 'Reproductive & Maternal Health', 
-      name: 'Reproductive & Maternal Health',
-      slug: 'reproductive-maternal-health', // Explicit slug
-      color: 'bg-blue-600',
-      icon: '...'
-    },
-    { 
-      id: 'Women\'s Health & Wellness', 
-      name: 'Women\'s Health & Wellness',
-      slug: 'womens-health-wellness', // Explicit slug
-      color: 'bg-green-600',
-      icon: '...'
-    }
-  ]}
-  baseUrl="/"
-/>
-
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest in FemTech & Women's Health</h1>
-    <p class="text-gray-600">Your curated source for women's health technology, innovations, and resources.</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest in FemTech News</h1>
+    <p class="text-gray-600">A curated collection of the latest news and innovations in women's health technology.</p>
   </div>
 
-  <!-- For the Group by toggles section, clean it up -->
-<div class="flex justify-end mb-6">
-  <div class="bg-white border border-gray-200 rounded-lg inline-flex">
-    <button 
-      id="category-view" 
-      class="px-4 py-2 text-sm font-medium rounded-l-lg text-gray-700 hover:bg-gray-50 focus:outline-none"
-    >
-      Group by Category
-    </button>
-    <button 
-      id="source-view" 
-      class="px-4 py-2 text-sm font-medium rounded-r-lg bg-purple-100 text-purple-800 focus:outline-none"
-    >
-      Group by Source
-    </button>
-  </div>
-</div>
-
-  <!-- Category-based view (initially hidden) -->
-  <div id="category-content" class="space-y-12 hidden">
-    {categories.map(category => {
-      const categoryNews = groupedByCategory[category.id] || [];
-      const totalArticles = categoryNews.length;
-      const hasMoreItems = totalArticles > articlesPerCategory;
-
-      if (categoryNews.length === 0) return null; // Explicitly return null for empty categories
-
-      return (
-        <section id={category.slug} class="article-section">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
-            <a 
-              href={`/${category.slug}`}
-              class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
-            >
-              View All
-              <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </a>
-          </div>
-          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
-            {categoryNews
-              /* Sort by date, newest first */
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-              /* Map each item to a NewsCard component, with hidden class for items beyond initial count */
-              .map((item, index) => (
-                <div class={`article-card-container ${index >= articlesPerCategory ? 'hidden' : ''}`}>
-                  <NewsCard
-                    title={item.title}
-                    description={item.description}
-                    link={item.link}
-                    date={item.date}
-                    source={item.sourceName}
-                    image={item.image} <!-- Make sure this is included -->
-                    category={item.category}
-                    class="article-card"
-                  />
-                </div>
-              ))
-            }
-          </div>
-          
-          {/* Add Load More button if there are more items */}
-          {hasMoreItems && (
-            <div class="mt-8 text-center">
-              <button 
-                class="load-more-category-btn px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                data-category={category.id}
-                data-shown={articlesPerCategory}
-                data-total={totalArticles}
-              >
-                Load More
-              </button>
-            </div>
-          )}
-        </section>
-      );
-    })}
-  </div>
-
-  <!-- Source-based view (initially shown) -->
-  <div id="source-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {Object.keys(groupedBySource).sort().map((sourceName) => (
-      <div class="bg-white rounded-lg shadow-md overflow-hidden source-card" data-source={sourceName}>
-        <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
-          <h2 class="text-lg font-bold text-white flex items-center">
-            {sourceName}
-            <span class="ml-auto text-xs bg-white bg-opacity-20 text-white px-2 py-0.5 rounded-full">
-              {groupedBySource[sourceName].length} articles
-            </span>
-          </h2>
-        </div>
+  {sources.length > 0 ? (
+    <div class="space-y-12">
+      {sources.map(source => {
+        const sourceNews = groupedBySource[source];
+        const hasMoreItems = sourceNews.length > initialCardsToShow;
         
-        <div class="divide-y divide-gray-100 article-grid">
-          {groupedBySource[sourceName]
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .map((item, index) => (
-              <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden' : ''}`}>
-                <a href={item.link} target="_blank" rel="noopener" class="block">
-                  <div class="flex items-center text-xs text-gray-500 mb-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {typeof item.date === 'string' 
-                      ? new Date(item.date).toLocaleDateString() 
-                      : item.date.toLocaleDateString()}
+        return (
+          <section class="source-section" data-source={source}>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <span>{source}</span>
+              <span class="ml-3 text-sm bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full">
+                {sourceNews.length} {sourceNews.length === 1 ? 'article' : 'articles'}
+              </span>
+            </h2>
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 source-news-grid">
+              {sourceNews
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date, newest first
+                .map((item, index) => (
+                  <div class={`news-card-container ${index >= initialCardsToShow ? 'hidden' : ''}`}>
+                    <NewsCard
+                      title={item.title}
+                      description={item.description}
+                      link={item.link}
+                      date={item.date}
+                      source={item.sourceName}
+                      image={item.image}
+                      category="FemTech News & Innovation"
+                    />
                   </div>
-                  <h3 class="text-base font-medium text-gray-900 mb-1.5 line-clamp-2 hover:text-purple-700 transition-colors">{item.title}</h3>
-                  <p class="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                </a>
+                ))
+              }
+            </div>
+            
+            {hasMoreItems && (
+              <div class="mt-8 text-center">
+                <button 
+                  class="load-more-btn px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                  data-source={source}
+                >
+                  Load More
+                </button>
               </div>
-            ))
-          }
-        </div>
-      </div>
-    ))}
-  </div>
-
-  {Object.keys(groupedByCategory).length === 0 && Object.keys(groupedBySource).length === 0 && (
+            )}
+          </section>
+        );
+      })}
+    </div>
+  ) : (
     <div class="text-center py-16">
+      <div class="text-gray-500 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+        </svg>
+        <h2 class="text-xl font-medium mt-4">No news available</h2>
+        <p class="mt-2">Please check back later for updates</p>
+      </div>
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <SkeletonCard />
         <SkeletonCard />
@@ -242,398 +130,24 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
       </div>
     </div>
   </div>
-
-  <!-- Modal Backdrop -->
-  <div id="customization-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
-
-  <!-- Customization Modal -->
-  <div id="customization-modal" class="fixed inset-x-0 top-20 mx-auto max-w-2xl bg-white rounded-lg shadow-xl z-50 hidden overflow-auto max-h-[80vh]">
-    <div class="p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-gray-900">Customize Your Experience</h2>
-        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      
-      <!-- Tabs -->
-      <div class="border-b border-gray-200 mb-6">
-        <div class="flex -mb-px">
-          <button 
-            id="categories-tab" 
-            class="py-2 px-4 border-b-2 border-purple-500 text-purple-600 font-medium text-sm focus:outline-none"
-          >
-            Categories
-          </button>
-          <button 
-            id="sources-tab" 
-            class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm focus:outline-none"
-          >
-            Sources
-          </button>
-        </div>
-      </div>
-      
-      <!-- Categories Tab Content -->
-      <div id="categories-content" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-3">Featured Categories</label>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {categories.map(category => (
-              <label class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                <input 
-                  type="checkbox" 
-                  class="category-toggle h-5 w-5 text-purple-600 rounded focus:ring-purple-500" 
-                  data-category={category.id}
-                  checked 
-                />
-                <span class="ml-3 text-sm font-medium text-gray-900">{category.name}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <!-- Sources Tab Content -->
-      <div id="sources-content" class="space-y-6 hidden">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-3">Select Sources</label>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-            {Object.keys(groupedBySource).sort().map(sourceName => (
-              <label class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                <input 
-                  type="checkbox" 
-                  class="source-toggle h-5 w-5 text-purple-600 rounded focus:ring-purple-500" 
-                  data-source={sourceName}
-                  checked 
-                />
-                <span class="ml-3 text-sm font-medium text-gray-900">{sourceName}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      <!-- Common Settings -->
-      <div class="mt-6 border-t border-gray-200 pt-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Articles per section</label>
-        <select id="articles-per-section" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md">
-          <option value="3">3 articles</option>
-          <option value="6">6 articles</option>
-          <option value="9" selected>9 articles</option>
-        </select>
-        
-        <div class="flex items-center mt-6">
-          <label for="group-by-source" class="text-sm font-medium text-gray-700 mr-4">Group by source instead of category</label>
-          <div class="relative inline-block w-10 mr-2 align-middle select-none">
-            <input type="checkbox" id="group-by-source" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-gray-300 appearance-none cursor-pointer"/>
-            <label for="group-by-source" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-          </div>
-        </div>
-      </div>
-      
-      <div class="mt-6">
-        <button 
-          id="save-preferences-btn" 
-          class="w-full px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-        >
-          Apply Changes
-        </button>
-      </div>
-    </div>
-  </div>
 </BaseLayout>
 
-<!-- Add this script to your index.astro page -->
-<script src="../scripts/sourceCardScroll.js"></script>
-
-<style is:global>
-  /* Include the essential styles inline for immediate loading, then the full stylesheet will be loaded */
-  .article-grid {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.3) rgba(243, 244, 246, 1);
-    position: relative;
-    padding-bottom: 8px;
-  }
-  
-  .article-grid::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .article-grid::-webkit-scrollbar-track {
-    background: rgba(243, 244, 246, 1);
-    border-radius: 3px;
-  }
-  
-  .article-grid::-webkit-scrollbar-thumb {
-    background-color: rgba(139, 92, 246, 0.3);
-    border-radius: 3px;
-  }
-  
-  /* Scroll indicators */
-  [data-scroll-shadow="top"].opacity-100,
-  [data-scroll-shadow="bottom"].opacity-100 {
-    opacity: 1;
-  }
-</style>
-
-<!-- Import the full stylesheet -->
-<link rel="stylesheet" href="../styles/sourceCardScroll.css">
-
 <script>
-  // Define categories for script access
-  const categories = [
-    { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
-    { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
-    { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' }
-  ];
-
-  // Handle search functionality
-  const searchInput = document.getElementById('global-search-input');
-  
-  function handleSearch(value) {
-    const articles = document.querySelectorAll('.article-card-container, .article-card');
-    const sections = document.querySelectorAll('.article-section');
-    value = value.toLowerCase().trim();
-    
-    // Reset visibility first (only for search filtering)
-    articles.forEach(article => {
-      article.classList.remove('search-hidden');
-    });
-    
-    if (value === '') return; // No search term, no filtering
-    
-    sections.forEach(section => {
-      let hasVisibleArticles = false;
-      const sectionArticles = section.querySelectorAll('.article-card-container:not(.hidden), .article-card:not(.hidden)');
-      
-      sectionArticles.forEach(article => {
-        const card = article.querySelector('.bg-white') || article;
-        if (!card) return;
-        
-        const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
-        const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
-        
-        if (title.includes(value) || description.includes(value)) {
-          hasVisibleArticles = true;
-        } else {
-          article.classList.add('search-hidden');
-        }
-      });
-      
-      // Show/hide the section based on matching articles
-      if (hasVisibleArticles) {
-        section.classList.remove('hidden');
-      } else {
-        section.classList.add('hidden');
-      }
-    });
-  }
-
-  searchInput?.addEventListener('input', (e) => {
-    if (e.target instanceof HTMLInputElement) {
-      handleSearch(e.target.value);
-    }
-  });
-
-  // Modal functionality
-  const customizeButton = document.getElementById('customize-button');
-  const customizationModal = document.getElementById('customization-modal');
-  const modalBackdrop = document.getElementById('customization-modal-backdrop');
-  const closeModalButton = document.getElementById('close-modal');
-  
-  function openModal() {
-    customizationModal.classList.remove('hidden');
-    modalBackdrop.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
-  }
-  
-  function closeModal() {
-    customizationModal.classList.add('hidden');
-    modalBackdrop.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
-  }
-  
-  customizeButton?.addEventListener('click', openModal);
-  closeModalButton?.addEventListener('click', closeModal);
-  modalBackdrop?.addEventListener('click', closeModal);
-  
-  // Tab functionality
-  const categoriesTab = document.getElementById('categories-tab');
-  const sourcesTab = document.getElementById('sources-tab');
-  const categoriesContent = document.getElementById('categories-content');
-  const sourcesContent = document.getElementById('sources-content');
-  
-  categoriesTab?.addEventListener('click', () => {
-    categoriesTab.classList.add('border-purple-500', 'text-purple-600');
-    sourcesTab.classList.remove('border-purple-500', 'text-purple-600');
-    sourcesTab.classList.add('border-transparent', 'text-gray-500');
-    
-    categoriesContent.classList.remove('hidden');
-    sourcesContent.classList.add('hidden');
-  });
-  
-  sourcesTab?.addEventListener('click', () => {
-    sourcesTab.classList.add('border-purple-500', 'text-purple-600');
-    categoriesTab.classList.remove('border-purple-500', 'text-purple-600');
-    categoriesTab.classList.add('border-transparent', 'text-gray-500');
-    
-    sourcesContent.classList.remove('hidden');
-    categoriesContent.classList.add('hidden');
-  });
-  
-  // View toggle functionality
-  const categoryViewBtn = document.getElementById('category-view');
-  const sourceViewBtn = document.getElementById('source-view');
-  const categoryContent = document.getElementById('category-content');
-  const sourceContent = document.getElementById('source-content');
-  const groupBySourceToggle = document.getElementById('group-by-source');
-  
-  // Toggle between category and source views
-  function setViewMode(isSourceView) {
-    if (isSourceView) {
-      sourceViewBtn.classList.add('bg-purple-100', 'text-purple-800');
-      categoryViewBtn.classList.remove('bg-purple-100', 'text-purple-800');
-      categoryViewBtn.classList.add('text-gray-700', 'hover:bg-gray-50');
-      
-      sourceContent.classList.remove('hidden');
-      categoryContent.classList.add('hidden');
-      
-      if (groupBySourceToggle) {
-        groupBySourceToggle.checked = true;
-      }
-    } else {
-      categoryViewBtn.classList.add('bg-purple-100', 'text-purple-800');
-      sourceViewBtn.classList.remove('bg-purple-100', 'text-purple-800');
-      sourceViewBtn.classList.add('text-gray-700', 'hover:bg-gray-50');
-      
-      categoryContent.classList.remove('hidden');
-      sourceContent.classList.add('hidden');
-      
-      if (groupBySourceToggle) {
-        groupBySourceToggle.checked = false;
-      }
-    }
-  }
-  
-  categoryViewBtn?.addEventListener('click', () => setViewMode(false));
-  sourceViewBtn?.addEventListener('click', () => setViewMode(true));
-  
-  // Initialize with source view as default
-  window.addEventListener('DOMContentLoaded', () => {
-    setViewMode(true);
-  });
-  
-  // Toggle from modal
-  groupBySourceToggle?.addEventListener('change', () => {
-    setViewMode(groupBySourceToggle.checked);
-  });
-  
-  // Save preferences functionality
-  const savePreferencesBtn = document.getElementById('save-preferences-btn');
-  const categoryToggles = document.querySelectorAll('.category-toggle');
-  const sourceToggles = document.querySelectorAll('.source-toggle');
-  const articlesPerSection = document.getElementById('articles-per-section');
-  
-  savePreferencesBtn?.addEventListener('click', () => {
-    // Handle category visibility
-    const selectedCategories = Array.from(categoryToggles)
-      .filter(cb => cb.checked)
-      .map(cb => cb.dataset.category);
-    
-    // Hide/show category sections
-    document.querySelectorAll('.article-section').forEach(section => {
-      const sectionId = section.id;
-      
-      // Try to find matching category
-      const matchingCategory = categories.find(cat => 
-        cat.slug === sectionId || cat.id.toLowerCase().replace(/\s+/g, '-').replace(/[&\']/g, '') === sectionId
-      );
-      
-      if (matchingCategory && selectedCategories.includes(matchingCategory.id)) {
-        section.classList.remove('hidden');
-      } else if (matchingCategory) {
-        section.classList.add('hidden');
-      }
-    });
-    
-    // Handle source visibility if in source view
-    const selectedSources = Array.from(sourceToggles)
-      .filter(cb => cb.checked)
-      .map(cb => cb.dataset.source);
-      
-    // Hide/show source cards
-    document.querySelectorAll('.source-card').forEach(card => {
-      const sourceName = card.dataset.source;
-      
-      if (selectedSources.includes(sourceName)) {
-        card.classList.remove('hidden');
-      } else {
-        card.classList.add('hidden');
-      }
-    });
-
-    // Update number of articles shown
-    const articlesCount = parseInt(articlesPerSection.value);
-    document.querySelectorAll('.article-grid').forEach(grid => {
-      const articles = Array.from(grid.querySelectorAll('.article-card'));
-      
-      articles.forEach((article, index) => {
-        if (index < articlesCount) {
-          article.classList.remove('hidden');
-        } else {
-          article.classList.add('hidden');
-        }
-      });
-    });
-    
-    // Show success message
-    const notification = document.createElement('div');
-    notification.className = 'fixed bottom-4 right-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg shadow-lg transition-opacity duration-500';
-    notification.innerHTML = '<div class="flex items-center"><svg class="h-5 w-5 mr-2 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Preferences saved successfully!</div>';
-    
-    document.body.appendChild(notification);
-    
-    // Remove notification after 3 seconds
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      setTimeout(() => notification.remove(), 500);
-    }, 3000);
-    
-    // Close modal after saving
-    closeModal();
-  });
-
-  // Add classes on page load
+  // Handle Load More functionality
   document.addEventListener('DOMContentLoaded', () => {
-    // Add appropriate classes to source cards if not already present
-    document.querySelectorAll('#source-content > div').forEach(card => {
-      const sourceName = card.querySelector('h2')?.textContent;
-      if (sourceName && !card.classList.contains('source-card')) {
-        card.classList.add('source-card');
-        card.dataset.source = sourceName;
-      }
-    });
-  });
-
-  // Handle Load More functionality for category view
-  document.addEventListener('DOMContentLoaded', () => {
-    const loadMoreCategoryButtons = document.querySelectorAll('.load-more-category-btn');
+    const loadMoreButtons = document.querySelectorAll('.load-more-btn');
     
-    loadMoreCategoryButtons.forEach(button => {
+    loadMoreButtons.forEach(button => {
       if (button instanceof HTMLElement) {
-        const categoryId = button.getAttribute('data-category');
-        let currentlyShown = parseInt(button.getAttribute('data-shown') || '9', 10);
-        const totalItems = parseInt(button.getAttribute('data-total') || '0', 10);
-        const increment = 6; // Show 6 more items at a time
+        const sourceName = button.getAttribute('data-source');
+        let currentlyShown = 6; // Start with initial cards already shown
+        const increment = 6; // How many more to show each time
         
         button.addEventListener('click', () => {
-          const section = button.closest('.article-section');
+          const section = button.closest('.source-section');
           if (!section) return;
           
-          const hiddenCards = section.querySelectorAll('.article-card-container.hidden:not(.search-hidden)');
+          const hiddenCards = section.querySelectorAll('.news-card-container.hidden:not(.search-hidden)');
           const cardsToShow = Array.from(hiddenCards).slice(0, increment);
           
           // Show the next batch of cards
@@ -643,16 +157,71 @@ const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length
           
           // Update counter
           currentlyShown += cardsToShow.length;
-          button.setAttribute('data-shown', currentlyShown.toString());
           
           // Hide the button if no more cards to show
-          if (currentlyShown >= totalItems || hiddenCards.length <= increment) {
+          if (hiddenCards.length <= increment) {
             button.classList.add('hidden');
           }
           
           // Update button text to show count
-          button.textContent = `Showing ${currentlyShown} of ${totalItems} - Load More`;
+          const totalCards = section.querySelectorAll('.news-card-container').length;
+          button.textContent = `Showing ${currentlyShown} of ${totalCards} - Load More`;
         });
       }
     });
+    
+    // Handle search functionality
+    const searchInput = document.getElementById('global-search-input');
+    
+    function handleSearch(value) {
+      const articles = document.querySelectorAll('.news-card-container');
+      const sections = document.querySelectorAll('.source-section');
+      value = value.toLowerCase().trim();
+      
+      // Reset visibility first (only for search filtering)
+      articles.forEach(article => {
+        article.classList.remove('search-hidden');
+      });
+      
+      if (value === '') return; // No search term, no filtering
+      
+      sections.forEach(section => {
+        let hasVisibleArticles = false;
+        const sectionArticles = section.querySelectorAll('.news-card-container:not(.hidden)');
+        
+        sectionArticles.forEach(article => {
+          const card = article.querySelector('.bg-white');
+          if (!card) return;
+          
+          const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+          const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
+          
+          if (title.includes(value) || description.includes(value)) {
+            hasVisibleArticles = true;
+          } else {
+            article.classList.add('search-hidden');
+          }
+        });
+        
+        // Show/hide the section based on matching articles
+        if (hasVisibleArticles) {
+          section.classList.remove('hidden');
+        } else {
+          section.classList.add('hidden');
+        }
+      });
+    }
+    
+    searchInput?.addEventListener('input', (e) => {
+      if (e.target instanceof HTMLInputElement) {
+        handleSearch(e.target.value);
+      }
+    });
   });
+</script>
+
+<style>
+  .search-hidden {
+    display: none;
+  }
+</style>

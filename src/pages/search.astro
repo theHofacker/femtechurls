@@ -27,12 +27,10 @@ if (query && query.trim() !== '') {
       const title = (item.title || '').toLowerCase();
       const description = (item.description || '').toLowerCase();
       const sourceName = (item.sourceName || '').toLowerCase();
-      const category = (item.category || '').toLowerCase();
       
       return title.includes(normalizedQuery) || 
              description.includes(normalizedQuery) || 
-             sourceName.includes(normalizedQuery) || 
-             category.includes(normalizedQuery);
+             sourceName.includes(normalizedQuery);
     });
     
     console.log(`Found ${results.length} results for "${normalizedQuery}"`);
@@ -97,7 +95,7 @@ const sources = Object.keys(groupedBySource);
                 date={item.date}
                 source={item.sourceName}
                 image={item.image}
-                category={item.category}
+                category="FemTech News & Innovation"
               />
             ))}
           </div>
