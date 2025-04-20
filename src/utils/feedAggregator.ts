@@ -593,3 +593,4 @@ try {
 } catch (error) {
   console.error(`Error fetching news for category ${category}:`, error);
   return sampleNewsItems.filter(item => item.category === category);
+}
