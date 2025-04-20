@@ -480,6 +480,20 @@ export async function fetchNewsByCategory(category: string): Promise<NewsItem[]>
   if (categorySources.length === 0) {
     return sampleNewsItems.filter(item => item.category === category);
   }
+
+  const promises = categorySources.map(source => fetchFeed(source));
+
+  try {
+    const results = await Promise.allSettled(promises);
+    const fulfilled = results
+      .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
+      .map(result => result.value);
+
+    return fulfilled.flat();
+  } catch (error) {
+    console.error(`Error fetching news for category ${category}:`, error);
+    return sampleNewsItems.filter(item => item.category === category);
+  }
 }
 
 /**
@@ -580,17 +594,3 @@ export function formatDate(date: Date | string): string {
   }
 }
   
-
-const promises = categorySources.map(source => fetchFeed(source));
-
-try {
-  const results = await Promise.allSettled(promises);
-  const fulfilled = results
-    .filter((result): result is PromiseFulfilledResult<NewsItem[]> => result.status === 'fulfilled')
-    .map(result => result.value);
-
-  return fulfilled.flat();
-} catch (error) {
-  console.error(`Error fetching news for category ${category}:`, error);
-  return sampleNewsItems.filter(item => item.category === category);
-}
