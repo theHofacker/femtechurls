@@ -579,7 +579,7 @@ export function formatDate(date: Date | string): string {
     return 'Unknown date';
   }
 }
-  }
+  
 
 const promises = categorySources.map(source => fetchFeed(source));
 
