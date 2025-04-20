@@ -93,7 +93,7 @@ export const sources: Source[] = [
     category: 'FemTech News & Innovation'
   },
   {
-    name: 'Women/'s Health Gov',
+    name: 'Women's Health Gov',
     type: 'rss',
     endpoint: 'https://rss.app/feeds/6gH5uGajqWMYV91g.xml', // Replace with actual RSS URL or RSS.app feed
     category: 'FemTech News & Innovation'
