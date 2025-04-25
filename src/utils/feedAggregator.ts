@@ -56,7 +56,7 @@ const feedCache = new Map<string, FeedCache>();
 const sourceHealthStore = new Map<string, SourceHealth>();
 
 // Cache configuration
-const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6 hours
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Define our focused list of sources specific to FemTech
 // NOTE: For some sources, you'll need to create RSS.app feeds if direct RSS isn't available
