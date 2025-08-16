@@ -32,8 +32,42 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
-// Sort sources alphabetically for consistent display
-const sources = Object.keys(groupedBySource).sort();
+// Function to get the most recent post date for a source
+function getMostRecentDateForSource(sourceName: string): Date {
+  const sourceItems = groupedBySource[sourceName] || [];
+  if (sourceItems.length === 0) return new Date(0); // Return epoch if no items
+  
+  const dates = sourceItems.map(item => new Date(item.date));
+  return new Date(Math.max(...dates.map(d => d.getTime())));
+}
+
+// Sort sources by most recent post date, keeping Femovate in the middle
+function sortSourcesByRecentness(sources: string[]): string[] {
+  const femovateIndex = sources.findIndex(s => s.toLowerCase().includes('femovate'));
+  const femovateSource = femovateIndex !== -1 ? sources[femovateIndex] : null;
+  
+  // Remove Femovate from the list temporarily
+  const sourcesWithoutFemovate = sources.filter(s => !s.toLowerCase().includes('femovate'));
+  
+  // Sort remaining sources by most recent post date
+  const sortedSources = sourcesWithoutFemovate.sort((a, b) => {
+    const dateA = getMostRecentDateForSource(a);
+    const dateB = getMostRecentDateForSource(b);
+    return dateB.getTime() - dateA.getTime(); // Most recent first
+  });
+  
+  // Insert Femovate in the middle if it exists
+  if (femovateSource) {
+    const middleIndex = Math.floor(sortedSources.length / 2);
+    sortedSources.splice(middleIndex, 0, femovateSource);
+  }
+  
+  return sortedSources;
+}
+
+// Get sorted source names (by most recent posts, Femovate in middle)
+const allSourceNames = Object.keys(groupedBySource);
+const sources = sortSourcesByRecentness(allSourceNames);
 
 // Initial number of cards to display per source
 const initialCardsToShow = 6;
