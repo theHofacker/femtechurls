@@ -23,6 +23,15 @@ try {
   news = sampleNewsItems;
 }
 
+// Group news by category
+const groupedByCategory = news.reduce((acc, item) => {
+  if (!acc[item.category]) {
+    acc[item.category] = [];
+  }
+  acc[item.category].push(item);
+  return acc;
+}, {} as Record<string, typeof news>);
+
 // Group news by source
 const groupedBySource = news.reduce((acc, item) => {
   if (!acc[item.sourceName]) {
@@ -32,263 +41,584 @@ const groupedBySource = news.reduce((acc, item) => {
   return acc;
 }, {} as Record<string, typeof news>);
 
-// Sort sources alphabetically for consistent display
-const sources = Object.keys(groupedBySource).sort();
+// Function to get the most recent post date for a source
+function getMostRecentDateForSource(sourceName: string): Date {
+  const sourceItems = groupedBySource[sourceName] || [];
+  if (sourceItems.length === 0) return new Date(0); // Return epoch if no items
+  
+  const dates = sourceItems.map(item => new Date(item.date));
+  return new Date(Math.max(...dates.map(d => d.getTime())));
+}
 
-// Initial number of cards to display per source
-const initialCardsToShow = 6;
+// Sort sources by most recent post date, keeping Femovate in the middle
+function sortSourcesByRecentness(sources: string[]): string[] {
+  const femovateIndex = sources.findIndex(s => s.toLowerCase().includes('femovate'));
+  const femovateSource = femovateIndex !== -1 ? sources[femovateIndex] : null;
+  
+  // Remove Femovate from the list temporarily
+  const sourcesWithoutFemovate = sources.filter(s => !s.toLowerCase().includes('femovate'));
+  
+  // Sort remaining sources by most recent post date
+  const sortedSources = sourcesWithoutFemovate.sort((a, b) => {
+    const dateA = getMostRecentDateForSource(a);
+    const dateB = getMostRecentDateForSource(b);
+    return dateB.getTime() - dateA.getTime(); // Most recent first
+  });
+  
+  // Insert Femovate in the middle if it exists
+  if (femovateSource) {
+    const middleIndex = Math.floor(sortedSources.length / 2);
+    sortedSources.splice(middleIndex, 0, femovateSource);
+  }
+  
+  return sortedSources;
+}
+
+// Get sorted source names
+const allSourceNames = Object.keys(groupedBySource);
+const sortedSourceNames = sortSourcesByRecentness(allSourceNames);
+
+// Updated categories to display
+const categories = [
+  { id: 'FemTech News & Innovation', name: 'FemTech News & Innovation', slug: 'femtech-news-innovation' },
+  { id: 'Reproductive & Maternal Health', name: 'Reproductive & Maternal Health', slug: 'reproductive-maternal-health' },
+  { id: 'Women\'s Health & Wellness', name: 'Women\'s Health & Wellness', slug: 'womens-health-wellness' }
+];
+
+// Default number of articles to show per section
+const articlesPerCategory = 9;
+const articlesPerSource = 3;
+
+// Find a featured article (most recent from FemTech News & Innovation)
+const featuredNews = groupedByCategory['FemTech News & Innovation'] || [];
+const featuredArticle = featuredNews.length > 0 ? featuredNews[0] : (news.length > 0 ? news[0] : null);
 ---
 
-<BaseLayout title="FemTechURLs">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Latest in FemTech News</h1>
-    <p class="text-gray-600">A curated collection of the latest news and innovations in women's health technology.</p>
-  </div>
-
-  {sources.length > 0 ? (
-    <div class="space-y-12">
-      {sources.map(source => {
-        const sourceNews = groupedBySource[source];
-        const hasMoreItems = sourceNews.length > initialCardsToShow;
-        
-        return (
-          <section class="source-section" data-source={source}>
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <span>{source}</span>
-              <span class="ml-3 text-sm bg-purple-50 text-purple-700 px-2.5 py-0.5 rounded-full">
-                {sourceNews.length} {sourceNews.length === 1 ? 'article' : 'articles'}
-              </span>
-            </h2>
-            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 source-news-grid">
-              {sourceNews
-                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date, newest first
-                .map((item, index) => (
-                  <div class={`news-card-container ${index >= initialCardsToShow ? 'hidden' : ''}`}>
-                    <NewsCard
-                      title={item.title}
-                      description={item.description}
-                      link={item.link}
-                      date={item.date}
-                      source={item.sourceName}
-                      image={item.image}
-                      category="FemTech News & Innovation"
-                    />
-                  </div>
-                ))
-              }
-            </div>
-            
-            {hasMoreItems && (
-              <div class="mt-8 text-center">
-                <button 
-                  class="load-more-btn px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                  data-source={source}
-                >
-                  Load More
-                </button>
-              </div>
-            )}
-          </section>
-        );
-      })}
-    </div>
-  ) : (
-    <div class="text-center py-16">
-      <div class="text-gray-500 mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-        </svg>
-        <h2 class="text-xl font-medium mt-4">No news available</h2>
-        <p class="mt-2">Please check back later for updates</p>
-      </div>
-      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+<BaseLayout title="FemTechURLs - Your Gateway to Women's Health Technology">
+  <!-- Hero section with featured article -->
+  {featuredArticle && (
+    <div class="mb-12 relative bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 rounded-xl overflow-hidden shadow-2xl">
+      <div class="absolute inset-0 bg-black opacity-20"></div>
+      <div class="relative p-8 md:p-12 text-white">
+        <div class="max-w-4xl">
+          <span class="inline-block px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm font-medium mb-4">
+            Featured Story
+          </span>
+          <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+            {featuredArticle.title}
+          </h1>
+          <p class="text-xl md:text-2xl text-purple-100 mb-6 leading-relaxed">
+            {featuredArticle.description}
+          </p>
+          <div class="flex items-center text-purple-200 mb-6">
+            <span class="mr-4">{featuredArticle.sourceName}</span>
+            <span>•</span>
+            <span class="ml-4">{new Date(featuredArticle.date).toLocaleDateString()}</span>
+          </div>
+          <a 
+            href={featuredArticle.link} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="inline-flex items-center px-6 py-3 bg-white text-purple-800 rounded-lg font-semibold hover:bg-purple-50 transition-colors"
+          >
+            Read Full Article
+            <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   )}
 
-  <!-- Newsletter subscription box -->
-<div class="bg-gray-50 border border-gray-200 rounded-lg p-6 my-12" id="newsletter-container">
-  <div class="flex flex-col md:flex-row items-center">
-    <div class="md:w-2/3 mb-6 md:mb-0">
-      <h3 class="text-xl font-bold text-gray-900 mb-2">Stay Updated on FemTech News</h3>
-      <p class="text-gray-600">Subscribe to our newsletter to receive the latest women's health technology news and innovations directly in your inbox.</p>
+  <!-- View Toggle -->
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-4 sm:mb-0">
+      <h2 class="text-2xl font-bold text-gray-900">Latest FemTech News</h2>
+      <p class="text-gray-600">Stay updated with the latest in women's health technology</p>
     </div>
-    <div class="md:w-1/3 w-full">
-      <form name="newsletter" method="POST" data-netlify="true" id="newsletter-form" class="w-full">
-        <input type="hidden" name="form-name" value="newsletter" />
-        <div class="flex">
-          <input 
-            type="email" 
-            name="email"
-            placeholder="Your email" 
-            required
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-          <button 
-            type="submit"
-            class="px-4 py-2 bg-purple-600 text-white rounded-r-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2">
-            Subscribe
-          </button>
-        </div>
-      </form>
+    
+    <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+      <button 
+        id="source-view" 
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-purple-100 text-purple-800"
+      >
+        Group by Source
+      </button>
+      <button 
+        id="category-view" 
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 hover:bg-gray-50"
+      >
+        Group by Category
+      </button>
     </div>
   </div>
-</div>
 
-<!-- Thank you message (hidden by default) -->
-<div id="thank-you-message" class="hidden bg-purple-50 border border-purple-200 rounded-lg p-6 my-12 text-center">
-  <svg class="h-12 w-12 text-purple-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-  </svg>
-  <h3 class="text-xl font-bold text-gray-900 mb-2">Thank You for Subscribing!</h3>
-  <p class="text-gray-600">You've successfully signed up for our newsletter. We'll keep you updated with the latest in FemTech news.</p>
-</div>
+  <!-- Category-based view (initially hidden) -->
+  <div id="category-content" class="space-y-12 hidden">
+    {categories.map(category => {
+      const categoryNews = groupedByCategory[category.id] || [];
+      return categoryNews.length > 0 ? (
+        <section id={category.slug} class="article-section">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">{category.name}</h2>
+            <a 
+              href={`/${category.slug}`}
+              class="text-purple-700 hover:text-purple-900 font-medium flex items-center"
+            >
+              View All
+              <svg class="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </a>
+          </div>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 article-grid">
+            {categoryNews
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .slice(0, articlesPerCategory)
+              .map(item => (
+                <NewsCard
+                  title={item.title}
+                  description={item.description}
+                  link={item.link}
+                  date={item.date}
+                  source={item.sourceName}
+                  class="article-card"
+                />
+              ))
+            }
+          </div>
+        </section>
+      ) : null;
+    })}
+  </div>
 
-<script>
-  // Handle form submission and thank you message
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('newsletter-form');
-    const container = document.getElementById('newsletter-container');
-    const thankYouMessage = document.getElementById('thank-you-message');
-    
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+  <!-- Source-based view (initially shown, sorted by most recent posts) -->
+  <div id="source-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {sortedSourceNames.map((sourceName) => (
+      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden source-card" data-source={sourceName}>
+        <div class="px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-500 border-b border-purple-700">
+          <h2 class="text-lg font-bold text-white flex items-center">
+            {sourceName}
+            <span class="ml-auto text-xs bg-white bg-opacity-20 text-white px-2 py-0.5 rounded-full">
+              {groupedBySource[sourceName].length} articles
+            </span>
+          </h2>
+        </div>
         
-        try {
-          const formData = new FormData(form);
-          
-          // Submit the form to Netlify
-          await fetch('/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(formData).toString()
-          });
-          
-          // Show thank you message
-          if (container && thankYouMessage) {
-            container.classList.add('hidden');
-            thankYouMessage.classList.remove('hidden');
-            
-            // Optional: Hide thank you message after some time
-            setTimeout(() => {
-              container.classList.remove('hidden');
-              thankYouMessage.classList.add('hidden');
-              form.reset(); // Clear the form
-            }, 5000); // Show for 5 seconds
+        <div class="divide-y divide-gray-100 article-grid max-h-[500px] overflow-auto">
+          {groupedBySource[sourceName]
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .map((item, index) => (
+              <div class={`p-4 hover:bg-purple-50 transition-colors article-card ${index >= articlesPerSource ? 'hidden articles-overflow' : ''}`}>
+                <a href={item.link} target="_blank" rel="noopener noreferrer" class="block">
+                  <h3 class="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 leading-tight">
+                    {item.title}
+                  </h3>
+                  <p class="text-xs text-gray-600 mb-2 line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span class="text-purple-600 font-medium">{item.sourceName}</span>
+                    <span>{new Date(item.date).toLocaleDateString()}</span>
+                  </div>
+                </a>
+              </div>
+            ))
           }
-        } catch (error) {
-          console.error('Error submitting form:', error);
-          alert('There was an error submitting the form. Please try again.');
-        }
-      });
-    }
-    
-    // Check for success parameter in URL (alternative approach)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success') === 'true') {
-      if (container && thankYouMessage) {
-        container.classList.add('hidden');
-        thankYouMessage.classList.remove('hidden');
-      }
-    }
-  });
-</script>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Customization Modal -->
+  <div id="customization-modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+  <div id="customization-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+      <div class="relative bg-white rounded-lg max-w-2xl w-full p-6 text-left overflow-hidden shadow-xl transform transition-all">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">Customize Your Experience</h2>
+          <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+          <div class="flex -mb-px">
+            <button 
+              id="categories-tab" 
+              class="py-2 px-4 border-b-2 border-purple-500 text-purple-600 font-medium text-sm focus:outline-none"
+            >
+              Categories & Settings
+            </button>
+            <button 
+              id="sources-tab" 
+              class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm focus:outline-none"
+            >
+              Sources
+            </button>
+          </div>
+        </div>
+        
+        <!-- Categories Tab Content -->
+        <div id="categories-content" class="space-y-6">
+          <!-- Post Ordering Filter -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Post Ordering</label>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input 
+                  type="radio" 
+                  name="post-order" 
+                  value="newest"
+                  class="post-order-toggle h-4 w-4 text-purple-600 focus:ring-purple-500" 
+                  checked 
+                />
+                <span class="ml-2 text-sm text-gray-900">Most Recent First</span>
+              </label>
+              <label class="flex items-center">
+                <input 
+                  type="radio" 
+                  name="post-order" 
+                  value="oldest"
+                  class="post-order-toggle h-4 w-4 text-purple-600 focus:ring-purple-500" 
+                />
+                <span class="ml-2 text-sm text-gray-900">Oldest First</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Articles per Section -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Articles per Section</label>
+            <select id="articles-per-section" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+              <option value="3" selected>3 articles</option>
+              <option value="5">5 articles</option>
+              <option value="10">10 articles</option>
+              <option value="all">Show all</option>
+            </select>
+          </div>
+
+          <!-- Featured Categories -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Featured Categories</label>
+            <div class="grid grid-cols-1 gap-3">
+              {categories.map(category => (
+                <label class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100">
+                  <input 
+                    type="checkbox" 
+                    class="category-toggle h-5 w-5 text-purple-600 rounded focus:ring-purple-500" 
+                    data-category={category.id}
+                    checked 
+                  />
+                  <span class="ml-3 text-sm font-medium text-gray-900">{category.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sources Tab Content -->
+        <div id="sources-content" class="space-y-6 hidden">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Select Sources</label>
+            <div class="grid grid-cols-1 gap-3 max-h-80 overflow-y-auto">
+              {sortedSourceNames.map(sourceName => (
+                <label class="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100">
+                  <input 
+                    type="checkbox" 
+                    class="source-toggle h-5 w-5 text-purple-600 rounded focus:ring-purple-500" 
+                    data-source={sourceName}
+                    checked 
+                  />
+                  <span class="ml-3 text-sm font-medium text-gray-900">{sourceName}</span>
+                  <span class="ml-auto text-xs text-gray-500">
+                    {groupedBySource[sourceName].length} articles
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="flex justify-end pt-6 border-t border-gray-200">
+          <button 
+            id="apply-filters" 
+            class="px-4 py-2 bg-purple-700 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          >
+            Apply Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </BaseLayout>
 
 <script>
-  // Handle Load More functionality
-  document.addEventListener('DOMContentLoaded', () => {
-    const loadMoreButtons = document.querySelectorAll('.load-more-btn');
+  // Get DOM elements
+  const customizationModal = document.getElementById('customization-modal');
+  const modalBackdrop = document.getElementById('customization-modal-backdrop');
+  const closeModalButton = document.getElementById('close-modal');
+  const customizeButton = document.getElementById('customize-button');
+  
+  // Modal functionality
+  function openModal() {
+    customizationModal.classList.remove('hidden');
+    modalBackdrop.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+  
+  function closeModal() {
+    customizationModal.classList.add('hidden');
+    modalBackdrop.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+  
+  customizeButton?.addEventListener('click', openModal);
+  closeModalButton?.addEventListener('click', closeModal);
+  modalBackdrop?.addEventListener('click', closeModal);
+  
+  // Tab functionality
+  const categoriesTab = document.getElementById('categories-tab');
+  const sourcesTab = document.getElementById('sources-tab');
+  const categoriesContent = document.getElementById('categories-content');
+  const sourcesContent = document.getElementById('sources-content');
+  
+  categoriesTab?.addEventListener('click', () => {
+    categoriesTab.classList.add('border-purple-500', 'text-purple-600');
+    sourcesTab?.classList.remove('border-purple-500', 'text-purple-600');
+    sourcesTab?.classList.add('border-transparent', 'text-gray-500');
     
-    loadMoreButtons.forEach(button => {
-      if (button instanceof HTMLElement) {
-        const sourceName = button.getAttribute('data-source');
-        let currentlyShown = 6; // Start with initial cards already shown
-        const increment = 6; // How many more to show each time
-        
-        button.addEventListener('click', () => {
-          const section = button.closest('.source-section');
-          if (!section) return;
-          
-          const hiddenCards = section.querySelectorAll('.news-card-container.hidden:not(.search-hidden)');
-          const cardsToShow = Array.from(hiddenCards).slice(0, increment);
-          
-          // Show the next batch of cards
-          cardsToShow.forEach(card => {
-            card.classList.remove('hidden');
-          });
-          
-          // Update counter
-          currentlyShown += cardsToShow.length;
-          
-          // Hide the button if no more cards to show
-          if (hiddenCards.length <= increment) {
-            button.classList.add('hidden');
-          }
-          
-          // Update button text to show count
-          const totalCards = section.querySelectorAll('.news-card-container').length;
-          button.textContent = `Showing ${currentlyShown} of ${totalCards} - Load More`;
-        });
+    categoriesContent?.classList.remove('hidden');
+    sourcesContent?.classList.add('hidden');
+  });
+  
+  sourcesTab?.addEventListener('click', () => {
+    sourcesTab.classList.add('border-purple-500', 'text-purple-600');
+    categoriesTab?.classList.remove('border-purple-500', 'text-purple-600');
+    categoriesTab?.classList.add('border-transparent', 'text-gray-500');
+    
+    sourcesContent?.classList.remove('hidden');
+    categoriesContent?.classList.add('hidden');
+  });
+  
+  // View toggle functionality
+  const categoryViewBtn = document.getElementById('category-view');
+  const sourceViewBtn = document.getElementById('source-view');
+  const categoryContent = document.getElementById('category-content');
+  const sourceContent = document.getElementById('source-content');
+  
+  // Toggle between category and source views
+  function setViewMode(isSourceView) {
+    if (isSourceView) {
+      sourceViewBtn?.classList.add('bg-purple-100', 'text-purple-800');
+      categoryViewBtn?.classList.remove('bg-purple-100', 'text-purple-800');
+      categoryViewBtn?.classList.add('text-gray-700', 'hover:bg-gray-50');
+      
+      sourceContent?.classList.remove('hidden');
+      categoryContent?.classList.add('hidden');
+    } else {
+      categoryViewBtn?.classList.add('bg-purple-100', 'text-purple-800');
+      sourceViewBtn?.classList.remove('bg-purple-100', 'text-purple-800');
+      sourceViewBtn?.classList.add('text-gray-700', 'hover:bg-gray-50');
+      
+      categoryContent?.classList.remove('hidden');
+      sourceContent?.classList.add('hidden');
+    }
+  }
+  
+  // Set initial view to "Group by Source"
+  setViewMode(true);
+  
+  categoryViewBtn?.addEventListener('click', () => setViewMode(false));
+  sourceViewBtn?.addEventListener('click', () => setViewMode(true));
+
+  // Post ordering functionality
+  function applyPostOrdering() {
+    const orderRadios = document.querySelectorAll('.post-order-toggle');
+    let isNewestFirst = true;
+    
+    orderRadios.forEach(radio => {
+      if (radio.checked && radio.value === 'oldest') {
+        isNewestFirst = false;
       }
     });
     
-    // Handle search functionality
-    const searchInput = document.getElementById('global-search-input');
-    
-    function handleSearch(value) {
-      const articles = document.querySelectorAll('.news-card-container');
-      const sections = document.querySelectorAll('.source-section');
-      value = value.toLowerCase().trim();
+    // Apply ordering to all article containers
+    const articleContainers = document.querySelectorAll('.article-grid');
+    articleContainers.forEach(container => {
+      const articles = Array.from(container.children);
       
-      // Reset visibility first (only for search filtering)
-      articles.forEach(article => {
-        article.classList.remove('search-hidden');
+      // Sort based on data-date if available, or try to extract from content
+      articles.sort((a, b) => {
+        // Try to get dates from the article content
+        const aDateEl = a.querySelector('[data-date]') || a.querySelector('span:last-child');
+        const bDateEl = b.querySelector('[data-date]') || b.querySelector('span:last-child');
+        
+        let aDate = new Date();
+        let bDate = new Date();
+        
+        if (aDateEl) {
+          const aDateText = aDateEl.textContent || aDateEl.getAttribute('data-date');
+          aDate = new Date(aDateText);
+        }
+        
+        if (bDateEl) {
+          const bDateText = bDateEl.textContent || bDateEl.getAttribute('data-date');
+          bDate = new Date(bDateText);
+        }
+        
+        return isNewestFirst ? bDate - aDate : aDate - bDate;
       });
       
-      if (value === '') return; // No search term, no filtering
+      // Reorder the DOM elements
+      articles.forEach(article => container.appendChild(article));
+    });
+  }
+
+  // Articles per section functionality
+  function applyArticlesPerSection() {
+    const articlesSelect = document.getElementById('articles-per-section');
+    const selectedValue = articlesSelect?.value || '3';
+    
+    // Show/hide articles based on selection
+    document.querySelectorAll('.source-card').forEach(sourceCard => {
+      const articles = sourceCard.querySelectorAll('.article-card');
       
-      sections.forEach(section => {
-        let hasVisibleArticles = false;
-        const sectionArticles = section.querySelectorAll('.news-card-container:not(.hidden)');
-        
-        sectionArticles.forEach(article => {
-          const card = article.querySelector('.bg-white');
-          if (!card) return;
-          
-          const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
-          const description = card.querySelector('p')?.textContent?.toLowerCase() || '';
-          
-          if (title.includes(value) || description.includes(value)) {
-            hasVisibleArticles = true;
-          } else {
-            article.classList.add('search-hidden');
-          }
-        });
-        
-        // Show/hide the section based on matching articles
-        if (hasVisibleArticles) {
-          section.classList.remove('hidden');
+      articles.forEach((article, index) => {
+        if (selectedValue === 'all' || index < parseInt(selectedValue)) {
+          article.classList.remove('hidden');
         } else {
-          section.classList.add('hidden');
+          article.classList.add('hidden');
         }
       });
-    }
+    });
     
-    searchInput?.addEventListener('input', (e) => {
-      if (e.target instanceof HTMLInputElement) {
-        handleSearch(e.target.value);
+    // Apply same logic to category view
+    document.querySelectorAll('.article-section .article-grid').forEach(grid => {
+      const articles = grid.querySelectorAll('.article-card');
+      
+      articles.forEach((article, index) => {
+        if (selectedValue === 'all' || index < parseInt(selectedValue)) {
+          article.classList.remove('hidden');
+        } else {
+          article.classList.add('hidden');
+        }
+      });
+    });
+  }
+
+  // Category filtering
+  function applyCategoryFilters() {
+    const categoryToggles = document.querySelectorAll('.category-toggle');
+    const enabledCategories = new Set();
+    
+    categoryToggles.forEach(toggle => {
+      if (toggle.checked) {
+        enabledCategories.add(toggle.dataset.category);
       }
     });
+    
+    // Show/hide category sections
+    document.querySelectorAll('.article-section').forEach(section => {
+      const categoryId = section.id;
+      const categoryName = section.querySelector('h2')?.textContent;
+      
+      // Check if this category should be shown
+      let shouldShow = false;
+      enabledCategories.forEach(cat => {
+        if (categoryId.includes(cat.toLowerCase().replace(/[^a-z0-9]/g, '-')) || 
+            categoryName?.includes(cat)) {
+          shouldShow = true;
+        }
+      });
+      
+      if (shouldShow) {
+        section.classList.remove('hidden');
+      } else {
+        section.classList.add('hidden');
+      }
+    });
+  }
+
+  // Source filtering
+  function applySourceFilters() {
+    const sourceToggles = document.querySelectorAll('.source-toggle');
+    const enabledSources = new Set();
+    
+    sourceToggles.forEach(toggle => {
+      if (toggle.checked) {
+        enabledSources.add(toggle.dataset.source);
+      }
+    });
+    
+    // Show/hide source cards
+    document.querySelectorAll('.source-card').forEach(card => {
+      const sourceName = card.dataset.source;
+      
+      if (enabledSources.has(sourceName)) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+    
+    // Filter articles in category view by source
+    document.querySelectorAll('.article-card').forEach(article => {
+      const sourceEl = article.querySelector('.text-purple-600, .text-purple-700');
+      const sourceName = sourceEl?.textContent?.trim();
+      
+      if (sourceName && enabledSources.has(sourceName)) {
+        article.classList.remove('hidden');
+      } else if (sourceName) {
+        article.classList.add('hidden');
+      }
+    });
+  }
+
+  // Apply all filters
+  function applyAllFilters() {
+    applyPostOrdering();
+    applyArticlesPerSection();
+    applyCategoryFilters();
+    applySourceFilters();
+    closeModal();
+  }
+
+  // Event listeners
+  document.getElementById('apply-filters')?.addEventListener('click', applyAllFilters);
+  
+  // Apply ordering when radio buttons change
+  document.querySelectorAll('.post-order-toggle').forEach(radio => {
+    radio.addEventListener('change', applyPostOrdering);
   });
+  
+  // Apply articles per section when dropdown changes
+  document.getElementById('articles-per-section')?.addEventListener('change', applyArticlesPerSection);
+  
+  // Initialize with default settings
+  setTimeout(() => {
+    applyPostOrdering();
+    applyArticlesPerSection();
+  }, 100);
 </script>
 
 <style>
-  .search-hidden {
-    display: none;
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>
